@@ -28,6 +28,12 @@ def get_shortname(fullname):
             return team[1]
     return fullname
 
+def get_team_image(fullname):
+    for team in settings['teams']:
+        if team[0] == fullname and len(team) > 2:
+            return p_temp.LEADERBOARD_ROW_FLAG % (team[2])
+    return ''
+
 def get_match_table(match):
     rows = ''
     for team in match.teams:
@@ -75,10 +81,12 @@ def get_match_grid(grid, matches, width, height):
     return p_temp.MATCH_GRID % (width, height, width, height, grid_boxes)
 
 def get_leaderboard_table(leaderboard):
+    if len([t for t in leaderboard if t is not None]) == 0:
+        return ''
     position = 1
     rows = ''
-    for team in [team if team is not None else '' for team in leaderboard]:
-        rows += p_temp.LEADERBOARD_ROW % (position, team)
+    for team in leaderboard:
+        rows += p_temp.LEADERBOARD_ROW % (position, get_team_image(team), team or '')
         position +=1
     html = p_temp.LEADERBOARD.decode('utf8') % (rows)
     return html
@@ -112,7 +120,7 @@ def get_match_info(match):
     info.loser_matches = list(set(info.loser_matches))
     try:
         row = db_fetch(match['database'], p_sql.PREFIX, ())
-        info.link = '%srunda%d' % (row[0], match['round'])
+        info.link = '%srunda%d.html' % (row[0], match['round'])
     except Exception as e:
         pass
     try:
@@ -165,6 +173,10 @@ for phase in settings['phases']:
         match_info[match['id']] = get_match_info(match)
         match_info[match['id']].link = phase['link'] if match_info[match['id']].link is None else urljoin(phase['link'], match_info[match['id']].link)
         grid[-1].append(match['id'])
+
+for team in settings['teams']:
+    if len(team) > 3:
+        leaderboard[team[3]-1] = team[0]
 
 leaderboard_teams = {}
 for phase in settings['phases']:

@@ -38,19 +38,21 @@ MATCH_GRID = '''
 '''
 
 MATCH_GRID_PHASE = '''
-<a href="%s" target="_top" style="display: inline-block; width: %dpx; text-align: center; position: absolute; top: 0; left: %dpx">%s</a>
+<a href="%s" target="_top" style="display: inline-block; width: %dpx; text-align: center; position: absolute; top: 0; left: %dpx">
+<font size="4">%s</font>
+</a>
 '''
 
-MATCH_GRID_RUNNING_PHASE = '''
+MATCH_GRID_PHASE_RUNNING = '''
 <a href="%s" target="_top" style="display: inline-block; width: %dpx; text-align: center; position: absolute; top: 0; left: %dpx">
 <img src="images/A.gif" />
-%s
+<font size="4">%s</font>
 <img src="images/A.gif" />
 </a>
 '''
 
 MATCH_BOX = '''
-<div style="position: absolute; left: %dpx; top: %dpx" data-id="%d" data-winner="%s" data-loser="%s" class="playoff_matchbox">
+<div style="text-align: center; position: absolute; left: %dpx; top: %dpx" data-id="%d" data-winner="%s" data-loser="%s" class="playoff_matchbox">
 %s
 </div>
 '''
@@ -74,8 +76,14 @@ LEADERBOARD = '''
 LEADERBOARD_ROW = '''
 <tr>
 <td class="bdc1">%d</td>
-<td class="bd">&nbsp;%s&nbsp;</td>
+<td class="bd">
+&nbsp;%s&nbsp;&nbsp;%s&nbsp;
+</td>
 </tr>
+'''
+
+LEADERBOARD_ROW_FLAG = '''
+<img class="fl" src="images/%s" />
 '''
 
 PAGE_HEAD = '''
