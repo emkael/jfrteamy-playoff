@@ -1,4 +1,4 @@
-import json, os, shutil, sys
+import json, os, shutil, socket, sys
 import mysql.connector
 from datetime import datetime
 from urlparse import urljoin
@@ -205,8 +205,7 @@ grid_rows = max([len(phase['matches']) for phase in settings['phases']])
 grid_height = grid_rows * (settings['page']['height'] + settings['page']['margin']) - settings['page']['margin']
 grid_width = grid_columns * (settings['page']['width'] + settings['page']['margin']) - settings['page']['margin']
 
-output = open(settings['output'], 'w')
-output.write((
+content = (
     p_temp.PAGE % (
         p_temp.PAGE_HEAD % (
             p_temp.PAGE_HEAD_REFRESH % (settings['page']['refresh']) if settings['page']['refresh'] > 0 else '',
@@ -219,7 +218,24 @@ output.write((
             p_temp.PAGE_BODY_FOOTER.decode('utf8') % (datetime.now().strftime('%Y-%m-%d o %H:%M'))
         )
     )).encode('utf8')
-)
+
+output = open(settings['output'], 'w')
+output.write(content)
+output.close()
+
+output_path = os.path.dirname(settings['output'])
+script_output_path = os.path.join(output_path, 'sklady/playoff.js')
 
 shutil.copy(unicode(os.path.join(os.path.dirname(__file__), 'playoff.js')),
-            unicode(os.path.join(os.path.dirname(settings['output']), 'sklady/playoff.js')))
+            unicode(script_output_path))
+
+if settings['goniec']['enabled']:
+    try:
+        content_lines = [(output_path.strip('/') + '/').replace('/', '\\')] + [os.path.basename(settings['output']), 'sklady/playoff.js'] + ['bye', '']
+        print '\n'.join(content_lines)
+        goniec = socket.socket()
+        goniec.connect((settings['goniec']['host'], settings['goniec']['port']))
+        goniec.sendall('\n'.join(content_lines))
+        goniec.close()
+    except socket.error:
+        pass
