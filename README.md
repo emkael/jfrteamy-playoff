@@ -61,6 +61,7 @@ przejechania segmentu Webmasterem
  * przez cały czas trwania play-off pełne nazwy teamów (w bazach i te
 określone w JSONie) muszą się zgadzać - teamy są rozróżniane po nich właśnie
  * skorzystanie z funkcjonalności umieszczenia drużyny na określonym miejscu klasyfikacji końcowej (przed rozegraniem play-off) wymaga obecności flag teamów
+ * nie ma możliwości skonfigurowania więcej niż jednego połączenia do MySQL
 
 Autor
 -----
