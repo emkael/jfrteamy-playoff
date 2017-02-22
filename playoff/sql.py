@@ -21,3 +21,7 @@ JOIN #db#.scores sc2
 JOIN #db#.admin
 WHERE sc1.tabl = %s AND sc1.rnd = %s
 '''
+
+PREFIX = '''
+SELECT shortname FROM #db#.admin
+'''

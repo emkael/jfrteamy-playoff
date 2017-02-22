@@ -12,8 +12,12 @@ MATCH_TABLE = '''
 
 MATCH_TEAM_ROW = '''
 <tr>
-<td class="bd1">&nbsp;<a onmouseover="Tip('%s')" onmouseout="UnTip()">%s</a>&nbsp;</td>
-<td class="bdc">&nbsp;%.1f&nbsp;</td>
+<td class="bd1">&nbsp;<a href="%s" onmouseover="Tip('%s')" onmouseout="UnTip()">%s</a>&nbsp;</td>
+<td class="bdc">
+<a href="%s" target="_top">
+&nbsp;%.1f&nbsp;
+</a>
+</td>
 </tr>
 '''
 
@@ -54,7 +58,7 @@ MATCH_BOX = '''
 LEADERBOARD = '''
 <table border="0" cellspacing="0">
 <tr>
-<td class="bdnl12" colspan="2" align="center"><b>KLASYFIKACJA KOŃCOWA</b></td>
+<td class="bdnl12" colspan="2" align="center"><b>&nbsp;KLASYFIKACJA KOŃCOWA&nbsp;</b></td>
 </tr>
 <tr>
 <td class="e" colspan="2">&nbsp;</td>

@@ -1,6 +1,7 @@
 import json, os, shutil, sys
 import mysql.connector
 from datetime import datetime
+from urlparse import urljoin
 from playoff import sql as p_sql
 from playoff import template as p_temp
 
@@ -31,8 +32,10 @@ def get_match_table(match):
     rows = ''
     for team in match.teams:
         rows += p_temp.MATCH_TEAM_ROW % (
+            match.link,
             team.name,
             ' / '.join([get_shortname(name) for name in team.name.split('<br />')]),
+            match.link,
             team.score
         )
     html = p_temp.MATCH_TABLE.decode('utf8') % (
@@ -87,7 +90,7 @@ class Team:
 class Match:
     teams = None
     running = 0
-    link = '#'
+    link = None
     winner = None
     loser = None
     winner_matches = None
@@ -107,6 +110,11 @@ def get_match_info(match):
             info.loser_matches += match['teams'][i]['loser']
     info.winner_matches = list(set(info.winner_matches))
     info.loser_matches = list(set(info.loser_matches))
+    try:
+        row = db_fetch(match['database'], p_sql.PREFIX, ())
+        info.link = '%srunda%d' % (row[0], match['round'])
+    except Exception as e:
+        pass
     try:
         row = db_fetch(match['database'], p_sql.MATCH_RESULTS, (match['table'], match['round']))
         info.teams[0].name = row[0]
@@ -155,7 +163,7 @@ for phase in settings['phases']:
     grid.append([])
     for match in phase['matches']:
         match_info[match['id']] = get_match_info(match)
-        match_info[match['id']].link = phase['link']
+        match_info[match['id']].link = phase['link'] if match_info[match['id']].link is None else urljoin(phase['link'], match_info[match['id']].link)
         grid[-1].append(match['id'])
 
 leaderboard_teams = {}
