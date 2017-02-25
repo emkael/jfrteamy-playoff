@@ -22,6 +22,13 @@ JOIN #db#.admin
 WHERE sc1.tabl = %s AND sc1.rnd = %s
 '''
 
+TOWEL_COUNT = '''
+SELECT #db#.admin.boardspersegment * SUM(#db#.segments.towel)
+FROM #db#.segments
+JOIN #db#.admin
+WHERE #db#.segments.tabl = %s AND #db#.segments.rnd = %s
+'''
+
 PREFIX = '''
 SELECT shortname FROM #db#.admin
 '''

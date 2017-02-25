@@ -155,13 +155,14 @@ def get_match_info(match):
                 ) if len([team for team in teams if team is not None]) > 0 else ''
 
     try:
+        towels = db_fetch(match['database'], p_sql.TOWEL_COUNT, (match['table'], match['round']))
         row = db_fetch(match['database'], p_sql.BOARD_COUNT, (match['table'], match['round']))
         if row[1] > 0:
             info.running = int(row[1])
-            if row[1] == row[0]:
-                info.running = 0
-                info.winner = info.teams[0].name if info.teams[0].score > info.teams[1].score else info.teams[1].name
-                info.loser = info.teams[1].name if info.teams[0].score > info.teams[1].score else info.teams[0].name
+        if row[1] >= row[0] - towels[0]:
+            info.running = 0
+            info.winner = info.teams[0].name if info.teams[0].score > info.teams[1].score else info.teams[1].name
+            info.loser = info.teams[1].name if info.teams[0].score > info.teams[1].score else info.teams[0].name
     except Exception as e:
         pass
     return info
