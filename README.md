@@ -46,8 +46,6 @@ Znane ograniczenia
  *  wszystkie mecze danej fazy muszą lądować na FTP w tej samej ścieżce:
 linki generowane są na podstawie URL całej fazy (linki z datami u góry),
 prefiksów turniejów oraz numerów rund
- * brak obsługi "ręczników" - trzeba wypełnić zręcznikowany segment
-średnimi, żeby pokazało, że mecz się skończył
  * fazy powinny być określone raczej chronologicznie (czytaj: nie
 testowano, co się stanie, jeśli określimy np., że w meczu fazy 2 ma zagrać
 zwycięzca z fazy 4), ale nie powinno być problemu z "przeskakiwaniem"
