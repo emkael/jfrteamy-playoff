@@ -58,7 +58,7 @@ def get_match_grid(grid, matches, width, height):
     col_no = 0
     for column in grid:
         grid_x = col_no * (settings['page']['width'] + settings['page']['margin'])
-        grid_header = p_temp.MATCH_GRID_PHASE_RUNNING if len([match for match in column if matches[match].running > 0]) > 0 else p_temp.MATCH_GRID_PHASE
+        grid_header = p_temp.MATCH_GRID_PHASE_RUNNING if len([match for match in column if match is not None and matches[match].running > 0]) > 0 else p_temp.MATCH_GRID_PHASE
         grid_boxes += grid_header % (
             settings['phases'][col_no]['link'],
             settings['page']['width'],
@@ -69,13 +69,14 @@ def get_match_grid(grid, matches, width, height):
         column_height = height / len(column)
         for match in column:
             grid_y = int(row_no * column_height + 0.5 * (column_height - settings['page']['height']))
-            grid_boxes += p_temp.MATCH_BOX % (
-                grid_x, grid_y,
-                match,
-                ' '.join([str(m) for m in matches[match].winner_matches]) if matches[match].winner_matches is not None else '',
-                ' '.join([str(m) for m in matches[match].loser_matches]) if matches[match].loser_matches is not None else '',
-                get_match_table(matches[match])
-            )
+            if match is not None:
+                grid_boxes += p_temp.MATCH_BOX % (
+                    grid_x, grid_y,
+                    match,
+                    ' '.join([str(m) for m in matches[match].winner_matches]) if matches[match].winner_matches is not None else '',
+                    ' '.join([str(m) for m in matches[match].loser_matches]) if matches[match].loser_matches is not None else '',
+                    get_match_table(matches[match])
+                )
             row_no += 1
         col_no += 1
     return p_temp.MATCH_GRID % (width, height, width, height, grid_boxes)
@@ -171,11 +172,17 @@ def get_match_info(match):
 
 grid = []
 for phase in settings['phases']:
-    grid.append([])
+    phase_grid = [None] * (len(phase['dummies']) + len(phase['matches']) if 'dummies' in phase else len(phase['matches']))
+    phase_pos = 0
     for match in phase['matches']:
+        if 'dummies' in phase:
+            while phase_pos in phase['dummies']:
+                phase_pos += 1
         match_info[match['id']] = get_match_info(match)
         match_info[match['id']].link = phase['link'] if match_info[match['id']].link is None else urljoin(phase['link'], match_info[match['id']].link)
-        grid[-1].append(match['id'])
+        phase_grid[phase_pos] = match['id']
+        phase_pos += 1
+    grid.append(phase_grid)
 
 for team in settings['teams']:
     if len(team) > 3:

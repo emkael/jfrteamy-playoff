@@ -48,6 +48,7 @@ Jest to tablica obiektów - każdy obiekt to kolejna faza (kolumna) drabinki.
 Faza ma następujące pola:
  - `"title"` - etykieta fazy, wyświetlana u góry jako link do wyników szczegółowych danej fazy
  - `"link"` - w/w link (ale linki do poszczególnych meczów generują się na podstawie informacji pobranych z bazy, dopóki wszystkie turnieje, których mecze wchodzą w skład danej fazy, są wysyłane do jednej ścieżki)
+ - opcjonalną tablicę `"dummies"` - liczb naturalnych pozycji (w pionie), w których dodane będą pionowe odstępy, uwzględniane przy rozmieszczaniu meczów fazy
  - tablicę `"matches"`, definiującej mecze w fazie
 
 Ustawienia kozy (co meczy)
