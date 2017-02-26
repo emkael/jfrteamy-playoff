@@ -137,6 +137,8 @@ def get_match_info(match):
         for i in range(0, 2):
             if isinstance(match['teams'][i], basestring):
                 info.teams[i].name = match['teams'][i]
+            elif isinstance(match['teams'][i], list):
+                info.teams[i].name = '<br />'.join(match['teams'][i])
             else:
                 teams = []
                 if 'winner' in match['teams'][i]:
