@@ -3,8 +3,8 @@ var playoff = {
     settings: {
         'winner_h_offset': 10,
         'loser_h_offset': 20,
-        'winner_v_offset': -4,
-        'loser_v_offset': 4,
+        'winner_v_offset': -6,
+        'loser_v_offset': 6,
         'loser_colour': '#ff0000',
         'winner_colour': '#00ff00'
     },
@@ -53,10 +53,13 @@ var playoff = {
                         parseInt(box.style.left) + parseInt(box.clientWidth) + this.settings[type + '_h_offset'],
                         parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + this.settings[type + '_v_offset']
                     ];
+                    console.log(from, line);
                     horizontal_from.push(line);
                     for (var l in horizontal_from) {
                         if (horizontal_from[l][2] < line[2]) {
                             horizontal_from[l][2] = line[2];
+                        } else {
+                            line[2] = horizontal_from[l][2];
                         }
                         if (vertical_from[0] < horizontal_from[l][2]) {
                             vertical_from[0] = horizontal_from[l][2];
@@ -84,6 +87,8 @@ var playoff = {
                     for (var l in horizontal_to) {
                         if (horizontal_to[l][2] > line[2]) {
                             horizontal_to[l][2] = line[2];
+                        } else {
+                            line[2] = horizontal_to[l][2];
                         }
                         if (vertical_to[0] > horizontal_to[l][2]) {
                             vertical_to[0] = horizontal_to[l][2];
