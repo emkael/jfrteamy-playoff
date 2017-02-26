@@ -103,11 +103,11 @@ var playoff = {
                         (vertical_from[1] + vertical_from[3]) / 2
                     ],
                     [
-                        (vertical_from[0] + vertical_from[2] + vertical_to[0] + vertical_to[2]) / 4,
+                        this.settings[type + '_v_offset'] + (vertical_from[0] + vertical_from[2] + vertical_to[0] + vertical_to[2]) / 4,
                         (vertical_from[1] + vertical_from[3]) / 2
                     ],
                     [
-                        (vertical_from[0] + vertical_from[2] + vertical_to[0] + vertical_to[2]) / 4,
+                        this.settings[type + '_v_offset'] + (vertical_from[0] + vertical_from[2] + vertical_to[0] + vertical_to[2]) / 4,
                         (vertical_to[1] + vertical_to[3]) / 2
                     ],
                     [
