@@ -216,7 +216,7 @@ for positions, teams in leaderboard_teams.iteritems():
                 leaderboard[position-1] = table_team[0]
 
 grid_columns = len(settings['phases'])
-grid_rows = max([len(phase['matches']) for phase in settings['phases']])
+grid_rows = max([len(phase['matches']) + len(phase['dummies']) if 'dummies' in phase else len(phase['matches']) for phase in settings['phases']])
 grid_height = grid_rows * (settings['page']['height'] + settings['page']['margin']) - settings['page']['margin']
 grid_width = grid_columns * (settings['page']['width'] + settings['page']['margin']) - settings['page']['margin']
 
