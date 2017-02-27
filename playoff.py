@@ -141,21 +141,26 @@ def get_match_info(match):
             elif isinstance(match['teams'][i], list):
                 info.teams[i].name = '<br />'.join(match['teams'][i])
             else:
-                teams = []
+                match_teams = []
                 if 'winner' in match['teams'][i]:
-                    teams += [
+                    match_teams += [
                         match_info[winner_match].winner
                         for winner_match in match['teams'][i]['winner']
                     ]
                 if 'loser' in match['teams'][i]:
-                    teams += [
+                    match_teams += [
                         match_info[loser_match].loser
                         for loser_match in match['teams'][i]['loser']
                     ]
+                if 'place' in match['teams'][i]:
+                    match_teams += [
+                        teams[place-1][0]
+                        for place in match['teams'][i]['place']
+                    ]
                 info.teams[i].name = '<br />'.join([
                     team if team is not None else '??'
-                    for team in teams]
-                ) if len([team for team in teams if team is not None]) > 0 else ''
+                    for team in match_teams]
+                ) if len([team for team in match_teams if team is not None]) > 0 else ''
 
     try:
         towels = db_fetch(match['database'], p_sql.TOWEL_COUNT, (match['table'], match['round']))

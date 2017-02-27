@@ -61,7 +61,7 @@ Mecz ma następujące pola:
 zestawu pól nie da się pobrać informacji o meczu
   Jest to tablica dwóch elementów, które mogą być:
    + łańcuchem tekstowym - wówczas musi to być pełna nazwa teamu
-   + obiektem, z możliwymi polami tablicowymi `"winner"` lub `"loser"` - oznacza to, że dane miejsce drabinki jest przeznaczone dla zwycięzców/przegranych w meczach o ID podanych w polu
+   + obiektem, z możliwymi polami tablicowymi `"place"`, `"winner"` lub `"loser"` - oznacza to, że dane miejsce drabinki jest przeznaczone dla drużyny z odpowiedniego miejsca z listy teamów (sekcja `"teams"`) lub dla zwycięzców/przegranych w meczach o ID podanych w polu
  - opcjonalne, pola `"winner"` i `"loser"` - które z kolei w tym kontekście oznaczają, miejsca, które zajmują zwycięzcy/przegrani danego meczu w końcowej klasyfikacji
 
 Na przykładach, pierwszy i ostatni mecz z poniższego pliku:
