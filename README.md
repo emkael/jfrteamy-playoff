@@ -3,7 +3,7 @@ JFR Teamy - play-off
 
 Generator drabinek wizualizacji play-off dla turniejów prowadzonych przy użyciu JFR Teamy.
 
-Przykład wizualizacji: [III liga LD, sezon 2016/17](https://emkael.info/brydz/playoff/).
+Przykład wizualizacji: [III liga LD, sezon 2016/17](https://emkael.github.io/playoff/).
 
 Wymagania systemowe
 -------------------
@@ -72,3 +72,7 @@ Licencja
 --------
 
 [Uproszczona licencja BSD](LICENSE)
+
+---
+
+`You're slipping slowly from my reach.`
