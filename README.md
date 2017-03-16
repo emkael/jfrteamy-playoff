@@ -38,6 +38,8 @@ python playoff.py PLIK_USTAWIEŃ_JSON
 
 `PLIK_USTAWIEŃ_JSON` jest plikiem konfiguracyjnym, dostarczającym wszelkich danych niezbędnych do pracy programu.
 
+Jeśli w wywołaniu nie podano ścieżki do pliku ustawień, program spyta o nią sam.
+
 Jego strukturę opisuje dokument [CONFIG](CONFIG.md).
 
 Znane ograniczenia
