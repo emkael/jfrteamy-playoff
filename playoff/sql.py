@@ -23,7 +23,7 @@ WHERE sc1.tabl = %s AND sc1.rnd = %s
 '''
 
 TOWEL_COUNT = '''
-SELECT #db#.admin.boardspersegment * SUM(#db#.segments.towel)
+SELECT #db#.admin.boardspersegment * SUM(#db#.segments.towel > 0)
 FROM #db#.segments
 JOIN #db#.admin
 WHERE #db#.segments.tabl = %s AND #db#.segments.rnd = %s
