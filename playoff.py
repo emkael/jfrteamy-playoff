@@ -179,7 +179,7 @@ def get_match_info(match):
 
     try:
         towels = db_fetch(match['database'], p_sql.TOWEL_COUNT, (match['table'], match['round']))
-        row = db_fetch(match['database'], p_sql.BOARD_COUNT, (match['table'], match['round']))
+        row = [0 if r is None else r for r in db_fetch(match['database'], p_sql.BOARD_COUNT, (match['table'], match['round']))]
         if row[1] > 0:
             info.running = int(row[1])
         if row[1] >= row[0] - towels[0]:
