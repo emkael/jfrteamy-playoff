@@ -17,7 +17,7 @@ Dla wersji skryptowej:
 Instalacja
 ----------
 
-Dla wersji skompilowanej: [ściągnąć](https://emkael.github.io/_files/playoff-teamy/playoff-1.0.1.zip), rozpakować, upewnić się, że [`playoff.js`](playoff.js) jest w katalogu pliku wykonywalnego.
+Dla wersji skompilowanej: [ściągnąć](https://emkael.github.io/_files/teamy-playoff/playoff-1.0.1.zip), rozpakować, upewnić się, że [`playoff.js`](playoff.js) jest w katalogu pliku wykonywalnego.
 
 Dla wersji skryptowej: sklonować to repozytorium.
 
