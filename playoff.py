@@ -1,25 +1,12 @@
-import glob, json, os, readline, shutil, socket, sys
+import os, shutil, socket
 from datetime import datetime
 from urlparse import urljoin
 from playoff import sql as p_sql
 from playoff import template as p_temp
 
-def complete_filename(text, state):
-    return (glob.glob(text+'*')+[None])[state]
-
-if len(sys.argv) > 1:
-    settings_file = sys.argv[1]
-else:
-    readline.set_completer_delims(' \t\n;')
-    readline.parse_and_bind("tab: complete")
-    readline.set_completer(complete_filename)
-    settings_file = raw_input('JSON settings file: ')
-
-if not os.path.exists(settings_file):
-    print 'Settings file "%s" not found' % settings_file
-    sys.exit(1)
-
-settings = json.load(open(settings_file))
+from playoff.settings import PlayoffSettings
+s = PlayoffSettings()
+settings = s.get()
 teams = settings['teams']
 leaderboard = [None] * len(teams)
 
