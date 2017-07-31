@@ -6,6 +6,7 @@ def complete_filename(text, state):
 class PlayoffSettings:
 
     def __init__(self):
+        self.settings = None
         self.interactive = False
         self.settings_file = None
         if len(sys.argv) > 1:
@@ -20,7 +21,8 @@ class PlayoffSettings:
             readline.set_completer(complete_filename)
             self.settings_file = raw_input('JSON settings file: ')
 
-        self.settings = json.load(open(self.settings_file))
+        if self.settings is None:
+            self.settings = json.load(open(self.settings_file))
 
     def has_section(self, key):
         self.load()
