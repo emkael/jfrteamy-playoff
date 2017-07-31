@@ -1,10 +1,10 @@
 import os, shutil, socket
 from datetime import datetime
 from urlparse import urljoin
-import playoff.sql as p_sql
-import playoff.template as p_temp
-from playoff.db import PlayoffDB
-from playoff.settings import PlayoffSettings
+import jfr_playoff.sql as p_sql
+import jfr_playoff.template as p_temp
+from jfr_playoff.db import PlayoffDB
+from jfr_playoff.settings import PlayoffSettings
 
 def get_shortname(fullname, teams):
     for team in teams:
