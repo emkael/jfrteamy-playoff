@@ -13,4 +13,5 @@ def main():
     file_manager.copy_scripts()
     file_manager.send_files()
 
-main()
+if __name__ == '__main__':
+    main()
