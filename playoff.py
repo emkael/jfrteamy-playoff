@@ -96,7 +96,13 @@ def get_match_grid(grid, matches, width, height):
                 )
             row_no += 1
         col_no += 1
-    return p_temp.MATCH_GRID % (width, height, width, height, grid_boxes)
+    canvas_settings = []
+    if 'canvas' in settings:
+        for setting, value in settings['canvas'].iteritems():
+            canvas_settings.append(
+                'data-%s="%s"' % (setting.replace('_', '-'), str(value))
+            )
+    return p_temp.MATCH_GRID % (width, height, width, height, ' '.join(canvas_settings), grid_boxes)
 
 def get_leaderboard_table(leaderboard):
     if len([t for t in leaderboard if t is not None]) == 0:

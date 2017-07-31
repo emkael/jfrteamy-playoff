@@ -16,6 +16,17 @@ var playoff = {
         ctx.stroke();
     },
 
+    loadSettings: function(canvas, defaults) {
+        for (var setting in defaults) {
+            var attr = 'data-' + setting.replace(/_/g, '-');
+            var attr_value = canvas.getAttribute(attr);
+            if (attr_value) {
+                defaults[setting] = attr_value;
+            }
+        }
+        return defaults;
+    },
+
     run: function() {
         var boxes = document.getElementsByClassName('playoff_matchbox');
         var lines = {
@@ -37,6 +48,7 @@ var playoff = {
             }
         }
         var canvas = document.getElementById('playoff_canvas');
+        this.settings = this.loadSettings(canvas, this.settings);
         var ctx = canvas.getContext('2d');
         for (var type in lines) {
             ctx.strokeStyle = this.settings[type + '_colour'];

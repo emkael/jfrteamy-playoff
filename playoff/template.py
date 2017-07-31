@@ -31,7 +31,7 @@ MATCH_RUNNING = '''
 
 MATCH_GRID = '''
 <div style="position: relative; width: %dpx; height: %dpx; margin: 10px">
-<canvas width="%d" height="%d" id="playoff_canvas"></canvas>
+<canvas width="%d" height="%d" id="playoff_canvas" %s></canvas>
 %s
 <script src="sklady/playoff.js" type="text/javascript"></script>
 </div>
