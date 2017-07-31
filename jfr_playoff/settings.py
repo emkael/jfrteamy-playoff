@@ -7,24 +7,27 @@ class PlayoffSettings:
 
     def __init__(self):
         self.interactive = False
+        self.settings_file = None
         if len(sys.argv) > 1:
-            settings_file = sys.argv[1]
+            self.settings_file = sys.argv[1]
         else:
             self.interactive = True
+
+    def load(self):
+        if self.settings_file is None:
             readline.set_completer_delims(' \t\n;')
             readline.parse_and_bind("tab: complete")
             readline.set_completer(complete_filename)
-            settings_file = raw_input('JSON settings file: ')
+            self.settings_file = raw_input('JSON settings file: ')
 
-        if not os.path.exists(settings_file):
-            raise IOError('Settings file %s not found' % settings_file)
-
-        self.settings = json.load(open(settings_file))
+        self.settings = json.load(open(self.settings_file))
 
     def has_section(self, key):
+        self.load()
         return key in self.settings
 
     def get(self, *keys):
+        self.load()
         section = self.settings
         for key in keys:
             section = section[key]
