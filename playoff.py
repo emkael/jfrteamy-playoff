@@ -1,8 +1,8 @@
 import os, shutil, socket
 from datetime import datetime
 from urlparse import urljoin
-from playoff import sql as p_sql
-from playoff import template as p_temp
+import playoff.sql as p_sql
+import playoff.template as p_temp
 from playoff.db import PlayoffDB
 from playoff.settings import PlayoffSettings
 
@@ -194,7 +194,7 @@ def prefill_leaderboard(teams):
             leaderboard[team[3]-1] = team[0]
     return leaderboard
 
-def fill_leaderboard(phases, teams):
+def fill_leaderboard(phases, teams, match_info):
     leaderboard_teams = {}
     leaderboard = prefill_leaderboard(teams)
     for phase in phases:
@@ -219,7 +219,7 @@ def fill_leaderboard(phases, teams):
                     leaderboard[position-1] = table_team[0]
     return leaderboard
 
-def generate_content(grid, phases, match_info, teams, grid_width, grid_height, page_settings, canvas_settings):
+def generate_content(grid, phases, match_info, teams, grid_width, grid_height, page_settings, canvas_settings, leaderboard):
     return p_temp.PAGE % (
         p_temp.PAGE_HEAD % (
             p_temp.PAGE_HEAD_REFRESH % (page_settings['refresh']) if page_settings['refresh'] > 0 else '',
@@ -260,24 +260,26 @@ def send_files(goniec_settings, path, files):
         except socket.error:
             pass
 
-s = PlayoffSettings()
-db = PlayoffDB(s.get('database'))
+def main():
+    s = PlayoffSettings()
+    db = PlayoffDB(s.get('database'))
 
-phase_settings = s.get('phases')
-grid = generate_phases(phase_settings)
-match_info = fill_match_info(phase_settings, s.get('teams'), db)
-leaderboard = fill_leaderboard(phase_settings, s.get('teams'))
+    phase_settings = s.get('phases')
+    grid = generate_phases(phase_settings)
+    match_info = fill_match_info(phase_settings, s.get('teams'), db)
+    leaderboard = fill_leaderboard(phase_settings, s.get('teams'), match_info)
 
-page_settings = s.get('page')
-grid_columns = len(phase_settings)
-grid_rows = max([len(phase['matches']) + len(phase['dummies']) if 'dummies' in phase else len(phase['matches']) for phase in phase_settings])
-grid_height = grid_rows * (page_settings['height'] + page_settings['margin']) - page_settings['margin']
-grid_width = grid_columns * (page_settings['width'] + page_settings['margin']) - page_settings['margin']
+    page_settings = s.get('page')
+    grid_columns = len(phase_settings)
+    grid_rows = max([len(phase['matches']) + len(phase['dummies']) if 'dummies' in phase else len(phase['matches']) for phase in phase_settings])
+    grid_height = grid_rows * (page_settings['height'] + page_settings['margin']) - page_settings['margin']
+    grid_width = grid_columns * (page_settings['width'] + page_settings['margin']) - page_settings['margin']
 
-content = generate_content(grid, phase_settings, match_info, s.get('teams'), grid_width, grid_height, page_settings, s.get('canvas') if s.has_section('canvas') else {})
+    content = generate_content(grid, phase_settings, match_info, s.get('teams'), grid_width, grid_height, page_settings, s.get('canvas') if s.has_section('canvas') else {}, leaderboard)
 
-output_file = s.get('output')
-output_path = write_content(content, output_file)
-script_path = copy_scripts(output_path)
-send_files(s.get('goniec'), output_path, [output_file, script_path])
+    output_file = s.get('output')
+    output_path = write_content(content, output_file)
+    script_path = copy_scripts(output_path)
+    send_files(s.get('goniec'), output_path, [output_file, script_path])
 
+main()
