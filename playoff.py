@@ -1,8 +1,6 @@
 from datetime import datetime
 from urlparse import urljoin
-import jfr_playoff.sql as p_sql
 import jfr_playoff.template as p_temp
-from jfr_playoff.db import PlayoffDB
 from jfr_playoff.settings import PlayoffSettings
 
 def get_shortname(fullname, teams):
@@ -83,140 +81,6 @@ def get_leaderboard_table(leaderboard, teams):
     html = p_temp.LEADERBOARD.decode('utf8') % (rows)
     return html
 
-class Team:
-    name = ''
-    score = 0.0
-
-class Match:
-    teams = None
-    running = 0
-    link = None
-    winner = None
-    loser = None
-    winner_matches = None
-    loser_matches = None
-
-def get_match_info(match, match_info, teams, db):
-    info = Match()
-    info.teams = [Team(), Team()]
-    info.winner_matches = []
-    info.loser_matches = []
-    for i in range(0, 2):
-        if 'winner' in match['teams'][i]:
-            info.winner_matches += match['teams'][i]['winner']
-        if 'loser' in match['teams'][i]:
-            info.loser_matches += match['teams'][i]['loser']
-    info.winner_matches = list(set(info.winner_matches))
-    info.loser_matches = list(set(info.loser_matches))
-    try:
-        row = db.fetch(match['database'], p_sql.PREFIX, ())
-        info.link = '%srunda%d.html' % (row[0], match['round'])
-    except Exception as e:
-        pass
-    try:
-        row = db.fetch(match['database'], p_sql.MATCH_RESULTS, (match['table'], match['round']))
-        info.teams[0].name = row[0]
-        info.teams[1].name = row[1]
-        info.teams[0].score = row[3] + row[5]
-        info.teams[1].score = row[4] + row[6]
-        if row[2] > 0:
-            info.teams[0].score += row[2]
-        else:
-            info.teams[1].score -= row[2]
-    except Exception as e:
-        for i in range(0, 2):
-            if isinstance(match['teams'][i], basestring):
-                info.teams[i].name = match['teams'][i]
-            elif isinstance(match['teams'][i], list):
-                info.teams[i].name = '<br />'.join(match['teams'][i])
-            else:
-                match_teams = []
-                if 'winner' in match['teams'][i]:
-                    match_teams += [
-                        match_info[winner_match].winner
-                        for winner_match in match['teams'][i]['winner']
-                    ]
-                if 'loser' in match['teams'][i]:
-                    match_teams += [
-                        match_info[loser_match].loser
-                        for loser_match in match['teams'][i]['loser']
-                    ]
-                if 'place' in match['teams'][i]:
-                    match_teams += [
-                        teams[place-1][0]
-                        for place in match['teams'][i]['place']
-                    ]
-                info.teams[i].name = '<br />'.join([
-                    team if team is not None else '??'
-                    for team in match_teams]
-                ) if len([team for team in match_teams if team is not None]) > 0 else ''
-
-    try:
-        towels = db.fetch(match['database'], p_sql.TOWEL_COUNT, (match['table'], match['round']))
-        row = [0 if r is None else r for r in db.fetch(match['database'], p_sql.BOARD_COUNT, (match['table'], match['round']))]
-        if row[1] > 0:
-            info.running = int(row[1])
-        if row[1] >= row[0] - towels[0]:
-            info.running = 0
-            info.winner = info.teams[0].name if info.teams[0].score > info.teams[1].score else info.teams[1].name
-            info.loser = info.teams[1].name if info.teams[0].score > info.teams[1].score else info.teams[0].name
-    except Exception as e:
-        pass
-    return info
-
-def generate_phases(phases):
-    grid = []
-    for phase in phases:
-        phase_grid = [None] * (len(phase['dummies']) + len(phase['matches']) if 'dummies' in phase else len(phase['matches']))
-        phase_pos = 0
-        for match in phase['matches']:
-            if 'dummies' in phase:
-                while phase_pos in phase['dummies']:
-                    phase_pos += 1
-            phase_grid[phase_pos] = match['id']
-            phase_pos += 1
-        grid.append(phase_grid)
-    return grid
-
-def fill_match_info(phases, teams, db):
-    match_info = {}
-    for phase in phases:
-        for match in phase['matches']:
-            match_info[match['id']] = get_match_info(match, match_info, teams, db)
-            match_info[match['id']].link = phase['link'] if match_info[match['id']].link is None else urljoin(phase['link'], match_info[match['id']].link)
-    return match_info
-
-def prefill_leaderboard(teams):
-    leaderboard = [None] * len(teams)
-    for team in teams:
-        if len(team) > 3:
-            leaderboard[team[3]-1] = team[0]
-    return leaderboard
-
-def fill_leaderboard(phases, teams, match_info):
-    leaderboard_teams = {}
-    leaderboard = prefill_leaderboard(teams)
-    for phase in phases:
-        for match in phase['matches']:
-            if 'winner' in match:
-                winner_key = tuple(match['winner'])
-                if winner_key not in leaderboard_teams:
-                    leaderboard_teams[winner_key] = []
-                leaderboard_teams[winner_key].append(match_info[match['id']].winner)
-            if 'loser' in match:
-                loser_key = tuple(match['loser'])
-                if loser_key not in leaderboard_teams:
-                    leaderboard_teams[loser_key] = []
-                leaderboard_teams[loser_key].append(match_info[match['id']].loser)
-
-    for positions, teams in leaderboard_teams.iteritems():
-        positions = list(positions)
-        if len(positions) == len([team for team in teams if team is not None]):
-            for table_team in teams:
-                if table_team[0] in teams:
-                    position = positions.pop(0)
-                    leaderboard[position-1] = table_team[0]
-    return leaderboard
 
 def generate_content(grid, phases, match_info, teams, grid_width, grid_height, page_settings, canvas_settings, leaderboard):
     return p_temp.PAGE % (
@@ -236,12 +100,13 @@ from jfr_playoff.filemanager import PlayoffFileManager
 
 def main():
     s = PlayoffSettings()
-    db = PlayoffDB(s.get('database'))
 
     phase_settings = s.get('phases')
-    grid = generate_phases(phase_settings)
-    match_info = fill_match_info(phase_settings, s.get('teams'), db)
-    leaderboard = fill_leaderboard(phase_settings, s.get('teams'), match_info)
+    from jfr_playoff.data import PlayoffData
+    data = PlayoffData(s)
+    grid = data.generate_phases()
+    match_info = data.fill_match_info()
+    leaderboard = data.fill_leaderboard()
 
     page_settings = s.get('page')
     grid_columns = len(phase_settings)
