@@ -46,7 +46,8 @@ def get_shortname(fullname):
 def get_team_image(fullname):
     for team in settings['teams']:
         if team[0] == fullname and len(team) > 2:
-            return p_temp.LEADERBOARD_ROW_FLAG % (team[2])
+            if team[2] is not None:
+                return p_temp.LEADERBOARD_ROW_FLAG % (team[2])
     return ''
 
 def get_match_table(match):
