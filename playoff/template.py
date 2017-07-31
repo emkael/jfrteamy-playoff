@@ -11,7 +11,7 @@ MATCH_TABLE = '''
 '''
 
 MATCH_TEAM_ROW = '''
-<tr>
+<tr class="%s">
 <td class="bd1">&nbsp;<a href="%s" onmouseover="Tip('%s')" onmouseout="UnTip()">%s</a>&nbsp;</td>
 <td class="bdc">
 <a href="%s" target="_top">

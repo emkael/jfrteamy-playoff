@@ -53,6 +53,8 @@ def get_match_table(match):
     rows = ''
     for team in match.teams:
         rows += p_temp.MATCH_TEAM_ROW % (
+            ' '.join(['winner' if team.name == match.winner else '',
+                      'loser' if team.name == match.loser else '']).strip(),
             match.link,
             team.name,
             ' / '.join([get_shortname(name) for name in team.name.split('<br />')]),
