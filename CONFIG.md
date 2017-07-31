@@ -40,7 +40,7 @@ Każdy team to tablica, kolejno: pełnej nazwy (tej, która MUSI się zgadzać z
 
 Jako czwarty element każdej tablicy można wpisać liczbę naturalną, która oznacza pozycję, jaką team ma zająć w końcowej klasyfikacji (tj. wpisanie tam liczby oznacza, że team od samego początku umieszczany jest na tej pozycji w klasyfikacji końcowej - np. jeśli nie uczestniczy w ogóle w play-off).
 
-Co zrobić, gdy jest taki team, a turniej nie ma ustawionych obrazków z flagami - nie wiem, będę się martwił kiedy indziej.
+Co zrobić, gdy jest taki team, a turniej nie ma ustawionych obrazków z flagami? Ustawić flagę na `null` - nie zostanie wyświetlona.
 
 Ustawienia drabinki
 -------------------
