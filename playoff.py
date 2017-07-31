@@ -3,30 +3,23 @@ from datetime import datetime
 from urlparse import urljoin
 from playoff import sql as p_sql
 from playoff import template as p_temp
-
-from playoff.settings import PlayoffSettings
-s = PlayoffSettings()
-settings = s.get()
-teams = settings['teams']
-leaderboard = [None] * len(teams)
-
 from playoff.db import PlayoffDB
-db = PlayoffDB(settings['database'])
+from playoff.settings import PlayoffSettings
 
-def get_shortname(fullname):
-    for team in settings['teams']:
+def get_shortname(fullname, teams):
+    for team in teams:
         if team[0] == fullname:
             return team[1]
     return fullname
 
-def get_team_image(fullname):
-    for team in settings['teams']:
+def get_team_image(fullname, teams):
+    for team in teams:
         if team[0] == fullname and len(team) > 2:
             if team[2] is not None:
                 return p_temp.LEADERBOARD_ROW_FLAG % (team[2])
     return ''
 
-def get_match_table(match):
+def get_match_table(match, teams, page_settings):
     rows = ''
     for team in match.teams:
         rows += p_temp.MATCH_TEAM_ROW % (
@@ -34,60 +27,59 @@ def get_match_table(match):
                       'loser' if team.name == match.loser else '']).strip(),
             match.link,
             team.name,
-            ' / '.join([get_shortname(name) for name in team.name.split('<br />')]),
+            ' / '.join([get_shortname(name, teams) for name in team.name.split('<br />')]),
             match.link,
             team.score
         )
     html = p_temp.MATCH_TABLE.decode('utf8') % (
-        int(settings['page']['width'] * 0.75),
-        int(settings['page']['width'] * 0.25),
+        int(page_settings['width'] * 0.75),
+        int(page_settings['width'] * 0.25),
         rows
     )
     if match.running > 0:
         html += p_temp.MATCH_RUNNING % (match.link, match.running)
     return html
 
-def get_match_grid(grid, matches, width, height):
+def get_match_grid(grid, phases, matches, page_settings, width, height, teams, canvas_settings):
     grid_boxes = ''
     col_no = 0
     for column in grid:
-        grid_x = col_no * (settings['page']['width'] + settings['page']['margin'])
+        grid_x = col_no * (page_settings['width'] + page_settings['margin'])
         grid_header = p_temp.MATCH_GRID_PHASE_RUNNING if len([match for match in column if match is not None and matches[match].running > 0]) > 0 else p_temp.MATCH_GRID_PHASE
         grid_boxes += grid_header % (
-            settings['phases'][col_no]['link'],
-            settings['page']['width'],
+            phases[col_no]['link'],
+            page_settings['width'],
             grid_x,
-            settings['phases'][col_no]['title']
+            phases[col_no]['title']
         )
         row_no = 0
         column_height = height / len(column)
         for match in column:
-            grid_y = int(row_no * column_height + 0.5 * (column_height - settings['page']['height']))
+            grid_y = int(row_no * column_height + 0.5 * (column_height - page_settings['height']))
             if match is not None:
                 grid_boxes += p_temp.MATCH_BOX % (
                     grid_x, grid_y,
                     match,
                     ' '.join([str(m) for m in matches[match].winner_matches]) if matches[match].winner_matches is not None else '',
                     ' '.join([str(m) for m in matches[match].loser_matches]) if matches[match].loser_matches is not None else '',
-                    get_match_table(matches[match])
+                    get_match_table(matches[match], teams, page_settings)
                 )
             row_no += 1
         col_no += 1
-    canvas_settings = []
-    if 'canvas' in settings:
-        for setting, value in settings['canvas'].iteritems():
-            canvas_settings.append(
-                'data-%s="%s"' % (setting.replace('_', '-'), str(value))
-            )
-    return p_temp.MATCH_GRID % (width, height, width, height, ' '.join(canvas_settings), grid_boxes)
+    canvas_attrs = []
+    for setting, value in canvas_settings.iteritems():
+        canvas_attrs.append(
+            'data-%s="%s"' % (setting.replace('_', '-'), str(value))
+        )
+    return p_temp.MATCH_GRID % (width, height, width, height, ' '.join(canvas_attrs), grid_boxes)
 
-def get_leaderboard_table(leaderboard):
+def get_leaderboard_table(leaderboard, teams):
     if len([t for t in leaderboard if t is not None]) == 0:
         return ''
     position = 1
     rows = ''
     for team in leaderboard:
-        rows += p_temp.LEADERBOARD_ROW % (position, get_team_image(team), team or '')
+        rows += p_temp.LEADERBOARD_ROW % (position, get_team_image(team, teams), team or '')
         position +=1
     html = p_temp.LEADERBOARD.decode('utf8') % (rows)
     return html
@@ -105,9 +97,7 @@ class Match:
     winner_matches = None
     loser_matches = None
 
-match_info = {}
-
-def get_match_info(match):
+def get_match_info(match, match_info, teams, db):
     info = Match()
     info.teams = [Team(), Team()]
     info.winner_matches = []
@@ -175,82 +165,119 @@ def get_match_info(match):
         pass
     return info
 
-grid = []
-for phase in settings['phases']:
-    phase_grid = [None] * (len(phase['dummies']) + len(phase['matches']) if 'dummies' in phase else len(phase['matches']))
-    phase_pos = 0
-    for match in phase['matches']:
-        if 'dummies' in phase:
-            while phase_pos in phase['dummies']:
-                phase_pos += 1
-        match_info[match['id']] = get_match_info(match)
-        match_info[match['id']].link = phase['link'] if match_info[match['id']].link is None else urljoin(phase['link'], match_info[match['id']].link)
-        phase_grid[phase_pos] = match['id']
-        phase_pos += 1
-    grid.append(phase_grid)
+def generate_phases(phases):
+    grid = []
+    for phase in phases:
+        phase_grid = [None] * (len(phase['dummies']) + len(phase['matches']) if 'dummies' in phase else len(phase['matches']))
+        phase_pos = 0
+        for match in phase['matches']:
+            if 'dummies' in phase:
+                while phase_pos in phase['dummies']:
+                    phase_pos += 1
+            phase_grid[phase_pos] = match['id']
+            phase_pos += 1
+        grid.append(phase_grid)
+    return grid
 
-for team in settings['teams']:
-    if len(team) > 3:
-        leaderboard[team[3]-1] = team[0]
+def fill_match_info(phases, teams, db):
+    match_info = {}
+    for phase in phases:
+        for match in phase['matches']:
+            match_info[match['id']] = get_match_info(match, match_info, teams, db)
+            match_info[match['id']].link = phase['link'] if match_info[match['id']].link is None else urljoin(phase['link'], match_info[match['id']].link)
+    return match_info
 
-leaderboard_teams = {}
-for phase in settings['phases']:
-    for match in phase['matches']:
-        if 'winner' in match:
-            winner_key = tuple(match['winner'])
-            if winner_key not in leaderboard_teams:
-                leaderboard_teams[winner_key] = []
-            leaderboard_teams[winner_key].append(match_info[match['id']].winner)
-        if 'loser' in match:
-            loser_key = tuple(match['loser'])
-            if loser_key not in leaderboard_teams:
-                leaderboard_teams[loser_key] = []
-            leaderboard_teams[loser_key].append(match_info[match['id']].loser)
+def prefill_leaderboard(teams):
+    leaderboard = [None] * len(teams)
+    for team in teams:
+        if len(team) > 3:
+            leaderboard[team[3]-1] = team[0]
+    return leaderboard
 
-for positions, teams in leaderboard_teams.iteritems():
-    positions = list(positions)
-    if len(positions) == len([team for team in teams if team is not None]):
-        for table_team in settings['teams']:
-            if table_team[0] in teams:
-                position = positions.pop(0)
-                leaderboard[position-1] = table_team[0]
+def fill_leaderboard(phases, teams):
+    leaderboard_teams = {}
+    leaderboard = prefill_leaderboard(teams)
+    for phase in phases:
+        for match in phase['matches']:
+            if 'winner' in match:
+                winner_key = tuple(match['winner'])
+                if winner_key not in leaderboard_teams:
+                    leaderboard_teams[winner_key] = []
+                leaderboard_teams[winner_key].append(match_info[match['id']].winner)
+            if 'loser' in match:
+                loser_key = tuple(match['loser'])
+                if loser_key not in leaderboard_teams:
+                    leaderboard_teams[loser_key] = []
+                leaderboard_teams[loser_key].append(match_info[match['id']].loser)
 
-grid_columns = len(settings['phases'])
-grid_rows = max([len(phase['matches']) + len(phase['dummies']) if 'dummies' in phase else len(phase['matches']) for phase in settings['phases']])
-grid_height = grid_rows * (settings['page']['height'] + settings['page']['margin']) - settings['page']['margin']
-grid_width = grid_columns * (settings['page']['width'] + settings['page']['margin']) - settings['page']['margin']
+    for positions, teams in leaderboard_teams.iteritems():
+        positions = list(positions)
+        if len(positions) == len([team for team in teams if team is not None]):
+            for table_team in teams:
+                if table_team[0] in teams:
+                    position = positions.pop(0)
+                    leaderboard[position-1] = table_team[0]
+    return leaderboard
 
-content = (
-    p_temp.PAGE % (
+def generate_content(grid, phases, match_info, teams, grid_width, grid_height, page_settings, canvas_settings):
+    return p_temp.PAGE % (
         p_temp.PAGE_HEAD % (
-            p_temp.PAGE_HEAD_REFRESH % (settings['page']['refresh']) if settings['page']['refresh'] > 0 else '',
-            settings['page']['title']
+            p_temp.PAGE_HEAD_REFRESH % (page_settings['refresh']) if page_settings['refresh'] > 0 else '',
+            page_settings['title']
         ),
         p_temp.PAGE_BODY % (
-            settings['page']['logoh'],
-            get_match_grid(grid, match_info, grid_width, grid_height),
-            get_leaderboard_table(leaderboard),
+            page_settings['logoh'],
+            get_match_grid(grid, phases, match_info, page_settings, grid_width, grid_height, teams, canvas_settings),
+            get_leaderboard_table(leaderboard, teams),
             p_temp.PAGE_BODY_FOOTER.decode('utf8') % (datetime.now().strftime('%Y-%m-%d o %H:%M'))
         )
-    )).encode('utf8')
+    )
 
-output = open(settings['output'], 'w')
-output.write(content)
-output.close()
+def write_content(content, output_file):
+    output = open(output_file, 'w')
+    output.write(content.encode('utf8'))
+    output.close()
+    return os.path.dirname(output_file)
 
-output_path = os.path.dirname(settings['output'])
-script_output_path = os.path.join(output_path, 'sklady/playoff.js')
+def copy_scripts(output_path):
+    script_path = 'sklady/playoff.js'
+    script_output_path = os.path.join(output_path, script_path)
+    shutil.copy(unicode(os.path.join(os.path.dirname(__file__), 'playoff.js')),
+                unicode(script_output_path))
+    return script_output_path
 
-shutil.copy(unicode(os.path.join(os.path.dirname(__file__), 'playoff.js')),
-            unicode(script_output_path))
+def send_files(goniec_settings, path, files):
+    if goniec_settings['enabled']:
+        try:
+            base_path = path.strip(os.sep) + os.sep
+            content_files = [filename.replace(base_path, '') for filename in files if filename.startswith(base_path)]
+            content_lines = [base_path] + content_files + ['bye', '']
+            print '\n'.join(content_lines)
+            goniec = socket.socket()
+            goniec.connect((goniec_settings['host'], goniec_settings['port']))
+            goniec.sendall('\n'.join(content_lines))
+            goniec.close()
+        except socket.error:
+            pass
 
-if settings['goniec']['enabled']:
-    try:
-        content_lines = [(output_path.strip('/') + '/').replace('/', '\\')] + [os.path.basename(settings['output']), 'sklady/playoff.js'] + ['bye', '']
-        print '\n'.join(content_lines)
-        goniec = socket.socket()
-        goniec.connect((settings['goniec']['host'], settings['goniec']['port']))
-        goniec.sendall('\n'.join(content_lines))
-        goniec.close()
-    except socket.error:
-        pass
+s = PlayoffSettings()
+db = PlayoffDB(s.get('database'))
+
+phase_settings = s.get('phases')
+grid = generate_phases(phase_settings)
+match_info = fill_match_info(phase_settings, s.get('teams'), db)
+leaderboard = fill_leaderboard(phase_settings, s.get('teams'))
+
+page_settings = s.get('page')
+grid_columns = len(phase_settings)
+grid_rows = max([len(phase['matches']) + len(phase['dummies']) if 'dummies' in phase else len(phase['matches']) for phase in phase_settings])
+grid_height = grid_rows * (page_settings['height'] + page_settings['margin']) - page_settings['margin']
+grid_width = grid_columns * (page_settings['width'] + page_settings['margin']) - page_settings['margin']
+
+content = generate_content(grid, phase_settings, match_info, s.get('teams'), grid_width, grid_height, page_settings, s.get('canvas') if s.has_section('canvas') else {})
+
+output_file = s.get('output')
+output_path = write_content(content, output_file)
+script_path = copy_scripts(output_path)
+send_files(s.get('goniec'), output_path, [output_file, script_path])
+
