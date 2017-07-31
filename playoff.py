@@ -1,4 +1,3 @@
-import os, shutil, socket
 from datetime import datetime
 from urlparse import urljoin
 import jfr_playoff.sql as p_sql
@@ -233,32 +232,7 @@ def generate_content(grid, phases, match_info, teams, grid_width, grid_height, p
         )
     )
 
-def write_content(content, output_file):
-    output = open(output_file, 'w')
-    output.write(content.encode('utf8'))
-    output.close()
-    return os.path.dirname(output_file)
-
-def copy_scripts(output_path):
-    script_path = 'sklady/playoff.js'
-    script_output_path = os.path.join(output_path, script_path)
-    shutil.copy(unicode(os.path.join(os.path.dirname(__file__), 'playoff.js')),
-                unicode(script_output_path))
-    return script_output_path
-
-def send_files(goniec_settings, path, files):
-    if goniec_settings['enabled']:
-        try:
-            base_path = path.strip(os.sep) + os.sep
-            content_files = [filename.replace(base_path, '') for filename in files if filename.startswith(base_path)]
-            content_lines = [base_path] + content_files + ['bye', '']
-            print '\n'.join(content_lines)
-            goniec = socket.socket()
-            goniec.connect((goniec_settings['host'], goniec_settings['port']))
-            goniec.sendall('\n'.join(content_lines))
-            goniec.close()
-        except socket.error:
-            pass
+from jfr_playoff.filemanager import PlayoffFileManager
 
 def main():
     s = PlayoffSettings()
@@ -277,9 +251,9 @@ def main():
 
     content = generate_content(grid, phase_settings, match_info, s.get('teams'), grid_width, grid_height, page_settings, s.get('canvas') if s.has_section('canvas') else {}, leaderboard)
 
-    output_file = s.get('output')
-    output_path = write_content(content, output_file)
-    script_path = copy_scripts(output_path)
-    send_files(s.get('goniec'), output_path, [output_file, script_path])
+    file_manager = PlayoffFileManager(s)
+    file_manager.write_content(content)
+    file_manager.copy_scripts()
+    file_manager.send_files()
 
 main()
