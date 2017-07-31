@@ -1,5 +1,4 @@
 import glob, json, os, readline, shutil, socket, sys
-import mysql.connector
 from datetime import datetime
 from urlparse import urljoin
 from playoff import sql as p_sql
@@ -24,18 +23,8 @@ settings = json.load(open(settings_file))
 teams = settings['teams']
 leaderboard = [None] * len(teams)
 
-database = mysql.connector.connect(
-    user=settings['database']['user'],
-    password=settings['database']['pass'],
-    host=settings['database']['host'],
-    port=settings['database']['port']
-)
-db_cursor = database.cursor(buffered=True)
-
-def db_fetch(db, sql, params):
-    db_cursor.execute(sql.replace('#db#', db), params)
-    row = db_cursor.fetchone()
-    return row
+from playoff.db import PlayoffDB
+db = PlayoffDB(settings['database'])
 
 def get_shortname(fullname):
     for team in settings['teams']:
@@ -144,12 +133,12 @@ def get_match_info(match):
     info.winner_matches = list(set(info.winner_matches))
     info.loser_matches = list(set(info.loser_matches))
     try:
-        row = db_fetch(match['database'], p_sql.PREFIX, ())
+        row = db.fetch(match['database'], p_sql.PREFIX, ())
         info.link = '%srunda%d.html' % (row[0], match['round'])
     except Exception as e:
         pass
     try:
-        row = db_fetch(match['database'], p_sql.MATCH_RESULTS, (match['table'], match['round']))
+        row = db.fetch(match['database'], p_sql.MATCH_RESULTS, (match['table'], match['round']))
         info.teams[0].name = row[0]
         info.teams[1].name = row[1]
         info.teams[0].score = row[3] + row[5]
@@ -187,8 +176,8 @@ def get_match_info(match):
                 ) if len([team for team in match_teams if team is not None]) > 0 else ''
 
     try:
-        towels = db_fetch(match['database'], p_sql.TOWEL_COUNT, (match['table'], match['round']))
-        row = [0 if r is None else r for r in db_fetch(match['database'], p_sql.BOARD_COUNT, (match['table'], match['round']))]
+        towels = db.fetch(match['database'], p_sql.TOWEL_COUNT, (match['table'], match['round']))
+        row = [0 if r is None else r for r in db.fetch(match['database'], p_sql.BOARD_COUNT, (match['table'], match['round']))]
         if row[1] > 0:
             info.running = int(row[1])
         if row[1] >= row[0] - towels[0]:
