@@ -13,5 +13,8 @@ def main():
     file_manager.copy_scripts()
     file_manager.send_files()
 
+    if s.interactive:
+        raw_input('Press any key to continue...')
+
 if __name__ == '__main__':
     main()
