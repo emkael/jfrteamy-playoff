@@ -1,8 +1,11 @@
 from urlparse import urljoin
+
 import mysql
-from jfr_playoff.db import PlayoffDB
-from jfr_playoff.dto import Team, Match, Phase
+
 import jfr_playoff.sql as p_sql
+from jfr_playoff.db import PlayoffDB
+from jfr_playoff.dto import Match, Phase, Team
+
 
 class PlayoffData(object):
     def __init__(self, settings):

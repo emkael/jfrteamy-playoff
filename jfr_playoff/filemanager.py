@@ -1,7 +1,9 @@
 import os
 import shutil
 import socket
+
 import __main__
+
 
 class PlayoffFileManager(object):
 

@@ -1,5 +1,6 @@
 import mysql.connector
 
+
 class PlayoffDB(object):
 
     db_cursor = None

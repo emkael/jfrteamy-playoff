@@ -3,6 +3,7 @@ import json
 import readline
 import sys
 
+
 def complete_filename(text, state):
     return (glob.glob(text+'*')+[None])[state]
 

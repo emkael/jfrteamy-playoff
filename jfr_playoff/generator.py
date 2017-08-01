@@ -1,6 +1,8 @@
 from datetime import datetime
+
 import jfr_playoff.template as p_temp
 from jfr_playoff.data import PlayoffData
+
 
 class PlayoffGenerator(object):
     def __init__(self, settings):

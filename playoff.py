@@ -1,7 +1,9 @@
 import traceback
-from jfr_playoff.settings import PlayoffSettings
-from jfr_playoff.generator import PlayoffGenerator
+
 from jfr_playoff.filemanager import PlayoffFileManager
+from jfr_playoff.generator import PlayoffGenerator
+from jfr_playoff.settings import PlayoffSettings
+
 
 def main():
 
