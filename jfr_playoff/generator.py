@@ -55,21 +55,21 @@ class PlayoffGenerator(object):
         ) - self.page['margin']
         grid_boxes = ''
         col_no = 0
-        for column in grid:
+        for phase in grid:
             grid_x = col_no * (self.page['width'] + self.page['margin'])
             grid_header = p_temp.MATCH_GRID_PHASE_RUNNING if len([
-                match for match in column if match is not None and matches[match].running > 0
+                match for match in phase.matches if match is not None and matches[match].running > 0
             ]) > 0 else p_temp.MATCH_GRID_PHASE
             grid_boxes += grid_header % (
-                self.settings.get('phases', col_no, 'link'),
+                phase.link,
                 self.page['width'],
                 grid_x,
-                self.settings.get('phases', col_no, 'title')
+                phase.title
             )
             row_no = 0
-            column_height = grid_height / len(column)
-            for match in column:
-                grid_y = int(row_no * column_height + 0.5 * (column_height - self.page['height']))
+            match_height = grid_height / len(phase.matches)
+            for match in phase.matches:
+                grid_y = int(row_no * match_height + 0.5 * (match_height - self.page['height']))
                 if match is not None:
                     grid_boxes += p_temp.MATCH_BOX % (
                         grid_x, grid_y,

@@ -19,15 +19,18 @@ class PlayoffData(object):
             phase_count = len(phase['matches'])
             if 'dummies' in phase:
                 phase_count += len(phase['dummies'])
-            phase_grid = [None] * phase_count
+            phase_object = Phase()
+            phase_object.title = phase['title']
+            phase_object.link = phase['link']
+            phase_object.matches = [None] * phase_count
             phase_pos = 0
             for match in phase['matches']:
                 if 'dummies' in phase:
                     while phase_pos in phase['dummies']:
                         phase_pos += 1
-                phase_grid[phase_pos] = match['id']
+                phase_object.matches[phase_pos] = match['id']
                 phase_pos += 1
-            grid.append(phase_grid)
+            grid.append(phase_object)
         return grid
 
     def fill_match_info(self):

@@ -11,4 +11,9 @@ class Match(object):
     winner_matches = None
     loser_matches = None
 
-__all__ = ['Team', 'Match']
+class Phase(object):
+    title = None
+    link = None
+    matches = []
+
+__all__ = ['Team', 'Match', 'Phase']
