@@ -10,11 +10,12 @@ class PlayoffData(object):
         self.database = PlayoffDB(self.settings.get('database'))
         self.phases = self.settings.get('phases')
         self.teams = self.settings.get('teams')
+        self.grid = []
         self.match_info = {}
         self.leaderboard = []
 
     def generate_phases(self):
-        grid = []
+        self.grid = []
         for phase in self.phases:
             phase_count = len(phase['matches'])
             if 'dummies' in phase:
@@ -30,14 +31,18 @@ class PlayoffData(object):
                         phase_pos += 1
                 phase_object.matches[phase_pos] = match['id']
                 phase_pos += 1
-            grid.append(phase_object)
-        return grid
+            self.grid.append(phase_object)
+        return self.grid
 
     def fill_match_info(self):
         self.match_info = {}
         for phase in self.phases:
             for match in phase['matches']:
                 self.match_info[match['id']] = self.get_match_info(match)
+                if self.match_info[match['id']].running > 0:
+                    for phase_obj in self.grid:
+                        if match['id'] in phase_obj.matches:
+                            phase_obj.running = True
                 if self.match_info[match['id']].link is None:
                     self.match_info[match['id']].link = phase['link']
                 else:
@@ -107,6 +112,7 @@ class PlayoffData(object):
 
     def get_match_info(self, match):
         info = Match()
+        info.id = match['id']
         info.winner_matches = []
         info.loser_matches = []
         for i in range(0, 2):
