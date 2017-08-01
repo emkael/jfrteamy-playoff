@@ -1,4 +1,5 @@
 from urlparse import urljoin
+import mysql
 from db import PlayoffDB
 import sql as p_sql
 
@@ -50,9 +51,64 @@ class PlayoffData(object):
                     phase['link'], self.match_info[match['id']].link)
         return self.match_info
 
+    def get_match_link(self, match):
+        try:
+            row = self.database.fetch(match['database'], p_sql.PREFIX, ())
+            if row is not None:
+                if len(row) > 0:
+                    return '%srunda%d.html' % (row[0], match['round'])
+        except mysql.connector.Error:
+            return None
+        return None
+
+    def get_db_match_teams(self, match):
+        teams = [Team(), Team()]
+        row = self.database.fetch(match['database'], p_sql.MATCH_RESULTS, (match['table'], match['round']))
+        teams[0].name = row[0]
+        teams[1].name = row[1]
+        teams[0].score = row[3] + row[5]
+        teams[1].score = row[4] + row[6]
+        if row[2] > 0:
+            teams[0].score += row[2]
+        else:
+            teams[1].score -= row[2]
+        return teams
+
+    def get_config_match_teams(self, match):
+        teams = [Team(), Team()]
+        for i in range(0, 2):
+            if isinstance(match['teams'][i], basestring):
+                teams[i].name = match['teams'][i]
+            elif isinstance(match['teams'][i], list):
+                teams[i].name = '<br />'.join(match['teams'][i])
+            else:
+                match_teams = []
+                if 'winner' in match['teams'][i]:
+                    match_teams += [
+                        self.match_info[winner_match].winner
+                        for winner_match in match['teams'][i]['winner']
+                    ]
+                if 'loser' in match['teams'][i]:
+                    match_teams += [
+                        self.match_info[loser_match].loser
+                        for loser_match in match['teams'][i]['loser']
+                    ]
+                if 'place' in match['teams'][i]:
+                    match_teams += [
+                        self.teams[place-1][0]
+                        for place in match['teams'][i]['place']
+                    ]
+            teams[i].name = '<br />'.join([
+                team if team is not None else '??'
+                for team in match_teams]
+            ) if len([
+                team for team in match_teams if team is not None
+            ]) > 0 else ''
+        return teams
+
+
     def get_match_info(self, match):
         info = Match()
-        info.teams = [Team(), Team()]
         info.winner_matches = []
         info.loser_matches = []
         for i in range(0, 2):
@@ -62,48 +118,11 @@ class PlayoffData(object):
                 info.loser_matches += match['teams'][i]['loser']
         info.winner_matches = list(set(info.winner_matches))
         info.loser_matches = list(set(info.loser_matches))
+        info.link = self.get_match_link(match)
         try:
-            row = self.database.fetch(match['database'], p_sql.PREFIX, ())
-            info.link = '%srunda%d.html' % (row[0], match['round'])
-        except Exception as e:
-            pass
-        try:
-            row = self.database.fetch(match['database'], p_sql.MATCH_RESULTS, (match['table'], match['round']))
-            info.teams[0].name = row[0]
-            info.teams[1].name = row[1]
-            info.teams[0].score = row[3] + row[5]
-            info.teams[1].score = row[4] + row[6]
-            if row[2] > 0:
-                info.teams[0].score += row[2]
-            else:
-                info.teams[1].score -= row[2]
-        except Exception as e:
-            for i in range(0, 2):
-                if isinstance(match['teams'][i], basestring):
-                    info.teams[i].name = match['teams'][i]
-                elif isinstance(match['teams'][i], list):
-                    info.teams[i].name = '<br />'.join(match['teams'][i])
-                else:
-                    match_teams = []
-                    if 'winner' in match['teams'][i]:
-                        match_teams += [
-                            self.match_info[winner_match].winner
-                            for winner_match in match['teams'][i]['winner']
-                        ]
-                    if 'loser' in match['teams'][i]:
-                        match_teams += [
-                            self.match_info[loser_match].loser
-                            for loser_match in match['teams'][i]['loser']
-                        ]
-                    if 'place' in match['teams'][i]:
-                        match_teams += [
-                            self.teams[place-1][0]
-                            for place in match['teams'][i]['place']
-                        ]
-                    info.teams[i].name = '<br />'.join([
-                        team if team is not None else '??'
-                        for team in match_teams]
-                    ) if len([team for team in match_teams if team is not None]) > 0 else ''
+            info.teams = self.get_db_match_teams(match)
+        except (mysql.connector.Error, TypeError, IndexError):
+            info.teams = self.get_config_match_teams(match)
         try:
             towels = self.database.fetch(match['database'], p_sql.TOWEL_COUNT, (match['table'], match['round']))
             row = [0 if r is None else r for r in self.database.fetch(match['database'], p_sql.BOARD_COUNT, (match['table'], match['round']))]
@@ -113,7 +132,7 @@ class PlayoffData(object):
                 info.running = 0
                 info.winner = info.teams[0].name if info.teams[0].score > info.teams[1].score else info.teams[1].name
                 info.loser = info.teams[1].name if info.teams[0].score > info.teams[1].score else info.teams[0].name
-        except Exception as e:
+        except (mysql.connector.Error, TypeError, KeyError):
             pass
         return info
 
