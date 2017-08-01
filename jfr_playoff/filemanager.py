@@ -11,7 +11,7 @@ class PlayoffFileManager(object):
         self.files = set()
 
     def reset(self):
-        self.files.empty()
+        self.files.clear()
 
     def register_file(self, path):
         if path.startswith(self.output_path):
