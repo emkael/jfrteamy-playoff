@@ -1,4 +1,5 @@
 *.pyc
 *.json
+playoff-*.zip
 build/*
 dist/*
