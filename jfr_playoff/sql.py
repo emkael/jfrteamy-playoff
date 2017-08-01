@@ -1,5 +1,6 @@
 MATCH_RESULTS = '''
-SELECT t1.fullname, t2.fullname, matches.carry, matches.vph, matches.vpv, matches.corrh, matches.corrv
+SELECT t1.fullname, t2.fullname, matches.carry,
+ matches.vph, matches.vpv, matches.corrh, matches.corrv
 FROM #db#.matches matches
 JOIN #db#.teams t1
  ON t1.id = #db#.matches.homet
@@ -9,7 +10,8 @@ WHERE matches.tabl = %s AND matches.rnd = %s
 '''
 
 BOARD_COUNT = '''
-SELECT segmentsperround*boardspersegment, SUM(sc1.contract IS NOT NULL AND sc2.contract IS NOT NULL)
+SELECT segmentsperround*boardspersegment,
+ SUM(sc1.contract IS NOT NULL AND sc2.contract IS NOT NULL)
 FROM #db#.scores sc1
 JOIN #db#.scores sc2
  ON sc1.rnd = sc2.rnd

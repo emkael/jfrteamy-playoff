@@ -2,6 +2,7 @@ class Team(object):
     name = ''
     score = 0.0
 
+
 class Match(object):
     id = None
     teams = None
@@ -12,10 +13,11 @@ class Match(object):
     winner_matches = None
     loser_matches = None
 
+
 class Phase(object):
     title = None
     link = None
     matches = []
     running = False
 
-__all__ = ['Team', 'Match', 'Phase']
+__all__ = ('Team', 'Match', 'Phase')

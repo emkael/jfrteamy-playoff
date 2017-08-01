@@ -7,6 +7,7 @@ import sys
 def complete_filename(text, state):
     return (glob.glob(text+'*')+[None])[state]
 
+
 class PlayoffSettings(object):
 
     def __init__(self):

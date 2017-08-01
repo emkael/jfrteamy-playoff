@@ -10,8 +10,7 @@ class PlayoffDB(object):
             user=settings['user'],
             password=settings['pass'],
             host=settings['host'],
-            port=settings['port']
-        )
+            port=settings['port'])
         self.db_cursor = self.database.cursor(buffered=True)
 
     def get_cursor(self):

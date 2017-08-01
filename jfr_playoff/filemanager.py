@@ -22,7 +22,6 @@ class PlayoffFileManager(object):
         if path.startswith(self.output_path):
             self.files.add(path.replace(self.output_path, ''))
 
-
     def write_content(self, content):
         output = open(self.output_file, 'w')
         output.write(content.encode('utf8'))
@@ -33,16 +32,18 @@ class PlayoffFileManager(object):
     def copy_scripts(self, script_path='sklady/playoff.js'):
         script_output_path = os.path.join(self.output_path, script_path)
         shutil.copy(
-            unicode(os.path.join(os.path.dirname(__main__.__file__), 'playoff.js')),
-            unicode(script_output_path)
-        )
+            unicode(os.path.join(
+                os.path.dirname(__main__.__file__), 'playoff.js')),
+            unicode(script_output_path))
         self.register_file(script_output_path)
         return script_output_path
 
     def send_files(self):
         if self.goniec['enabled']:
             try:
-                content_lines = [self.output_path] + list(self.files) + ['bye', '']
+                content_lines = [self.output_path] + \
+                                list(self.files) + \
+                                ['bye', '']
                 print '\n'.join(content_lines)
                 goniec = socket.socket()
                 goniec.connect((self.goniec['host'], self.goniec['port']))

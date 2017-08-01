@@ -16,23 +16,18 @@ class PlayoffGenerator(object):
         return p_temp.PAGE % (
             p_temp.PAGE_HEAD % (
                 p_temp.PAGE_HEAD_REFRESH % (
-                    self.page['refresh']
-                ) if self.page['refresh'] > 0 else '',
-                self.page['title']
-            ),
+                    self.page['refresh'])
+                if self.page['refresh'] > 0 else '',
+                self.page['title']),
             p_temp.PAGE_BODY % (
                 self.page['logoh'],
                 self.get_match_grid(
                     self.data.get_dimensions(),
                     self.data.generate_phases(),
-                    self.data.fill_match_info()
-                ),
+                    self.data.fill_match_info()),
                 self.get_leaderboard_table(self.data.fill_leaderboard()),
                 p_temp.PAGE_BODY_FOOTER.decode('utf8') % (
-                    datetime.now().strftime('%Y-%m-%d o %H:%M')
-                )
-            )
-        )
+                    datetime.now().strftime('%Y-%m-%d o %H:%M'))))
 
     def get_match_table(self, match):
         rows = ''
@@ -46,16 +41,13 @@ class PlayoffGenerator(object):
                 team.name,
                 ' / '.join([
                     self.data.get_shortname(name) for name in
-                    team.name.split('<br />')
-                ]),
+                    team.name.split('<br />')]),
                 match.link,
-                team.score
-            )
+                team.score)
         html = p_temp.MATCH_TABLE.decode('utf8') % (
             int(self.page['width'] * 0.75),
             int(self.page['width'] * 0.25),
-            rows
-        )
+            rows)
         if match.running > 0:
             html += p_temp.MATCH_RUNNING % (match.link, match.running)
         return html
@@ -69,8 +61,7 @@ class PlayoffGenerator(object):
             phase.link,
             self.page['width'],
             position,
-            phase.title
-        )
+            phase.title)
 
     def get_match_box(self, match, position):
         if match is not None:
@@ -83,8 +74,7 @@ class PlayoffGenerator(object):
                 ' '.join([
                     str(m) for m in match.loser_matches
                 ]) if match.loser_matches is not None else '',
-                self.get_match_table(match)
-            )
+                self.get_match_table(match))
         return ''
 
     def get_match_grid(self, dimensions, grid, matches):
@@ -94,8 +84,7 @@ class PlayoffGenerator(object):
             ) - self.page['margin'],
             dimensions[1] * (
                 self.page['height'] + self.page['margin']
-            ) - self.page['margin']
-        )
+            ) - self.page['margin'])
         grid_boxes = ''
         col_no = 0
         for phase in grid:
@@ -126,7 +115,8 @@ class PlayoffGenerator(object):
         position = 1
         rows = ''
         for team in leaderboard:
-            rows += p_temp.LEADERBOARD_ROW % (position, self.get_flag(team), team or '')
+            rows += p_temp.LEADERBOARD_ROW % (
+                position, self.get_flag(team), team or '')
             position += 1
         html = p_temp.LEADERBOARD.decode('utf8') % (rows)
         return html
