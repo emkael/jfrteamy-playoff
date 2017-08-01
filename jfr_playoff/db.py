@@ -13,7 +13,10 @@ class PlayoffDB(object):
         )
         self.db_cursor = self.database.cursor(buffered=True)
 
-    def fetch(self, db, sql, params):
-        self.db_cursor.execute(sql.replace('#db#', db), params)
+    def get_cursor(self):
+        return self.db_cursor
+
+    def fetch(self, db_name, sql, params):
+        self.db_cursor.execute(sql.replace('#db#', db_name), params)
         row = self.db_cursor.fetchone()
         return row

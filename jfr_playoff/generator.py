@@ -1,6 +1,6 @@
 from datetime import datetime
-import template as p_temp
-from data import PlayoffData
+import jfr_playoff.template as p_temp
+from jfr_playoff.data import PlayoffData
 
 class PlayoffGenerator(object):
     def __init__(self, settings):
@@ -14,14 +14,22 @@ class PlayoffGenerator(object):
     def generate_content(self):
         return p_temp.PAGE % (
             p_temp.PAGE_HEAD % (
-                p_temp.PAGE_HEAD_REFRESH % (self.page['refresh']) if self.page['refresh'] > 0 else '',
+                p_temp.PAGE_HEAD_REFRESH % (
+                    self.page['refresh']
+                ) if self.page['refresh'] > 0 else '',
                 self.page['title']
             ),
             p_temp.PAGE_BODY % (
                 self.page['logoh'],
-                self.get_match_grid(self.data.get_dimensions(), self.data.generate_phases(), self.data.fill_match_info()),
+                self.get_match_grid(
+                    self.data.get_dimensions(),
+                    self.data.generate_phases(),
+                    self.data.fill_match_info()
+                ),
                 self.get_leaderboard_table(self.data.fill_leaderboard()),
-                p_temp.PAGE_BODY_FOOTER.decode('utf8') % (datetime.now().strftime('%Y-%m-%d o %H:%M'))
+                p_temp.PAGE_BODY_FOOTER.decode('utf8') % (
+                    datetime.now().strftime('%Y-%m-%d o %H:%M')
+                )
             )
         )
 
@@ -29,11 +37,16 @@ class PlayoffGenerator(object):
         rows = ''
         for team in match.teams:
             rows += p_temp.MATCH_TEAM_ROW % (
-                ' '.join(['winner' if team.name == match.winner else '',
-                          'loser' if team.name == match.loser else '']).strip(),
+                ' '.join([
+                    'winner' if team.name == match.winner else '',
+                    'loser' if team.name == match.loser else ''
+                ]).strip(),
                 match.link,
                 team.name,
-                ' / '.join([self.data.get_shortname(name) for name in team.name.split('<br />')]),
+                ' / '.join([
+                    self.data.get_shortname(name) for name in
+                    team.name.split('<br />')
+                ]),
                 match.link,
                 team.score
             )
@@ -74,8 +87,14 @@ class PlayoffGenerator(object):
                     grid_boxes += p_temp.MATCH_BOX % (
                         grid_x, grid_y,
                         match,
-                        ' '.join([str(m) for m in matches[match].winner_matches]) if matches[match].winner_matches is not None else '',
-                        ' '.join([str(m) for m in matches[match].loser_matches]) if matches[match].loser_matches is not None else '',
+                        ' '.join([
+                            str(m) for m in
+                            matches[match].winner_matches
+                        ]) if matches[match].winner_matches is not None else '',
+                        ' '.join([
+                            str(m) for m in
+                            matches[match].loser_matches
+                        ]) if matches[match].loser_matches is not None else '',
                         self.get_match_table(matches[match])
                     )
                 row_no += 1
@@ -85,7 +104,12 @@ class PlayoffGenerator(object):
             canvas_attrs.append(
                 'data-%s="%s"' % (setting.replace('_', '-'), str(value))
             )
-        return p_temp.MATCH_GRID % (grid_width, grid_height, grid_width, grid_height, ' '.join(canvas_attrs), grid_boxes)
+        return p_temp.MATCH_GRID % (
+            grid_width, grid_height,
+            grid_width, grid_height,
+            ' '.join(canvas_attrs),
+            grid_boxes
+        )
 
     def get_leaderboard_table(self, leaderboard):
         if len([t for t in leaderboard if t is not None]) == 0:
@@ -94,7 +118,7 @@ class PlayoffGenerator(object):
         rows = ''
         for team in leaderboard:
             rows += p_temp.LEADERBOARD_ROW % (position, self.get_flag(team), team or '')
-            position +=1
+            position += 1
         html = p_temp.LEADERBOARD.decode('utf8') % (rows)
         return html
 

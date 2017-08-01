@@ -1,9 +1,12 @@
-import glob, json, os, readline, sys
+import glob
+import json
+import readline
+import sys
 
 def complete_filename(text, state):
     return (glob.glob(text+'*')+[None])[state]
 
-class PlayoffSettings:
+class PlayoffSettings(object):
 
     def __init__(self):
         self.settings = None

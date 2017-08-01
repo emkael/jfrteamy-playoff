@@ -1,8 +1,8 @@
 from urlparse import urljoin
 import mysql
-from db import PlayoffDB
-import sql as p_sql
-from dto import *
+from jfr_playoff.db import PlayoffDB
+from jfr_playoff.dto import Team, Match, Phase
+import jfr_playoff.sql as p_sql
 
 class PlayoffData(object):
     def __init__(self, settings):
@@ -38,8 +38,12 @@ class PlayoffData(object):
         for phase in self.phases:
             for match in phase['matches']:
                 self.match_info[match['id']] = self.get_match_info(match)
-                self.match_info[match['id']].link = phase['link'] if self.match_info[match['id']].link is None else urljoin(
-                    phase['link'], self.match_info[match['id']].link)
+                if self.match_info[match['id']].link is None:
+                    self.match_info[match['id']].link = phase['link']
+                else:
+                    self.match_info[match['id']].link = urljoin(
+                        phase['link'], self.match_info[match['id']].link
+                    )
         return self.match_info
 
     def get_match_link(self, match):
@@ -54,7 +58,10 @@ class PlayoffData(object):
 
     def get_db_match_teams(self, match):
         teams = [Team(), Team()]
-        row = self.database.fetch(match['database'], p_sql.MATCH_RESULTS, (match['table'], match['round']))
+        row = self.database.fetch(
+            match['database'], p_sql.MATCH_RESULTS,
+            (match['table'], match['round'])
+        )
         teams[0].name = row[0]
         teams[1].name = row[1]
         teams[0].score = row[3] + row[5]
@@ -89,12 +96,12 @@ class PlayoffData(object):
                         self.teams[place-1][0]
                         for place in match['teams'][i]['place']
                     ]
-            teams[i].name = '<br />'.join([
-                team if team is not None else '??'
-                for team in match_teams]
-            ) if len([
-                team for team in match_teams if team is not None
-            ]) > 0 else ''
+            known_teams = [team for team in match_teams if team is not None]
+            if len(known_teams) > 0:
+                teams[i].name = '<br />'.join([
+                    team if team is not None else '??' for team in match_teams])
+            else:
+                teams[i].name = ''
         return teams
 
 
@@ -115,14 +122,26 @@ class PlayoffData(object):
         except (mysql.connector.Error, TypeError, IndexError):
             info.teams = self.get_config_match_teams(match)
         try:
-            towels = self.database.fetch(match['database'], p_sql.TOWEL_COUNT, (match['table'], match['round']))
-            row = [0 if r is None else r for r in self.database.fetch(match['database'], p_sql.BOARD_COUNT, (match['table'], match['round']))]
+            towels = self.database.fetch(
+                match['database'], p_sql.TOWEL_COUNT,
+                (match['table'], match['round'])
+            )
+            row = [0 if r is None
+                   else r for r in
+                   self.database.fetch(
+                       match['database'], p_sql.BOARD_COUNT,
+                       (match['table'], match['round'])
+                   )]
             if row[1] > 0:
                 info.running = int(row[1])
             if row[1] >= row[0] - towels[0]:
                 info.running = 0
-                info.winner = info.teams[0].name if info.teams[0].score > info.teams[1].score else info.teams[1].name
-                info.loser = info.teams[1].name if info.teams[0].score > info.teams[1].score else info.teams[0].name
+                if info.teams[0].score > info.teams[1].score:
+                    info.winner = info.teams[0].name
+                    info.loser = info.teams[1].name
+                else:
+                    info.loser = info.teams[0].name
+                    info.winner = info.teams[1].name
         except (mysql.connector.Error, TypeError, KeyError):
             pass
         return info
