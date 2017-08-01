@@ -59,55 +59,63 @@ class PlayoffGenerator(object):
             html += p_temp.MATCH_RUNNING % (match.link, match.running)
         return html
 
+    def get_phase_header(self, phase, position):
+        if phase.running:
+            grid_header = p_temp.MATCH_GRID_PHASE_RUNNING
+        else:
+            grid_header = p_temp.MATCH_GRID_PHASE
+        return grid_header % (
+            phase.link,
+            self.page['width'],
+            position,
+            phase.title
+        )
+
+    def get_match_box(self, match, position):
+        if match is not None:
+            return p_temp.MATCH_BOX % (
+                position[0], position[1],
+                match.id,
+                ' '.join([
+                    str(m) for m in match.winner_matches
+                ]) if match.winner_matches is not None else '',
+                ' '.join([
+                    str(m) for m in match.loser_matches
+                ]) if match.loser_matches is not None else '',
+                self.get_match_table(match)
+            )
+        return ''
+
     def get_match_grid(self, dimensions, grid, matches):
-        grid_width = dimensions[0] * (
-            self.page['width'] + self.page['margin']
-        ) - self.page['margin']
-        grid_height = dimensions[1] * (
-            self.page['height'] + self.page['margin']
-        ) - self.page['margin']
+        canvas_size = (
+            dimensions[0] * (
+                self.page['width'] + self.page['margin']
+            ) - self.page['margin'],
+            dimensions[1] * (
+                self.page['height'] + self.page['margin']
+            ) - self.page['margin']
+        )
         grid_boxes = ''
         col_no = 0
         for phase in grid:
             grid_x = col_no * (self.page['width'] + self.page['margin'])
-            grid_header = p_temp.MATCH_GRID_PHASE_RUNNING if len([
-                match for match in phase.matches if match is not None and matches[match].running > 0
-            ]) > 0 else p_temp.MATCH_GRID_PHASE
-            grid_boxes += grid_header % (
-                phase.link,
-                self.page['width'],
-                grid_x,
-                phase.title
-            )
+            grid_boxes += self.get_phase_header(phase, grid_x)
+            match_height = canvas_size[1] / len(phase.matches)
             row_no = 0
-            match_height = grid_height / len(phase.matches)
             for match in phase.matches:
-                grid_y = int(row_no * match_height + 0.5 * (match_height - self.page['height']))
-                if match is not None:
-                    grid_boxes += p_temp.MATCH_BOX % (
-                        grid_x, grid_y,
-                        match,
-                        ' '.join([
-                            str(m) for m in
-                            matches[match].winner_matches
-                        ]) if matches[match].winner_matches is not None else '',
-                        ' '.join([
-                            str(m) for m in
-                            matches[match].loser_matches
-                        ]) if matches[match].loser_matches is not None else '',
-                        self.get_match_table(matches[match])
-                    )
+                grid_y = int(row_no * match_height +
+                             0.5 * (match_height - self.page['height']))
+                grid_boxes += self.get_match_box(
+                    matches[match] if match is not None else None,
+                    (grid_x, grid_y))
                 row_no += 1
             col_no += 1
-        canvas_attrs = []
-        for setting, value in self.canvas.iteritems():
-            canvas_attrs.append(
-                'data-%s="%s"' % (setting.replace('_', '-'), str(value))
-            )
         return p_temp.MATCH_GRID % (
-            grid_width, grid_height,
-            grid_width, grid_height,
-            ' '.join(canvas_attrs),
+            canvas_size[0], canvas_size[1],
+            canvas_size[0], canvas_size[1],
+            ' '.join(['data-%s="%s"' % (
+                setting.replace('_', '-'), str(value)
+            ) for setting, value in self.canvas.iteritems()]),
             grid_boxes
         )
 
