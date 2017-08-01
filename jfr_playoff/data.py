@@ -2,19 +2,7 @@ from urlparse import urljoin
 import mysql
 from db import PlayoffDB
 import sql as p_sql
-
-class Team:
-    name = ''
-    score = 0.0
-
-class Match:
-    teams = None
-    running = 0
-    link = None
-    winner = None
-    loser = None
-    winner_matches = None
-    loser_matches = None
+from dto import *
 
 class PlayoffData(object):
     def __init__(self, settings):
