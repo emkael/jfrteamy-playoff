@@ -17,7 +17,8 @@ Dla wersji skryptowej:
 Instalacja
 ----------
 
-Dla wersji skompilowanej: [ściągnąć](https://emkael.github.io/_files/teamy-playoff/playoff-1.0.2.zip), rozpakować, upewnić się, że [`playoff.js`](playoff.js) jest w katalogu pliku wykonywalnego.
+Dla wersji skompilowanej: [ściągnąć](https://emkael.github.io/_files/teamy-playoff/playoff-1.0.2.zip), rozpakować, upewnić się, że [`playoff.js`](playoff.js) jest w katalogu pliku wykonywalnego.  
+Wersja testowa (bez rewolucji funkcjonalności, po prostu po mocnej przebudowie kodu źródłowego): [1.0.3-beta](https://emkael.github.io/_files/teamy-playoff/playoff-1.0.3-beta.zip).
 
 Dla wersji skryptowej: sklonować to repozytorium.
 
@@ -51,8 +52,7 @@ prefiksów turniejów oraz numerów rund
  * fazy powinny być określone raczej chronologicznie (czytaj: nie
 testowano, co się stanie, jeśli określimy np., że w meczu fazy 2 ma zagrać
 zwycięzca z fazy 4), ale nie powinno być problemu z "przeskakiwaniem"
-faz (czyli awansem zwycięzcy z fazy 1 od razu do fazy 3), przy czym
-takiej sytuacji też nie testowano (rysować się powinno, ale ubytki estetyczne są prawie pewne)
+faz (czyli awansem zwycięzcy z fazy 1 od razu do fazy 3)
  * program wymaga działania Webmastera (wyniki czytane są z takiego
 miejsca bazy, do którego pisze Webmaster, a z jakichś powodów nie pisze
 Admin przy zamykaniu rundy/segmentu), więc nawet w przypadku grania
