@@ -8,10 +8,11 @@ import __main__
 class PlayoffFileManager(object):
 
     def __init__(self, settings):
-        self.settings = settings
-        self.goniec = self.settings.get('goniec')
-        self.output_file = self.settings.get('output')
-        self.output_path = os.path.dirname(self.output_file).strip(os.sep) + os.sep
+        self.goniec = settings.get('goniec')
+        self.output_file = settings.get('output')
+        self.output_path = os.path.dirname(
+            self.output_file
+        ).strip(os.sep) + os.sep
         self.files = set()
 
     def reset(self):

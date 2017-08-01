@@ -9,10 +9,9 @@ from jfr_playoff.dto import Match, Phase, Team
 
 class PlayoffData(object):
     def __init__(self, settings):
-        self.settings = settings
-        self.database = PlayoffDB(self.settings.get('database'))
-        self.phases = self.settings.get('phases')
-        self.teams = self.settings.get('teams')
+        self.database = PlayoffDB(settings.get('database'))
+        self.phases = settings.get('phases')
+        self.teams = settings.get('teams')
         self.grid = []
         self.match_info = {}
         self.leaderboard = []

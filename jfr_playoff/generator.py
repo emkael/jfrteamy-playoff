@@ -6,12 +6,11 @@ from jfr_playoff.data import PlayoffData
 
 class PlayoffGenerator(object):
     def __init__(self, settings):
-        self.settings = settings
-        self.data = PlayoffData(self.settings)
-        self.page = self.settings.get('page')
+        self.data = PlayoffData(settings)
+        self.page = settings.get('page')
         self.canvas = {}
-        if self.settings.has_section('canvas'):
-            self.canvas = self.settings.get('canvas')
+        if settings.has_section('canvas'):
+            self.canvas = settings.get('canvas')
 
     def generate_content(self):
         return p_temp.PAGE % (
