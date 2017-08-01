@@ -1,7 +1,7 @@
 JFR Teamy - play-off - plik konfiguracyjny
 ==========================================
 
-Przykładowy plik konfiguracyjny, który służył do wygenerowania [przykładów](https://emkael.info/brydz/playoff/), umieszczono w całości u dołu tego pliku.
+Przykładowy kompletny plik konfiguracyjny umieszczono w całości u dołu tego pliku.
 
 Ogólny format
 -------------
@@ -126,6 +126,14 @@ Pełen plik konfiguracyjny
         "height": 80,
         "margin": 70
     },
+    "canvas": {
+        "winner_h_offset": 8,
+        "loser_h_offset": 14,
+        "winner_v_offset": -6,
+        "loser_v_offset": 6,
+        "loser_colour": "#ff0000",
+        "winner_colour": "#00ff00"
+    },
     "database": {
         "host": "localhost",
         "port": 3306,
@@ -166,8 +174,8 @@ Pełen plik konfiguracyjny
                     "round": 1,
                     "table": 1,
                     "teams": [
-                        "CKM Łódź",
-                        "MKS Bzura I Ozorków"
+                        { "place": [5] },
+                        { "place": [7, 8] }
                     ],
                     "loser": [7, 8]
                 },
@@ -177,8 +185,8 @@ Pełen plik konfiguracyjny
                     "round": 1,
                     "table": 2,
                     "teams": [
-                        "PTC - PAFANA I Pabianice",
-                        "Intra Łódź"
+                        { "place": [6] },
+                        { "place": [7, 8] }
                     ],
                     "loser": [7, 8]
                 },
@@ -188,8 +196,8 @@ Pełen plik konfiguracyjny
                     "round": 1,
                     "table": 3,
                     "teams": [
-                        "BOK Rondo Łódź",
-                        "KDK III Kutno"
+                        { "place": [9] },
+                        { "place": [11, 12] }
                     ],
                     "winner": [9, 10]
                 },
@@ -199,8 +207,8 @@ Pełen plik konfiguracyjny
                     "round": 1,
                     "table": 4,
                     "teams": [
-                        "Zdrowie Piast Sieradz",
-                        "Ekolog Łódź"
+                        { "place": [10] },
+                        { "place": [11, 12] }
                     ],
                     "winner": [9, 10]
                 }
