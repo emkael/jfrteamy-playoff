@@ -61,9 +61,9 @@ var playoff = {
                     var box = boxes_idx[from[f]];
                     var line = [
                         Math.floor(parseInt(box.style.left) + parseInt(box.clientWidth)),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + this.settings[type + '_v_offset']),
-                        Math.floor(parseInt(box.style.left) + parseInt(box.clientWidth) + this.settings[type + '_h_offset']),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + this.settings[type + '_v_offset'])
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + parseFloat(this.settings[type + '_v_offset'])),
+                        Math.floor(parseInt(box.style.left) + parseInt(box.clientWidth) + parseFloat(this.settings[type + '_h_offset'])),
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + parseFloat(this.settings[type + '_v_offset']))
                     ];
                     horizontal_from.push(line);
                     for (var l in horizontal_from) {
@@ -90,9 +90,9 @@ var playoff = {
                     var box = boxes_idx[to[t]];
                     var line = [
                         parseInt(box.style.left),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + this.settings[type + '_v_offset']),
-                        Math.floor(parseInt(box.style.left) - this.settings[type + '_h_offset']),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + this.settings[type + '_v_offset'])
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + parseFloat(this.settings[type + '_v_offset'])),
+                        Math.floor(parseInt(box.style.left) - parseFloat(this.settings[type + '_h_offset'])),
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + parseFloat(this.settings[type + '_v_offset']))
                     ];
                     horizontal_to.push(line);
                     for (var l in horizontal_to) {
@@ -119,11 +119,11 @@ var playoff = {
                         (vertical_from[1] + vertical_from[3]) / 2
                     ],
                     [
-                        this.settings[type + '_h_offset'] / 2 + (vertical_from[0] + vertical_from[2] + vertical_to[0] + vertical_to[2]) / 4,
+                        parseFloat(this.settings[type + '_h_offset']) / 2 + (vertical_from[0] + vertical_from[2] + vertical_to[0] + vertical_to[2]) / 4,
                         (vertical_from[1] + vertical_from[3]) / 2
                     ],
                     [
-                        this.settings[type + '_h_offset'] / 2 + (vertical_from[0] + vertical_from[2] + vertical_to[0] + vertical_to[2]) / 4,
+                        parseFloat((this.settings[type + '_h_offset']) / 2 + (vertical_from[0] + vertical_from[2] + vertical_to[0] + vertical_to[2]) / 4,
                         (vertical_to[1] + vertical_to[3]) / 2
                     ],
                     [
