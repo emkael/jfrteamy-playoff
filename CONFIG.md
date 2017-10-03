@@ -112,6 +112,21 @@ Miejsca w tym meczu zajmują przegrani meczów o ID 11 i 12 (przy czym gospodarz
 
 Zwycięzca zajmie 15. miejsce w lidze, a przegrany - 16.
 
+Ustawienia swissów
+------------------
+
+W sekcji `swiss` można zdefiniować pobieranie pozycji drużyn w klasyfikacji końcowej z klasyfikacji wybranych (zakończonych) turniejów JFR Teamy.
+
+Sekcja jest tablicą obiektów określonych przy pomocy następujących właściwości:
+
+ - `database`: nazwa bazy danych turnieju źródłowego
+ - `position`: pozycja klasyfikacji końcowej, od której wypełniane są miejsca, kolejnymi teamami z klasyfikacji turnieju źródłowego
+ - `relative_path`: opcjonalnie - względna ścieżka katalogu WWW turnieju źródłowego (względem katalogu, do którego generowana jest wizualizacja play-off), na potrzeby linku do wyników turnieju
+
+Każdy tak zdefiniowany turniej musi być w całości zakończony, a pełne nazwy teamów w nim uczestniczących muszą być zgodne ze zdefiniowanymi w sekcji `teams`.
+
+UWAGA: program nie rozstryga remisów w VP. Teamy o równej liczbie VP klasyfikowane są według kolejności, w jakiej są zdefiniowane w sekcji `teams`.
+
 Pełen plik konfiguracyjny
 -------------------------
 
