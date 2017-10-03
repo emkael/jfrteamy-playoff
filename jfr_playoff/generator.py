@@ -25,7 +25,8 @@ class PlayoffGenerator(object):
                     self.data.get_dimensions(),
                     self.data.generate_phases(),
                     self.data.fill_match_info()),
-                self.get_leaderboard_table(self.data.fill_leaderboard()),
+                self.get_swiss_links(),
+                self.get_leaderboard_table(),
                 p_temp.PAGE_BODY_FOOTER.decode('utf8') % (
                     datetime.now().strftime('%Y-%m-%d o %H:%M'))))
 
@@ -109,7 +110,8 @@ class PlayoffGenerator(object):
             grid_boxes
         )
 
-    def get_leaderboard_table(self, leaderboard):
+    def get_leaderboard_table(self):
+        leaderboard = self.data.fill_leaderboard()
         if len([t for t in leaderboard if t is not None]) == 0:
             return ''
         position = 1
@@ -120,6 +122,12 @@ class PlayoffGenerator(object):
             position += 1
         html = p_temp.LEADERBOARD.decode('utf8') % (rows)
         return html
+
+    def get_swiss_links(self):
+        return '\n'.join([
+            p_temp.SWISS_LINK % (
+                event['link'], event['position']
+            ) for event in self.data.get_swiss_info()])
 
     def get_flag(self, team):
         flag = self.data.get_team_image(team)

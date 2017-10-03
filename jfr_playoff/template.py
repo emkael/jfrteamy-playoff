@@ -107,6 +107,9 @@ PAGE_BODY = '''
 <script type="text/javascript" src="sklady/wz_tooltip.js"></script>
 %s
 %s
+<p>
+%s
+</p>
 %s
 %s
 '''
@@ -125,4 +128,8 @@ PAGE = '''
 %s
 </body>
 </html>
+'''
+
+SWISS_LINK = '''
+[<a href="%s" class="zb" target="_top">&nbsp;Turniej o %d. miejsce&nbsp;</a>]<br /><br />
 '''

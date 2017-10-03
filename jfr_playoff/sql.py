@@ -34,3 +34,19 @@ WHERE #db#.segments.tabl = %s AND #db#.segments.rnd = %s
 PREFIX = '''
 SELECT shortname FROM #db#.admin
 '''
+
+SWISS_ENDED = '''
+SELECT (rnd = roundcnt) AND (segm = segmentsperround) FROM #db#.admin
+'''
+
+SWISS_RESULTS = '''
+SELECT #db#.teams.fullname,
+ SUM(IF(#db#.matches.homet = #db#.teams.id, vph+corrh, vpv+corrv))
+  + #db#.teams.score,
+ #db#.teams.grupa
+FROM #db#.teams
+LEFT JOIN #db#.matches
+ ON (#db#.teams.id = #db#.matches.homet OR #db#.teams.id = #db#.matches.visit)
+WHERE #db#.teams.bye = 0
+GROUP BY #db#.teams.id
+'''
