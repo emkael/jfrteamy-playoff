@@ -131,5 +131,7 @@ PAGE = '''
 '''
 
 SWISS_LINK = '''
-[<a href="%s" class="zb" target="_top">&nbsp;Turniej o %d. miejsce&nbsp;</a>]<br /><br />
+[<a href="%s" class="zb" target="_top">&nbsp;%s&nbsp;</a>]<br /><br />
 '''
+
+SWISS_DEFAULT_LABEL = 'Turniej o&nbsp;%d.&nbsp;miejsce'
