@@ -1,13 +1,16 @@
+
 JFR Teamy - play-off - plik konfiguracyjny
 ==========================================
 
 Przykładowy kompletny plik konfiguracyjny umieszczono w całości u dołu tego pliku.
+
 
 Ogólny format
 -------------
 
 Plik konfiguracyjny jest formatu JSON - a to oznacza na przykład, że trzeba pilnować backslashów wewnątrz łańcuchów znaków.
 Na przykład - backslashe w konfiguracji logo nagłówka są podwojone. Szczególnie należy na to uważać przy podawaniu ścieżek do pliku wyjściowego.
+
 
 Opcje ogólne
 ------------
@@ -29,6 +32,7 @@ Konfiguracja składa się, po kolei, z:
  - sekcji `"database"`, zawierającej ustawienia połączenia bazy danych
  - sekcji `"goniec"`, zawierającej ustawienia Gońca (`"enabled"` przyjmuje wartości `0`/`1`)
 
+
 Ustawienia teamów
 -----------------
 
@@ -42,6 +46,7 @@ Jako czwarty element każdej tablicy można wpisać liczbę naturalną, która o
 
 Co zrobić, gdy jest taki team, a turniej nie ma ustawionych obrazków z flagami? Ustawić flagę na `null` - nie zostanie wyświetlona.
 
+
 Ustawienia drabinki
 -------------------
 
@@ -54,6 +59,7 @@ Faza ma następujące pola:
  - `"link"` - w/w link (ale linki do poszczególnych meczów generują się na podstawie informacji pobranych z bazy, dopóki wszystkie turnieje, których mecze wchodzą w skład danej fazy, są wysyłane do jednej ścieżki)
  - opcjonalną tablicę `"dummies"` - liczb naturalnych pozycji (w pionie), w których dodane będą pionowe odstępy, uwzględniane przy rozmieszczaniu meczów fazy
  - tablicę `"matches"`, definiującej mecze w fazie
+
 
 Ustawienia kozy (co meczy)
 --------------------------
@@ -112,6 +118,7 @@ Miejsca w tym meczu zajmują przegrani meczów o ID 11 i 12 (przy czym gospodarz
 
 Zwycięzca zajmie 15. miejsce w lidze, a przegrany - 16.
 
+
 Ustawienia swissów
 ------------------
 
@@ -121,11 +128,15 @@ Sekcja jest tablicą obiektów określonych przy pomocy następujących właści
 
  - `database`: nazwa bazy danych turnieju źródłowego
  - `position`: pozycja klasyfikacji końcowej, od której wypełniane są miejsca, kolejnymi teamami z klasyfikacji turnieju źródłowego
+ - `position_to`: opcjonalnie - ostatnia pozycja klasyfikacji końcowej, która ma zostać wypełniona teamami ze swissa (domyślnie - program wypełnia kolejne miejsca, dopóki ma teamy lub miejsca w tabeli)
+ - `swiss_position`: opcjonalnie - pozycja klasyfikacji swissa, od której program ma rozpocząć pobieranie teamów (domyślnie: od początku tabeli)
  - `relative_path`: opcjonalnie - względna ścieżka katalogu WWW turnieju źródłowego (względem katalogu, do którego generowana jest wizualizacja play-off), na potrzeby linku do wyników turnieju
+ - `label`: opcjonalnie - tekst wyświetlany jako link do swissa nad tabelą klasyfikacji końcowej (domyślnie: `Turniej o []. miejsce`)
 
 Każdy tak zdefiniowany turniej musi być w całości zakończony, a pełne nazwy teamów w nim uczestniczących muszą być zgodne ze zdefiniowanymi w sekcji `teams`.
 
 UWAGA: program nie rozstryga remisów w VP. Teamy o równej liczbie VP klasyfikowane są według kolejności, w jakiej są zdefiniowane w sekcji `teams`.
+
 
 Pełen plik konfiguracyjny
 -------------------------
