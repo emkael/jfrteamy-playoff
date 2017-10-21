@@ -190,15 +190,30 @@ class PlayoffData(object):
                 swiss_results = sorted(swiss_results, key=lambda t: t[0])
                 swiss_results = sorted(
                     swiss_results, key=lambda t: t[1], reverse=True)
+                swiss_position = (
+                    event['source_position']
+                    if 'source_position' in event
+                    else 1
+                )
+                position_limit = (
+                    event['position_to']
+                    if 'position_to' in event
+                    else 9999
+                )
                 prev_result = None
-                place = -1
+                place = 1
                 for team in sorted(
                         swiss_results, key=lambda team: team[2]):
                     if prev_result == team[1]:
                         print SWISS_TIE_WARNING % (event['database'])
                     prev_result = team[1]
-                    self.leaderboard[
-                        event['position'] + place] = teams[team[0]]
+                    if place >= swiss_position:
+                        target_position = event['position'] \
+                                              + place - swiss_position
+                        if target_position <= min(
+                                position_limit, len(self.leaderboard)):
+                            self.leaderboard[
+                                target_position - 1] = teams[team[0]]
                     place += 1
 
     def fill_leaderboard(self):
