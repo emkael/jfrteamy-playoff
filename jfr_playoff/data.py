@@ -1,3 +1,4 @@
+from cached_property import cached_property
 from urlparse import urljoin
 
 import mysql
@@ -15,14 +16,26 @@ SWISS_TIE_WARNING = 'WARNING: tie detected in swiss %s.' + \
 class PlayoffData(object):
     def __init__(self, settings):
         self.database = PlayoffDB(settings.get('database'))
+        self.team_settings = settings.get('teams')
         self.phases = settings.get('phases')
-        self.teams = settings.get('teams')
         self.swiss = []
         if settings.has_section('swiss'):
             self.swiss = settings.get('swiss')
         self.grid = []
         self.match_info = {}
         self.leaderboard = []
+
+    @cached_property
+    def teams(self):
+        if isinstance(self.team_settings, list):
+            return self.team_settings
+        db_teams = self.get_swiss_results(
+            self.team_settings['database'],
+            self.team_settings['ties'] if 'ties' in self.team_settings else [])
+        if 'final_positions' in self.team_settings:
+            for position in self.team_settings['final_positions']:
+                db_teams[position-1].append(position)
+        return db_teams
 
     def generate_phases(self):
         self.grid = []
