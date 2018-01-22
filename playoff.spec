@@ -1,7 +1,7 @@
 import os
 a = Analysis(['playoff.py'],
              pathex=[os.path.abspath('.')],
-             hiddenimports=[],
+             hiddenimports=['mysql.connector.locales.eng.client_error'],
              hookspath=None,
              runtime_hooks=None,
              excludes=None)

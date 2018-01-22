@@ -1,4 +1,5 @@
 import mysql.connector
+import sys
 
 
 class PlayoffDB(object):
@@ -6,6 +7,8 @@ class PlayoffDB(object):
     db_cursor = None
 
     def __init__(self, settings):
+        reload(sys)
+        sys.setdefaultencoding("latin1")
         self.database = mysql.connector.connect(
             user=settings['user'],
             password=settings['pass'],
