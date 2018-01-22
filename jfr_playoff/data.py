@@ -102,12 +102,12 @@ class PlayoffData(object):
     def get_config_match_teams(self, match):
         teams = [Team(), Team()]
         for i in range(0, 2):
+            match_teams = []
             if isinstance(match['teams'][i], basestring):
                 teams[i].name = match['teams'][i]
             elif isinstance(match['teams'][i], list):
                 teams[i].name = '<br />'.join(match['teams'][i])
             else:
-                match_teams = []
                 if 'winner' in match['teams'][i]:
                     match_teams += [
                         self.match_info[winner_match].winner
