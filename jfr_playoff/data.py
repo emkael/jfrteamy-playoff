@@ -84,8 +84,12 @@ class PlayoffData(object):
         return None
 
     def get_match_link(self, match):
-        return self.__get_link(
+        link = self.__get_link(
             match['database'], 'runda%d.html' % (match['round']))
+        if link is None:
+            if 'link' in match:
+                link = match['link']
+        return link
 
     def get_leaderboard_link(self, database):
         return self.__get_link(database, 'leaderb.html')
