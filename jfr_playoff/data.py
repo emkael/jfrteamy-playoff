@@ -191,8 +191,8 @@ class PlayoffData(object):
                 swiss_results = sorted(
                     swiss_results, key=lambda t: t[1], reverse=True)
                 swiss_position = (
-                    event['source_position']
-                    if 'source_position' in event
+                    event['swiss_position']
+                    if 'swiss_position' in event
                     else 1
                 )
                 position_limit = (
