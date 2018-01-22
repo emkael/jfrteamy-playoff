@@ -144,6 +144,9 @@ class PlayoffData(object):
                     else '??' for team in match_teams])
             else:
                 teams[i].name = ''
+        if 'score' in match:
+            for i in range(0, 2):
+                teams[i].score = match['score'][i]
         return teams
 
     def get_match_info(self, match):
@@ -176,14 +179,16 @@ class PlayoffData(object):
                 info.running = int(row[1])
             if row[1] >= row[0] - towels[0]:
                 info.running = 0
-                if info.teams[0].score > info.teams[1].score:
-                    info.winner = info.teams[0].name
-                    info.loser = info.teams[1].name
-                else:
-                    info.loser = info.teams[0].name
-                    info.winner = info.teams[1].name
         except (mysql.connector.Error, TypeError, KeyError):
             pass
+        if (info.running == 0) and \
+           ((info.teams[0].score != 0) or (info.teams[1].score != 0)):
+            if info.teams[0].score > info.teams[1].score:
+                info.winner = info.teams[0].name
+                info.loser = info.teams[1].name
+            else:
+                info.loser = info.teams[0].name
+                info.winner = info.teams[1].name
         return info
 
     def prefill_leaderboard(self, teams):

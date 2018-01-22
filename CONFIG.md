@@ -74,6 +74,7 @@ zestawu pól nie da się pobrać informacji o meczu
    + obiektem, z możliwymi polami tablicowymi `"place"`, `"winner"` lub `"loser"` - oznacza to, że dane miejsce drabinki jest przeznaczone dla drużyny z odpowiedniego miejsca z listy teamów (sekcja `"teams"`) lub dla zwycięzców/przegranych w meczach o ID podanych w polu
  - opcjonalne, pola `"winner"` i `"loser"` - które z kolei w tym kontekście oznaczają, miejsca, które zajmują zwycięzcy/przegrani danego meczu w końcowej klasyfikacji
  - opcjonalnie, pole `"link"` - określające link do wyników meczu, jeśli nie można go pobrać z bazy turnieju
+ - opcjonalnie, pole `"score"` - dwuelementową tablicę, z której pobierany jest końcowy wynik meczu, jeśli nie można go pobrać z bazy turnieju
 
 Na przykładach, pierwszy i ostatni mecz z poniższego pliku:
 
