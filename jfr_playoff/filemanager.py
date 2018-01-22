@@ -12,7 +12,9 @@ class PlayoffFileManager(object):
         self.output_file = settings.get('output')
         self.output_path = os.path.dirname(
             self.output_file
-        ).strip(os.sep) + os.sep
+        ).strip(os.sep)
+        if len(self.output_path) > 0:
+            self.output_path += os.sep
         self.files = set()
 
     def reset(self):
