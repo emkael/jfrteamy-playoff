@@ -36,15 +36,26 @@ Konfiguracja składa się, po kolei, z:
 Ustawienia teamów
 -----------------
 
-Dalej mamy sekcję `"teams"`, która jest pierwsza do przebudowy (albo do odstrzału, w ogóle), więc zbytnio nie przyzwyczajałbym się do jej struktury.
-
-W niej definiujemy teamy w kolejności, wg której mają być rozdzielane miejsca (w sytuacjach "przegrani zajmują miejsca...").
+Dalej mamy sekcję `"teams"`. W niej definiujemy teamy w kolejności, wg której mają być rozdzielane miejsca (w sytuacjach "przegrani zajmują miejsca...").
 
 Każdy team to tablica, kolejno: pełnej nazwy (tej, która MUSI się zgadzać z nazwami we wszystkich turniejach), skróconej nazwy, pliku flagi (opcjonalnie).
 
 Jako czwarty element każdej tablicy można wpisać liczbę naturalną, która oznacza pozycję, jaką team ma zająć w końcowej klasyfikacji (tj. wpisanie tam liczby oznacza, że team od samego początku umieszczany jest na tej pozycji w klasyfikacji końcowej - np. jeśli nie uczestniczy w ogóle w play-off).
 
 Co zrobić, gdy jest taki team, a turniej nie ma ustawionych obrazków z flagami? Ustawić flagę na `null` - nie zostanie wyświetlona.
+
+
+Ustawienia teamów - wariant pobierania z bazy danych
+----------------------------------------------------
+
+Sekcja `"teams"` może również być **obiektem**, określającym turniej (np. fazy zasadniczej), z którego zostanie pobrana lista teamów. Pobierane są: pełna nazwa, nazwa skrócona oraz nazwa pliku flagi.
+
+Składa się z następujących pól:
+ - `"database"` - nazwa bazy danych turnieju, z której pobierana jest lista teamów
+ - opcjonalne pole `"final_positions"` - tablica numerów miejsc, dla drużyn, które zakończyły rozgrywki (odpowiednik czwartego pola tablicy w tekstowej wersji listy teamów)
+ - opcjonalne pole `"ties"` - tablica pełnych nazw drużyn w kolejności, w jakiej rozstrzygane powinny być remisy w VP w turnieju źródłowym (program nie potrafi ich rozstzygać samodzielnie)
+
+Miejsca w tabeli końcowej dla drużyn zdefiniowanych jako kończące rozgrywki będą zgodne z miejscami zajętymi w zdefiniowanym turnieju. Jeśli potrzeba zmapować te miejsca na inne miejsca klasyfikacji końcowej, należy użyć sekcji `"swiss"`, opisanej poniżej.
 
 
 Ustawienia drabinki
