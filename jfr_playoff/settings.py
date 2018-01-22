@@ -15,7 +15,8 @@ class PlayoffSettings(object):
         self.interactive = False
         self.settings_file = None
         if len(sys.argv) > 1:
-            self.settings_file = sys.argv[1]
+            self.settings_file = sys.argv[1].decode(
+                sys.getfilesystemencoding())
         else:
             self.interactive = True
 
@@ -24,10 +25,11 @@ class PlayoffSettings(object):
             readline.set_completer_delims(' \t\n;')
             readline.parse_and_bind("tab: complete")
             readline.set_completer(complete_filename)
-            self.settings_file = raw_input('JSON settings file: ')
+            self.settings_file = raw_input(
+                'JSON settings file: ').decode(sys.stdin.encoding)
 
         if self.settings is None:
-            self.settings = json.load(open(self.settings_file))
+            self.settings = json.load(open(unicode(self.settings_file)))
 
     def has_section(self, key):
         self.load()
