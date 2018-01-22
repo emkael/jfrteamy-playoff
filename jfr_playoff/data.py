@@ -183,13 +183,6 @@ class PlayoffData(object):
             swiss_finished = self.database.fetch(
                 event['database'], p_sql.SWISS_ENDED, {})
             if swiss_finished[0] > 0:
-                swiss_teams = self.database.fetch_all(
-                    event['database'], p_sql.SWISS_RESULTS, {})
-                swiss_results = [(teams.index(team[0]), team[1], team[2]) for
-                                 team in swiss_teams]
-                swiss_results = sorted(swiss_results, key=lambda t: t[0])
-                swiss_results = sorted(
-                    swiss_results, key=lambda t: t[1], reverse=True)
                 swiss_position = (
                     event['swiss_position']
                     if 'swiss_position' in event
@@ -200,21 +193,36 @@ class PlayoffData(object):
                     if 'position_to' in event
                     else 9999
                 )
-                prev_result = None
                 place = 1
-                for team in sorted(
-                        swiss_results, key=lambda team: team[2]):
-                    if prev_result == team[1]:
-                        print SWISS_TIE_WARNING % (event['database'])
-                    prev_result = team[1]
+                swiss_results = self.get_swiss_results(
+                    event['database'], teams)
+                for team in swiss_results:
                     if place >= swiss_position:
                         target_position = event['position'] \
                                               + place - swiss_position
                         if target_position <= min(
                                 position_limit, len(self.leaderboard)):
                             self.leaderboard[
-                                target_position - 1] = teams[team[0]]
+                                target_position - 1] = team[0]
                     place += 1
+
+    def get_swiss_results(self, swiss, ties=None):
+        if ties is None:
+            ties = []
+        swiss_teams = self.database.fetch_all(
+            swiss, p_sql.SWISS_RESULTS, {})
+        swiss_results = sorted(
+            swiss_teams,
+            key=lambda t: ties.index(t[0]) if t[0] in ties else -1)
+        swiss_results = sorted(
+            swiss_results, key=lambda t: t[1], reverse=True)
+        swiss_results = sorted(swiss_results, key=lambda team: team[2])
+        prev_result = None
+        for team in swiss_results:
+            if prev_result == team[1]:
+                print SWISS_TIE_WARNING % (swiss)
+            prev_result = team[1]
+        return [[team[0], team[3], team[4]] for team in swiss_results]
 
     def fill_leaderboard(self):
         self.prefill_leaderboard(self.teams)

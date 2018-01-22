@@ -43,7 +43,9 @@ SWISS_RESULTS = '''
 SELECT #db#.teams.fullname,
  SUM(IF(#db#.matches.homet = #db#.teams.id, vph+corrh, vpv+corrv))
   + #db#.teams.score,
- #db#.teams.grupa
+ #db#.teams.grupa,
+ #db#.teams.shortname,
+ #db#.teams.gif
 FROM #db#.teams
 LEFT JOIN #db#.matches
  ON (#db#.teams.id = #db#.matches.homet OR #db#.teams.id = #db#.matches.visit)
