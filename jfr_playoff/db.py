@@ -1,5 +1,6 @@
-import mysql.connector
 import sys
+
+import mysql.connector
 
 
 class PlayoffDB(object):

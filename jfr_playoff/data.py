@@ -1,12 +1,11 @@
-from cached_property import cached_property
 from urlparse import urljoin
 
 import mysql
+from cached_property import cached_property
 
 import jfr_playoff.sql as p_sql
 from jfr_playoff.db import PlayoffDB
 from jfr_playoff.dto import Match, Phase, Team
-
 
 SWISS_TIE_WARNING = 'WARNING: tie detected in swiss %s.' + \
                     ' Make sure to resolve the tie by arranging teams' + \
