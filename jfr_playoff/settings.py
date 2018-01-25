@@ -29,7 +29,8 @@ class PlayoffSettings(object):
                 'JSON settings file: ').decode(sys.stdin.encoding)
 
         if self.settings is None:
-            self.settings = json.load(open(unicode(self.settings_file)))
+            self.settings = json.loads(
+                open(unicode(self.settings_file)).read().decode('utf-8-sig'))
 
     def has_section(self, key):
         self.load()
