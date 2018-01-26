@@ -11,7 +11,7 @@ WHERE matches.tabl = %s AND matches.rnd = %s
 
 BOARD_COUNT = '''
 SELECT segmentsperround*boardspersegment,
- SUM(sc1.contract IS NOT NULL AND sc2.contract IS NOT NULL)
+ SUM(sc1.score IS NOT NULL AND sc2.score IS NOT NULL)
 FROM #db#.scores sc1
 JOIN #db#.scores sc2
  ON sc1.rnd = sc2.rnd
