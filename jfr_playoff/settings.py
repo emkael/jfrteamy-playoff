@@ -32,8 +32,9 @@ class PlayoffSettings(object):
                 if (key not in base_config) or overwrite:
                     base_config[key] = value
         except Exception as e:
-            print 'WARNING: unable to fetch remote config %s: %s' % (
-                url, str(e))
+            print 'WARNING: unable to merge remote config: %s' % (str(e))
+            if remote_url is not None:
+                print 'Offending URL: %s' % (remote_url)
         return base_config
 
     def load(self):
