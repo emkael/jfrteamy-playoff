@@ -31,7 +31,7 @@ class PlayoffSettings(object):
             for key, value in remote_config.iteritems():
                 if (key not in base_config) or overwrite:
                     base_config[key] = value
-        except e:
+        except Exception as e:
             print 'WARNING: unable to fetch remote config %s: %s' % (
                 url, str(e))
         return base_config
