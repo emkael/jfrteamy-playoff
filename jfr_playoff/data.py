@@ -153,6 +153,7 @@ class PlayoffData(object):
         info.id = match['id']
         info.winner_matches = []
         info.loser_matches = []
+        info.running = 0
         for i in range(0, 2):
             if 'winner' in match['teams'][i]:
                 info.winner_matches += match['teams'][i]['winner']
@@ -165,6 +166,8 @@ class PlayoffData(object):
             info.teams = self.get_db_match_teams(match)
         except (mysql.connector.Error, TypeError, IndexError):
             info.teams = self.get_config_match_teams(match)
+            if (info.teams[0].score != 0) or (info.teams[1].score != 0):
+                info.running = -1
         try:
             towels = self.database.fetch(
                 match['database'], p_sql.TOWEL_COUNT,
@@ -176,12 +179,12 @@ class PlayoffData(object):
                        (match['table'], match['round']))]
             if row[1] > 0:
                 info.running = int(row[1])
-            if row[1] >= row[0] - towels[0]:
-                info.running = 0
+            if row[0] > 0:
+                if row[1] >= row[0] - towels[0]:
+                    info.running = -1
         except (mysql.connector.Error, TypeError, KeyError):
             pass
-        if (info.running == 0) and \
-           ((info.teams[0].score != 0) or (info.teams[1].score != 0)):
+        if (info.running == -1):
             if info.teams[0].score > info.teams[1].score:
                 info.winner = info.teams[0].name
                 info.loser = info.teams[1].name
