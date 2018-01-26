@@ -33,6 +33,14 @@ Konfiguracja składa się, po kolei, z:
  - sekcji `"goniec"`, zawierającej ustawienia Gońca (`"enabled"` przyjmuje wartości `0`/`1`)
 
 
+Zdalne pliki konfiguracyjne
+---------------------------
+
+Sekcja `"remotes"` umożliwia zdefiniowanie zdalnych (dostępnych przez HTTP(S)) plików konfiguracyjnych, które są scalane z lokalną konfiguracją. Jest to tablica URLów.
+
+Konfiguracja scalana jest per sekcja. Jeśli sekcja jest obecna w pliku lokalnym, nie jest zmieniana. Jeśli sekcja obecna jest w kilku plikach zdalnych, sekcje późniejsze nadpisują sekcje wcześniejsze.
+
+
 Ustawienia teamów
 -----------------
 
