@@ -2,6 +2,7 @@ import glob
 import json
 import readline
 import sys
+import urllib
 
 
 def complete_filename(text, state):
@@ -20,6 +21,21 @@ class PlayoffSettings(object):
         else:
             self.interactive = True
 
+    def __merge_config(self, base_config,
+                       new_config=None, remote_url=None,
+                       overwrite=True):
+        try:
+            remote_config = new_config if new_config is not None else \
+                            json.loads(urllib.urlopen(
+                                remote_url).read().decode('utf-8-sig'))
+            for key, value in remote_config.iteritems():
+                if (key not in base_config) or overwrite:
+                    base_config[key] = value
+        except e:
+            print 'WARNING: unable to fetch remote config %s: %s' % (
+                url, str(e))
+        return base_config
+
     def load(self):
         if self.settings_file is None:
             readline.set_completer_delims(' \t\n;')
@@ -31,6 +47,14 @@ class PlayoffSettings(object):
         if self.settings is None:
             self.settings = json.loads(
                 open(unicode(self.settings_file)).read().decode('utf-8-sig'))
+            if self.has_section('remotes'):
+                remote_config = {}
+                for remote in self.get('remotes'):
+                    remote_config = self.__merge_config(
+                        remote_config, remote_url=remote)
+                self.settings = self.__merge_config(
+                    self.settings, new_config=remote_config,
+                    overwrite=False)
 
     def has_section(self, key):
         self.load()
