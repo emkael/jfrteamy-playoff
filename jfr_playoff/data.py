@@ -143,9 +143,6 @@ class PlayoffData(object):
                     else '??' for team in match_teams])
             else:
                 teams[i].name = ''
-        if 'score' in match:
-            for i in range(0, 2):
-                teams[i].score = match['score'][i]
         return teams
 
     def get_match_info(self, match):
@@ -166,8 +163,10 @@ class PlayoffData(object):
             info.teams = self.get_db_match_teams(match)
         except (mysql.connector.Error, TypeError, IndexError):
             info.teams = self.get_config_match_teams(match)
-            if (info.teams[0].score != 0) or (info.teams[1].score != 0):
-                info.running = -1
+        if 'score' in match:
+            for i in range(0, 2):
+                info.teams[i].score = match['score'][i]
+            info.running = -1
         try:
             towels = self.database.fetch(
                 match['database'], p_sql.TOWEL_COUNT,
