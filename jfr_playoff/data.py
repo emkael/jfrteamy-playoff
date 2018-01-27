@@ -68,8 +68,9 @@ class PlayoffData(object):
                 if self.match_info[match['id']].link is None:
                     self.match_info[match['id']].link = phase['link']
                 else:
-                    self.match_info[match['id']].link = urljoin(
-                        phase['link'], self.match_info[match['id']].link)
+                    if self.match_info[match['id']].link != '#':
+                        self.match_info[match['id']].link = urljoin(
+                            phase['link'], self.match_info[match['id']].link)
         return self.match_info
 
     def __get_link(self, database, suffix):
