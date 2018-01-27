@@ -22,6 +22,7 @@ JOIN #db#.scores sc2
  AND sc2.room = 2
 JOIN #db#.admin
 WHERE sc1.tabl = %s AND sc1.rnd = %s
+GROUP BY sc1.tabl, sc1.rnd
 '''
 
 TOWEL_COUNT = '''
@@ -29,6 +30,7 @@ SELECT #db#.admin.boardspersegment * SUM(#db#.segments.towel > 0)
 FROM #db#.segments
 JOIN #db#.admin
 WHERE #db#.segments.tabl = %s AND #db#.segments.rnd = %s
+GROUP BY #db#.segments.tabl, #db#.segments.rnd
 '''
 
 PREFIX = '''
