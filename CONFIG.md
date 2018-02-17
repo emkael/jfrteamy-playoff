@@ -83,17 +83,24 @@ Faza ma następujące pola:
 Ustawienia kozy (co meczy)
 --------------------------
 
-Mecz ma następujące pola:
+Pola obiektu meczu można podzielić na takie, które definiują strukturę drabinki (awanse, spadki, przejścia między fazami itd.) oraz na takie, które definiują źródło danych do wyświetlenia wyniku i obliczenia rezultatu danego meczu.
+
+Definicję struktury drabinki określają pola:
  - `"id"` - identyfikator meczu (liczbowy, musi być unikatowy)
- - `"database"`, `"round"` i `"table"` - określają, skąd brać dane meczu
- - `"teams"` określa, co ma się wyświetlić w przypadku, gdy z powyższego
-zestawu pól nie da się pobrać informacji o meczu
-  Jest to tablica dwóch elementów, które mogą być:
+ - `"teams"` - jest to tablica dwóch elementów, które mogą być:
    + łańcuchem tekstowym - wówczas musi to być pełna nazwa teamu
    + obiektem, z możliwymi polami tablicowymi `"place"`, `"winner"` lub `"loser"` - oznacza to, że dane miejsce drabinki jest przeznaczone dla drużyny z odpowiedniego miejsca z listy teamów (sekcja `"teams"`) lub dla zwycięzców/przegranych w meczach o ID podanych w polu
+  Tablica ta jest używana do wyświetlenia możliwych w meczu drużyn, jeśli dane meczu nie mogą być pobrane z innego źródła (np. bazy danych).
  - opcjonalne, pola `"winner"` i `"loser"` - które z kolei w tym kontekście oznaczają, miejsca, które zajmują zwycięzcy/przegrani danego meczu w końcowej klasyfikacji
- - opcjonalnie, pole `"link"` - określające link do wyników meczu, nadpisujący link generowany z bazy turnieju
- - opcjonalnie, pole `"score"` - dwuelementową tablicę, z której pobierany jest końcowy wynik meczu, nadpisujący wynik z bazy turnieju
+ - opcjonalnie, pole `"link"` - określające link do wyników meczu, nadpisujący link generowany z bazy turnieju lub linku fazy
+
+Dane meczu mogą pochodzić z następujących źródeł:
+ - bazy danych turnieju: wówczas należy zdefiniować pola `"database"`, `"round"` i `"table"`
+ - ręcznie wpisanego wyniku, wówczas:
+   + pole `"score"` określa wynik meczu: może być tablicą dwóch liczb (wynik gospodarzy, wynik gości), może również być słownikiem indeksowanym pełną nazwą teamu lub łańcuchem tekstowym określającym miejsce w tablicy z sekcji `"teams"`
+   + opcjonalne pole `"running"` określa, że nie jest zakończony i podaje liczbę rozegranych rozdań (0 dla meczu w przyszłości, >0 dla meczu w trakcie)
+
+Jeżeli wynik zdefiniowany jest w pliku konfiguracyjnym, nie jest pobierany z żadnego innego źródła. Jeśli plik definiuje do tego uczestniczące w meczu teamy, one również nie są pobierane z innych źródeł (ale gdy zdefiniowany jest tylko wynik, teamy wyznaczane są z bazy danych lub danych struktury drabinki).
 
 Na przykładach, pierwszy i ostatni mecz z poniższego pliku:
 
