@@ -33,6 +33,11 @@ WHERE #db#.segments.tabl = %s AND #db#.segments.rnd = %s
 GROUP BY #db#.segments.tabl, #db#.segments.rnd
 '''
 
+CURRENT_SEGMENT = '''
+SELECT LEAST(segmentsperround, segm+1)
+FROM #db#.admin
+'''
+
 PREFIX = '''
 SELECT shortname FROM #db#.admin
 '''

@@ -1,3 +1,4 @@
+import re
 from urlparse import urljoin
 
 import mysql
@@ -169,6 +170,21 @@ class MatchInfo:
                 self.info.loser = self.info.teams[0].name
                 self.info.winner = self.info.teams[1].name
 
+    def __get_db_running_link(self, prefix, round_no):
+        current_segment = int(
+            self.database.fetch(
+                self.config['database'], p_sql.CURRENT_SEGMENT, ())[0])
+        return '%s%st%d-%d.html' % (
+            prefix, round_no, self.config['table'], current_segment)
+
+    def __determine_running_link(self):
+        link_match = re.match(r'^(.*)runda(\d+)\.html$', self.info.link)
+        if link_match:
+            try:
+                self.info.link = self.__get_db_running_link(
+                    link_match.group(1), link_match.group(2))
+            except (mysql.connector.Error, TypeError, IndexError, KeyError):
+                pass
 
     def set_phase_link(self, phase_link):
         if self.info.link is None:
@@ -181,4 +197,6 @@ class MatchInfo:
         self.__fetch_teams_with_scores()
         self.__fetch_board_count()
         self.__determine_outcome()
+        if self.info.running > 0:
+            self.__determine_running_link()
         return self.info
