@@ -125,7 +125,7 @@ class MatchInfo:
         if not teams_fetched:
             try:
                 self.info.teams = self.__get_db_teams(self.info.teams, not scores_fetched)
-            except (mysql.connector.Error, TypeError, IndexError):
+            except (mysql.connector.Error, TypeError, IndexError, KeyError):
                 self.info.teams = self.__get_config_teams(self.info.teams)
 
     def __get_db_board_count(self):
