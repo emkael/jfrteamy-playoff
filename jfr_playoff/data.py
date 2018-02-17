@@ -1,11 +1,10 @@
-from urlparse import urljoin
-
 import mysql
 from cached_property import cached_property
 
 import jfr_playoff.sql as p_sql
 from jfr_playoff.db import PlayoffDB
-from jfr_playoff.dto import Match, Phase, Team
+from jfr_playoff.dto import Phase
+from jfr_playoff.matchinfo import MatchInfo
 
 SWISS_TIE_WARNING = 'WARNING: tie detected in swiss %s.' + \
                     ' Make sure to resolve the tie by arranging teams' + \
@@ -60,36 +59,14 @@ class PlayoffData(object):
         self.match_info = {}
         for phase in self.phases:
             for match in phase['matches']:
-                self.match_info[match['id']] = self.get_match_info(match)
+                match_info = MatchInfo(match, self.teams, self.database)
+                match_info.set_phase_link(phase['link'])
+                self.match_info[match['id']] = match_info.get_info()
                 if self.match_info[match['id']].running > 0:
                     for phase_obj in self.grid:
                         if match['id'] in phase_obj.matches:
                             phase_obj.running = True
-                if self.match_info[match['id']].link is None:
-                    self.match_info[match['id']].link = phase['link']
-                else:
-                    if self.match_info[match['id']].link != '#':
-                        self.match_info[match['id']].link = urljoin(
-                            phase['link'], self.match_info[match['id']].link)
         return self.match_info
-
-    def __get_link(self, database, suffix):
-        try:
-            row = self.database.fetch(database, p_sql.PREFIX, ())
-            if row is not None:
-                if len(row) > 0:
-                    return row[0] + suffix
-        except mysql.connector.Error:
-            return None
-        return None
-
-    def get_match_link(self, match):
-        if 'link' in match:
-            link = match['link']
-        else:
-            link = self.__get_link(
-                match['database'], 'runda%d.html' % (match['round']))
-        return link
 
     def get_leaderboard_link(self, database):
         return self.__get_link(database, 'leaderb.html')
@@ -100,98 +77,6 @@ class PlayoffData(object):
                 event['relative_path'] is not None):
             swiss_link = '%s/%s' % (event['relative_path'], swiss_link)
         return swiss_link
-
-    def get_db_match_teams(self, match):
-        teams = [Team(), Team()]
-        row = self.database.fetch(
-            match['database'], p_sql.MATCH_RESULTS,
-            (match['table'], match['round']))
-        teams[0].name = row[0]
-        teams[1].name = row[1]
-        teams[0].score = row[3] + row[5]
-        teams[1].score = row[4] + row[6]
-        if row[2] > 0:
-            teams[0].score += row[2]
-        else:
-            teams[1].score -= row[2]
-        return teams
-
-    def get_config_match_teams(self, match):
-        teams = [Team(), Team()]
-        for i in range(0, 2):
-            match_teams = []
-            if isinstance(match['teams'][i], basestring):
-                teams[i].name = match['teams'][i]
-            elif isinstance(match['teams'][i], list):
-                teams[i].name = '<br />'.join(match['teams'][i])
-            else:
-                if 'winner' in match['teams'][i]:
-                    match_teams += [
-                        self.match_info[winner_match].winner
-                        for winner_match in match['teams'][i]['winner']]
-                if 'loser' in match['teams'][i]:
-                    match_teams += [
-                        self.match_info[loser_match].loser
-                        for loser_match in match['teams'][i]['loser']]
-                if 'place' in match['teams'][i]:
-                    match_teams += [
-                        self.teams[place-1][0]
-                        for place in match['teams'][i]['place']]
-            known_teams = [team for team in match_teams if team is not None]
-            if len(known_teams) > 0:
-                teams[i].name = '<br />'.join([
-                    team if team is not None
-                    else '??' for team in match_teams])
-            else:
-                teams[i].name = ''
-        return teams
-
-    def get_match_info(self, match):
-        info = Match()
-        info.id = match['id']
-        info.winner_matches = []
-        info.loser_matches = []
-        info.running = 0
-        for i in range(0, 2):
-            if 'winner' in match['teams'][i]:
-                info.winner_matches += match['teams'][i]['winner']
-            if 'loser' in match['teams'][i]:
-                info.loser_matches += match['teams'][i]['loser']
-        info.winner_matches = list(set(info.winner_matches))
-        info.loser_matches = list(set(info.loser_matches))
-        info.link = self.get_match_link(match)
-        try:
-            info.teams = self.get_db_match_teams(match)
-        except (mysql.connector.Error, TypeError, IndexError):
-            info.teams = self.get_config_match_teams(match)
-        if 'score' in match:
-            for i in range(0, 2):
-                info.teams[i].score = match['score'][i]
-            info.running = -1
-        try:
-            towels = self.database.fetch(
-                match['database'], p_sql.TOWEL_COUNT,
-                (match['table'], match['round']))
-            row = [0 if r is None
-                   else r for r in
-                   self.database.fetch(
-                       match['database'], p_sql.BOARD_COUNT,
-                       (match['table'], match['round']))]
-            if row[1] > 0:
-                info.running = int(row[1])
-            if row[0] > 0:
-                if row[1] >= row[0] - towels[0]:
-                    info.running = -1
-        except (mysql.connector.Error, TypeError, KeyError):
-            pass
-        if (info.running == -1):
-            if info.teams[0].score > info.teams[1].score:
-                info.winner = info.teams[0].name
-                info.loser = info.teams[1].name
-            else:
-                info.loser = info.teams[0].name
-                info.winner = info.teams[1].name
-        return info
 
     def prefill_leaderboard(self, teams):
         self.leaderboard = [None] * len(teams)
