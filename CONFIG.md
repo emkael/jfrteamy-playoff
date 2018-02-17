@@ -91,8 +91,8 @@ Definicję struktury drabinki określają pola:
    + łańcuchem tekstowym - wówczas musi to być pełna nazwa teamu
    + obiektem, z możliwymi polami tablicowymi `"place"`, `"winner"` lub `"loser"` - oznacza to, że dane miejsce drabinki jest przeznaczone dla drużyny z odpowiedniego miejsca z listy teamów (sekcja `"teams"`) lub dla zwycięzców/przegranych w meczach o ID podanych w polu
   Tablica ta jest używana do wyświetlenia możliwych w meczu drużyn, jeśli dane meczu nie mogą być pobrane z innego źródła (np. bazy danych).
- - opcjonalne, pola `"winner"` i `"loser"` - które z kolei w tym kontekście oznaczają, miejsca, które zajmują zwycięzcy/przegrani danego meczu w końcowej klasyfikacji
- - opcjonalnie, pole `"link"` - określające link do wyników meczu, nadpisujący link generowany z bazy turnieju lub linku fazy
+ - opcjonalne pola `"winner"` i `"loser"` - które z kolei w tym kontekście oznaczają, miejsca, które zajmują zwycięzcy/przegrani danego meczu w końcowej klasyfikacji
+ - opcjonalne pole `"link"` - określające link do wyników meczu, nadpisujący link generowany z bazy turnieju lub linku fazy
 
 Dane meczu mogą pochodzić z następujących źródeł:
  - bazy danych turnieju: wówczas należy zdefiniować pola `"database"`, `"round"` i `"table"`
