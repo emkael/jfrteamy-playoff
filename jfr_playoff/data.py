@@ -78,7 +78,7 @@ class PlayoffData(object):
             row = self.database.fetch(database, p_sql.PREFIX, ())
             if row is not None:
                 if len(row) > 0:
-                    return '%s%s' % (row[0], suffix)
+                    return row[0] + suffix
         except mysql.connector.Error:
             return None
         return None
