@@ -50,23 +50,32 @@ class MatchInfo:
             self.info.link = self.__fetch_link(
                 'runda%d.html' % (self.config['round']))
 
-    def __get_db_teams(self):
+    def __get_predefined_scores(self):
         teams = [Team(), Team()]
+        scores_fetched = False
+        teams_fetched = False
+        if 'score' in self.config:
+            for i in range(0, 2):
+                teams[i].score = self.config['score'][i]
+            scores_fetched = True
+        return scores_fetched, teams_fetched, teams
+
+    def __get_db_teams(self, teams, fetch_scores):
         row = self.database.fetch(
             self.config['database'], p_sql.MATCH_RESULTS,
             (self.config['table'], self.config['round']))
         teams[0].name = row[0]
         teams[1].name = row[1]
-        teams[0].score = row[3] + row[5]
-        teams[1].score = row[4] + row[6]
-        if row[2] > 0:
-            teams[0].score += row[2]
-        else:
-            teams[1].score -= row[2]
+        if fetch_scores:
+            teams[0].score = row[3] + row[5]
+            teams[1].score = row[4] + row[6]
+            if row[2] > 0:
+                teams[0].score += row[2]
+            else:
+                teams[1].score -= row[2]
         return teams
 
-    def __get_config_teams(self):
-        teams = [Team(), Team()]
+    def __get_config_teams(self, teams):
         for i in range(0, 2):
             match_teams = []
             if isinstance(self.config['teams'][i], basestring):
@@ -96,14 +105,15 @@ class MatchInfo:
         return teams
 
     def __fetch_teams_with_scores(self):
-        try:
-            self.info.teams = self.__get_db_teams()
-        except (mysql.connector.Error, TypeError, IndexError):
-            self.info.teams = self.__get_config_teams()
-        if 'score' in self.config:
-            for i in range(0, 2):
-                self.info.teams[i].score = self.config['score'][i]
+        (scores_fetched, teams_fetched,
+         self.info.teams) = self.__get_predefined_scores()
+        if scores_fetched:
             self.info.running = -1
+        if not teams_fetched:
+            try:
+                self.info.teams = self.__get_db_teams(self.info.teams, not scores_fetched)
+            except (mysql.connector.Error, TypeError, IndexError):
+                self.info.teams = self.__get_config_teams(self.info.teams)
 
     def __get_db_board_count(self):
         towels = self.database.fetch(
