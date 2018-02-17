@@ -15,7 +15,7 @@ class MatchInfo:
         self.database = database
         self.info = Match()
         self.__init_info()
-        self.__get_match_link()
+        self.__fetch_match_link()
 
     def __init_info(self):
         self.info.id = self.config['id']
@@ -32,7 +32,7 @@ class MatchInfo:
         self.info.loser_matches = list(set(self.info.loser_matches))
         self.info.teams = []
 
-    def __fetch_link(self, suffix):
+    def __get_link(self, suffix):
         try:
             row = self.database.fetch(
                 self.config['database'], p_sql.PREFIX, ())
@@ -43,11 +43,11 @@ class MatchInfo:
             return None
         return None
 
-    def __get_match_link(self):
+    def __fetch_match_link(self):
         if 'link' in self.config:
             self.info.link = self.config['link']
         else:
-            self.info.link = self.__fetch_link(
+            self.info.link = self.__get_link(
                 'runda%d.html' % (self.config['round']))
 
     def __get_predefined_scores(self):
