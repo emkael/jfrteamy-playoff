@@ -55,8 +55,21 @@ class MatchInfo:
         scores_fetched = False
         teams_fetched = False
         if 'score' in self.config:
-            for i in range(0, 2):
-                teams[i].score = self.config['score'][i]
+            i = 0
+            for score in self.config['score']:
+                if isinstance(self.config['score'], dict):
+                    teams[i].score = self.config['score'][score]
+                    try:
+                        team_no = int(score)
+                        teams[i].name = self.teams[team_no-1][0]
+                    except ValueError:
+                        teams[i].name = score
+                    teams_fetched = True
+                else:
+                    teams[i].score = score
+                i += 1
+                if i == 2:
+                    break
             scores_fetched = True
         return scores_fetched, teams_fetched, teams
 
