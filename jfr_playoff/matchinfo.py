@@ -46,7 +46,7 @@ class MatchInfo:
     def __fetch_match_link(self):
         if 'link' in self.config:
             self.info.link = self.config['link']
-        else:
+        elif 'round' in self.config:
             self.info.link = self.__get_link(
                 'runda%d.html' % (self.config['round']))
 
