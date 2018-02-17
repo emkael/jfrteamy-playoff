@@ -121,7 +121,10 @@ class MatchInfo:
         (scores_fetched, teams_fetched,
          self.info.teams) = self.__get_predefined_scores()
         if scores_fetched:
-            self.info.running = -1
+            if 'running' in self.config:
+                self.info.running = int(self.config['running'])
+            else:
+                self.info.running = -1
         if not teams_fetched:
             try:
                 self.info.teams = self.__get_db_teams(self.info.teams, not scores_fetched)
@@ -155,8 +158,6 @@ class MatchInfo:
             self.info.running = -1 \
                                 if boards_played >= boards_to_play \
                                    else boards_played
-        else:
-            self.info.running = 0
 
 
     def __determine_outcome(self):
