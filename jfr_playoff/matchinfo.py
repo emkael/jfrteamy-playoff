@@ -105,23 +105,36 @@ class MatchInfo:
                 self.info.teams[i].score = self.config['score'][i]
             self.info.running = -1
 
+    def __get_db_board_count(self):
+        towels = self.database.fetch(
+            self.config['database'], p_sql.TOWEL_COUNT,
+            (self.config['table'], self.config['round']))
+        row = [0 if r is None
+               else r for r in
+               self.database.fetch(
+                   self.config['database'], p_sql.BOARD_COUNT,
+                   (self.config['table'], self.config['round']))]
+        boards_to_play = row[0]
+        if row[1] > 0:
+            boards_played = int(row[1])
+        if boards_to_play > 0:
+            boards_played += int(towels[0])
+        return boards_played, boards_to_play
+
     def __fetch_board_count(self):
+        boards_played = 0
+        boards_to_play = 0
         try:
-            towels = self.database.fetch(
-                self.config['database'], p_sql.TOWEL_COUNT,
-                (self.config['table'], self.config['round']))
-            row = [0 if r is None
-                   else r for r in
-                   self.database.fetch(
-                       self.config['database'], p_sql.BOARD_COUNT,
-                       (self.config['table'], self.config['round']))]
-            if row[1] > 0:
-                self.info.running = int(row[1])
-            if row[0] > 0:
-                if row[1] >= row[0] - towels[0]:
-                    self.info.running = -1
+            boards_played, boards_to_play = self.__get_db_board_count()
         except (mysql.connector.Error, TypeError, KeyError):
             pass
+        if boards_played > 0:
+            self.info.running = -1 \
+                                if boards_played >= boards_to_play \
+                                   else boards_played
+        else:
+            self.info.running = 0
+
 
     def __determine_outcome(self):
         if (self.info.running == -1):
