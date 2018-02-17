@@ -152,7 +152,7 @@ class MatchInfo:
         boards_to_play = 0
         try:
             boards_played, boards_to_play = self.__get_db_board_count()
-        except (mysql.connector.Error, TypeError, KeyError):
+        except (mysql.connector.Error, TypeError, IndexError, KeyError):
             pass
         if boards_played > 0:
             self.info.running = -1 \
