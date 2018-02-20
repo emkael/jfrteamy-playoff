@@ -182,25 +182,87 @@ class MatchInfo:
                self.database.fetch(
                    self.config['database'], p_sql.BOARD_COUNT,
                    (self.config['table'], self.config['round']))]
-        boards_to_play = row[0]
-        if row[1] > 0:
-            boards_played = int(row[1])
+        boards_to_play = int(row[0])
+        boards_played = max(int(row[1]), 0)
         if boards_to_play > 0:
             boards_played += int(towels[0])
         return boards_played, boards_to_play
+
+    def __has_segment_link(self, cell):
+        links = [link for link in cell.select('a[href]')
+                 if re.match(r'^.*\d+t\d+-\d+\.htm$', link['href'])]
+        return len(links) > 0
+
+    def __has_towel_image(self, cell):
+        return len(cell.select('img[alt="towel"]')) > 0
+
+    def __has_running_board_count(self, cell):
+        return len(cell.select('img[alt="running..."]')) > 0
+
+    def __get_html_running_boards(self, cell):
+        return int(cell.contents[-1].strip())
+
+    def __get_finished_info(self, cell):
+        segment_link = cell.select('a[href]')
+        if len(segment_link) > 0:
+            segment_url = re.sub(
+                r'\.htm$', '.html',
+                urljoin(self.info.link, segment_link[0]['href']))
+            try:
+                segment_content = bs(self.__fetch_url(segment_url), 'lxml')
+                board_rows = [row for row in segment_content.find_all('tr') if len(row.select('a.zb')) > 0]
+                board_count = len(board_rows)
+                played_boards = len([
+                    row for row in board_rows if len(
+                        ''.join([cell.text.strip() for cell in row.select('td.bdn') + row.select('td.bde')])) > 0])
+                return board_count, played_boards >= board_count
+            except IOError:
+                return 0, False
+        return 0, False
+
+    def __get_html_board_count(self):
+        row = self.__find_table_row(self.info.link)
+        if row is None:
+            raise ValueError('table row not found')
+        cells = row.select('td.bdc')
+        segments = [cell for cell in cells if self.__has_segment_link(cell)]
+        towels = [cell for cell in cells if self.__has_towel_image(cell)]
+        if len(segments) == 0:
+            if len(towels) > 0:
+                return 1, 1 # entire match is toweled, so mark as finished
+            else:
+                raise ValueError('segments not found')
+        running_segments = [cell for cell in row.select('td.bdca') if self.__has_running_board_count(cell)]
+        running_boards = sum([self.__get_html_running_boards(segment) for segment in running_segments])
+        finished_segments = []
+        boards_in_segment = None
+        for segment in segments:
+            if segment not in running_segments:
+                boards, is_finished = self.__get_finished_info(segment)
+                if is_finished:
+                    finished_segments.append(segment)
+                if boards_in_segment is None and boards > 0:
+                    boards_in_segment = boards
+        total_boards = (len(segments) + len(towels) + len(running_segments)) * boards_in_segment
+        played_boards = (len(towels) + len(finished_segments)) * boards_in_segment + running_boards
+        return played_boards, total_boards
 
     def __fetch_board_count(self):
         boards_played = 0
         boards_to_play = 0
         try:
+            if self.database is None:
+                raise KeyError('database not configured')
             boards_played, boards_to_play = self.__get_db_board_count()
         except (mysql.connector.Error, TypeError, IndexError, KeyError):
-            pass
+            try:
+                boards_played, boards_to_play = self.__get_html_board_count()
+            except (TypeError, IndexError, KeyError, IOError, ValueError):
+                pass
         if boards_played > 0:
             self.info.running = -1 \
                                 if boards_played >= boards_to_play \
                                    else boards_played
-
 
     def __determine_outcome(self):
         if (self.info.running == -1):
