@@ -280,14 +280,26 @@ class MatchInfo:
         return '%s%st%d-%d.html' % (
             prefix, round_no, self.config['table'], current_segment)
 
+    def __get_html_running_link(self):
+        row = self.__find_table_row(self.info.link)
+        running_link = row.select('td.bdcg a[href]')
+        if len(running_link) == 0:
+            raise ValueError('running link not found')
+        return urljoin(self.info.link, running_link[0]['href'])
+
     def __determine_running_link(self):
         link_match = re.match(r'^(.*)runda(\d+)\.html$', self.info.link)
         if link_match:
             try:
+                if self.database is None:
+                    raise KeyError('database not configured')
                 self.info.link = self.__get_db_running_link(
                     link_match.group(1), link_match.group(2))
             except (mysql.connector.Error, TypeError, IndexError, KeyError):
-                pass
+                try:
+                    self.info.link = self.__get_html_running_link()
+                except (TypeError, IndexError, KeyError, IOError, ValueError):
+                    pass
 
     def set_phase_link(self, phase_link):
         if self.info.link is None:
