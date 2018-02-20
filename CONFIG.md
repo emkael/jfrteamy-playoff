@@ -34,6 +34,8 @@ Konfiguracja składa się, po kolei, z:
 
 Ustawienia bazy danych nie są wymagane, program potrafi sobie poradzić bez nich, jeśli do poszczególnych faz/meczów podano dostępne przez HTTP linki.
 
+Ustawienia Gońca nie są wymagane, domyślnie jest on wyłączony, a przy włączeniu - domyślnie komunikuje się z `localhost` na porcie `8090`.
+
 Zdalne pliki konfiguracyjne
 ---------------------------
 
