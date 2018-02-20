@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup as bs
 
 import jfr_playoff.sql as p_sql
 from jfr_playoff.dto import Match, Team
+from jfr_playoff.tournamentinfo import TournamentInfo
 
 class MatchInfo:
 
@@ -36,22 +37,12 @@ class MatchInfo:
         self.info.loser_matches = list(set(self.info.loser_matches))
         self.info.teams = []
 
-    def __get_link(self, suffix):
-        try:
-            row = self.database.fetch(
-                self.config['database'], p_sql.PREFIX, ())
-            if row is not None:
-                if len(row) > 0:
-                    return row[0] + suffix
-        except mysql.connector.Error:
-            return None
-        return None
-
     def __fetch_match_link(self):
         if 'link' in self.config:
             self.info.link = self.config['link']
-        elif 'round' in self.config:
-            self.info.link = self.__get_link(
+        elif ('round' in self.config) and ('database' in self.config):
+            event_info = TournamentInfo(self.config, self.database)
+            self.info.link = event_info.get_results_link(
                 'runda%d.html' % (self.config['round']))
 
     def __get_predefined_scores(self):
