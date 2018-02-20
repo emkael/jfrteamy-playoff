@@ -8,7 +8,7 @@ import __main__
 class PlayoffFileManager(object):
 
     def __init__(self, settings):
-        self.goniec = settings.get('goniec')
+        self.goniec = settings.get('goniec') if settings.has_section('goniec') else None
         self.output_file = settings.get('output')
         self.output_path = os.path.dirname(
             self.output_file
@@ -41,8 +41,12 @@ class PlayoffFileManager(object):
         return script_output_path
 
     def send_files(self):
-        if self.goniec['enabled']:
+        if (self.goniec is not None) and self.goniec['enabled']:
             try:
+                if 'host' not in self.goniec:
+                    self.goniec['host'] = 'localhost'
+                if 'port' not in self.goniec:
+                    self.goniec['port'] = 8090
                 content_lines = [self.output_path] + \
                                 list(self.files) + \
                                 ['bye', '']
