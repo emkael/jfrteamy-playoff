@@ -6,6 +6,7 @@ import mysql.connector
 class PlayoffDB(object):
 
     db_cursor = None
+    DATABASE_NOT_CONFIGURED_WARNING = 'WARNING: database not configured'
 
     def __init__(self, settings):
         reload(sys)

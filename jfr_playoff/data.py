@@ -13,7 +13,9 @@ SWISS_TIE_WARNING = 'WARNING: tie detected in swiss %s.' + \
 
 class PlayoffData(object):
     def __init__(self, settings):
-        self.database = PlayoffDB(settings.get('database'))
+        self.database = PlayoffDB(settings.get('database')) if settings.has_section('database') else None
+        if self.database is None:
+            print PlayoffDB.DATABASE_NOT_CONFIGURED_WARNING
         self.team_settings = settings.get('teams')
         self.phases = settings.get('phases')
         self.swiss = []
@@ -88,36 +90,41 @@ class PlayoffData(object):
 
     def fill_swiss_leaderboard(self, swiss, teams):
         teams = [team[0] for team in teams]
+        if self.database is None:
+            return
         for event in swiss:
             swiss_finished = self.database.fetch(
                 event['database'], p_sql.SWISS_ENDED, {})
-            if swiss_finished[0] > 0:
-                swiss_position = (
-                    event['swiss_position']
-                    if 'swiss_position' in event
-                    else 1
-                )
-                position_limit = (
-                    event['position_to']
-                    if 'position_to' in event
-                    else 9999
-                )
-                place = 1
-                swiss_results = self.get_swiss_results(
-                    event['database'], teams)
-                for team in swiss_results:
-                    if place >= swiss_position:
-                        target_position = event['position'] \
+            if len(swiss_finished) > 0:
+                if swiss_finished[0] > 0:
+                    swiss_position = (
+                        event['swiss_position']
+                        if 'swiss_position' in event
+                        else 1
+                    )
+                    position_limit = (
+                        event['position_to']
+                        if 'position_to' in event
+                        else 9999
+                    )
+                    place = 1
+                    swiss_results = self.get_swiss_results(
+                        event['database'], teams)
+                    for team in swiss_results:
+                        if place >= swiss_position:
+                            target_position = event['position'] \
                                               + place - swiss_position
-                        if target_position <= min(
-                                position_limit, len(self.leaderboard)):
-                            self.leaderboard[
-                                target_position - 1] = team[0]
-                    place += 1
+                            if target_position <= min(
+                                    position_limit, len(self.leaderboard)):
+                                self.leaderboard[
+                                    target_position - 1] = team[0]
+                        place += 1
 
     def get_swiss_results(self, swiss, ties=None):
         if ties is None:
             ties = []
+        if self.database is None:
+            return []
         swiss_teams = self.database.fetch_all(
             swiss, p_sql.SWISS_RESULTS, {})
         swiss_results = sorted(
