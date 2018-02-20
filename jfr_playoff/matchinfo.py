@@ -3,6 +3,7 @@ import urllib
 from urlparse import urljoin
 
 import mysql
+from bs4 import BeautifulSoup as bs
 
 import jfr_playoff.sql as p_sql
 from jfr_playoff.dto import Match, Team
@@ -96,6 +97,31 @@ class MatchInfo:
             MatchInfo.url_cache[url] = urllib.urlopen(url).read()
         return MatchInfo.url_cache[url]
 
+    def __find_table_row(self, url):
+        html_content = bs(self.__fetch_url(url), 'lxml')
+        for row in html_content.select('tr tr'):
+            for cell in row.select('td.t1'):
+                if cell.text.strip() == str(self.config['table']):
+                    return row
+        return None
+
+    def __get_html_teams(self, teams, fetch_score):
+        row = self.__find_table_row(self.info.link)
+        if row is None:
+            raise ValueError('table row not found')
+        score_cell = row.select('td.bdc')[-1]
+        scores = [
+            float(text) for text
+            in score_cell.contents
+            if isinstance(text, unicode)]
+        team_names = [[text for text in link.contents
+                       if isinstance(text, unicode)][0].strip(u'\xa0')
+                      for link in row.select('a[onmouseover]')]
+        for i in range(0, 2):
+            teams[i].name = team_names[i]
+            teams[i].score = scores[i]
+        return teams
+
     def __get_config_teams(self, teams):
         for i in range(0, 2):
             match_teams = []
@@ -126,8 +152,7 @@ class MatchInfo:
         return teams
 
     def __fetch_teams_with_scores(self):
-        (scores_fetched, teams_fetched,
-         self.info.teams) = self.__get_predefined_scores()
+        (scores_fetched, teams_fetched, self.info.teams) = self.__get_predefined_scores()
         if scores_fetched:
             if 'running' in self.config:
                 self.info.running = int(self.config['running'])
@@ -135,8 +160,17 @@ class MatchInfo:
                 self.info.running = -1
         if not teams_fetched:
             try:
-                self.info.teams = self.__get_db_teams(self.info.teams, not scores_fetched)
-            except (mysql.connector.Error, TypeError, IndexError, KeyError):
+                try:
+                    if self.database is None:
+                        raise KeyError('database not configured')
+                    if 'database' not in self.config:
+                        raise KeyError('database not configured')
+                    self.info.teams = self.__get_db_teams(
+                        self.info.teams, not scores_fetched)
+                except (mysql.connector.Error, TypeError, IndexError, KeyError):
+                    self.info.teams = self.__get_html_teams(
+                        self.info.teams, not scores_fetched)
+            except (TypeError, IndexError, KeyError, IOError, ValueError):
                 self.info.teams = self.__get_config_teams(self.info.teams)
 
     def __get_db_board_count(self):
