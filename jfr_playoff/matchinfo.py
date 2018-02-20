@@ -1,4 +1,5 @@
 import re
+import urllib
 from urlparse import urljoin
 
 import mysql
@@ -9,6 +10,7 @@ from jfr_playoff.dto import Match, Team
 class MatchInfo:
 
     matches = {}
+    url_cache = {}
 
     def __init__(self, match_config, teams, database):
         self.config = match_config
@@ -88,6 +90,11 @@ class MatchInfo:
             else:
                 teams[1].score -= row[2]
         return teams
+
+    def __fetch_url(self, url):
+        if url not in MatchInfo.url_cache:
+            MatchInfo.url_cache[url] = urllib.urlopen(url).read()
+        return MatchInfo.url_cache[url]
 
     def __get_config_teams(self, teams):
         for i in range(0, 2):
