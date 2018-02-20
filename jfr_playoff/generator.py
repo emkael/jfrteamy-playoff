@@ -129,7 +129,7 @@ class PlayoffGenerator(object):
             event_label = p_temp.SWISS_DEFAULT_LABEL % (event['position'])
             if 'label' in event and event['label'] is not None:
                 event_label = event['label']
-            info.append(p_temp.SWISS_LINK % (
+            info.append((p_temp.SWISS_LINK if event['finished'] else p_temp.SWISS_RUNNING_LINK) % (
                 event['link'], event_label
             ))
         return '\n'.join(info)

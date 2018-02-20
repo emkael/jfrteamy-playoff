@@ -134,4 +134,8 @@ SWISS_LINK = '''
 [<a href="%s" class="zb" target="_top">&nbsp;%s&nbsp;</a>]<br /><br />
 '''
 
+SWISS_RUNNING_LINK = '''
+[<a href="%s" class="zb" target="_top">&nbsp;<img src="images/A.gif" />&nbsp;%s&nbsp;<img src="images/A.gif" />&nbsp;</a>]<br /><br />
+'''
+
 SWISS_DEFAULT_LABEL = 'Turniej o&nbsp;%d.&nbsp;miejsce'

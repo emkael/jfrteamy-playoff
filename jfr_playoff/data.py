@@ -138,7 +138,8 @@ class PlayoffData(object):
         return [{
             'link': self.get_swiss_link(event),
             'position': event['position'],
-            'label': event['label'] if 'label' in event else None
+            'label': event['label'] if 'label' in event else None,
+            'finished': TournamentInfo(event, self.database).is_finished()
         } for event in self.swiss]
 
     def get_dimensions(self):
