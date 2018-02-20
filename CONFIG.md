@@ -32,6 +32,7 @@ Konfiguracja składa się, po kolei, z:
  - sekcji `"database"`, zawierającej ustawienia połączenia bazy danych
  - sekcji `"goniec"`, zawierającej ustawienia Gońca (`"enabled"` przyjmuje wartości `0`/`1`)
 
+Ustawienia bazy danych nie są wymagane, program potrafi sobie poradzić bez nich, jeśli do poszczególnych faz/meczów podano dostępne przez HTTP linki.
 
 Zdalne pliki konfiguracyjne
 ---------------------------
@@ -96,11 +97,14 @@ Definicję struktury drabinki określają pola:
 
 Dane meczu mogą pochodzić z następujących źródeł:
  - bazy danych turnieju: wówczas należy zdefiniować pola `"database"`, `"round"` i `"table"`
+ - strony HTML meczu (tj. strony `PREFIXrundaN.html`): wówczas należy zdefiniować pola `"link"` (dla całej fazy lub dla pojedynczego meczu) oraz `"table"`
  - ręcznie wpisanego wyniku, wówczas:
    + pole `"score"` określa wynik meczu: może być tablicą dwóch liczb (wynik gospodarzy, wynik gości), może również być słownikiem indeksowanym pełną nazwą teamu lub łańcuchem tekstowym określającym miejsce w tablicy z sekcji `"teams"`
    + opcjonalne pole `"running"` określa, że nie jest zakończony i podaje liczbę rozegranych rozdań (0 dla meczu w przyszłości, >0 dla meczu w trakcie)
 
 Jeżeli wynik zdefiniowany jest w pliku konfiguracyjnym, nie jest pobierany z żadnego innego źródła. Jeśli plik definiuje do tego uczestniczące w meczu teamy, one również nie są pobierane z innych źródeł (ale gdy zdefiniowany jest tylko wynik, teamy wyznaczane są z bazy danych lub danych struktury drabinki).
+
+Wynik ze strony HTML wyników turnieju pobierany jest, jeśli nie uda się pobrać wyniku z bazy danych. Jeśli nie da sięgo pobrać ze stron WWW, program wraca do wypełniania uczestników meczu na podstawie ustawień drabinki.
 
 Na przykładach, pierwszy i ostatni mecz z poniższego pliku:
 
