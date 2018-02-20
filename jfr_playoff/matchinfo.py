@@ -1,18 +1,16 @@
 import re
-import urllib
 from urlparse import urljoin
 
 import mysql
-from bs4 import BeautifulSoup as bs
 
 import jfr_playoff.sql as p_sql
 from jfr_playoff.dto import Match, Team
+from jfr_playoff.remote import RemoteUrl as p_remote
 from jfr_playoff.tournamentinfo import TournamentInfo
 
 class MatchInfo:
 
     matches = {}
-    url_cache = {}
 
     def __init__(self, match_config, teams, database):
         self.config = match_config
@@ -83,13 +81,8 @@ class MatchInfo:
                 teams[1].score -= row[2]
         return teams
 
-    def __fetch_url(self, url):
-        if url not in MatchInfo.url_cache:
-            MatchInfo.url_cache[url] = urllib.urlopen(url).read()
-        return MatchInfo.url_cache[url]
-
     def __find_table_row(self, url):
-        html_content = bs(self.__fetch_url(url), 'lxml')
+        html_content = p_remote.fetch(url)
         for row in html_content.select('tr tr'):
             for cell in row.select('td.t1'):
                 if cell.text.strip() == str(self.config['table']):
@@ -200,7 +193,7 @@ class MatchInfo:
                 r'\.htm$', '.html',
                 urljoin(self.info.link, segment_link[0]['href']))
             try:
-                segment_content = bs(self.__fetch_url(segment_url), 'lxml')
+                segment_content = p_remote.fetch(segment_url)
                 board_rows = [row for row in segment_content.find_all('tr') if len(row.select('a.zb')) > 0]
                 board_count = len(board_rows)
                 played_boards = len([
