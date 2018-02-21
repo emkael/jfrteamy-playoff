@@ -1,6 +1,7 @@
 import mysql
 
 import jfr_playoff.sql as p_sql
+from jfr_playoff.remote import RemoteUrl as p_remote
 
 SWISS_TIE_WARNING = 'WARNING: tie detected in swiss %s.' + \
                     ' Make sure to resolve the tie by arranging teams' + \
@@ -13,9 +14,14 @@ class TournamentInfo:
         self.settings = settings
         self.database = database
 
-    def get_tournament_results(self):
+    def __get_html_results(self):
+        return []
+
+    def __get_db_results(self):
         if self.database is None:
-            return []
+            raise KeyError('database not configured')
+        if 'database' not in self.settings:
+            raise KeyError('database not configured')
         if 'ties' not in self.settings:
             self.settings['ties'] = []
         swiss_teams = self.database.fetch_all(
@@ -38,13 +44,49 @@ class TournamentInfo:
                 db_teams[position-1].append(position)
         return db_teams
 
-    def is_finished(self):
+    def __get_html_finished(self):
+        if 'link' not in self.settings:
+            raise KeyError('link not configured')
+        if not self.settings['link'].endswith('leaderb.html'):
+            raise ValueError('unable to determine tournament status')
+        leaderboard = p_remote.fetch(self.settings['link'])
+        leaderb_heading = leaderboard.select('td.bdnl12')[0].text
+        non_zero_scores = [imps.text for imps in leaderboard.select('td.bdc small') if imps.text != '0-0']
+        return (not any(char.isdigit() for char in leaderb_heading)) and (len(non_zero_scores) > 0)
+
+    def __get_db_finished(self):
+        if self.database is None:
+            raise KeyError('database not configured')
+        if 'database' not in self.settings:
+            raise KeyError('database not configured')
         finished = self.database.fetch(
             self.settings['database'], p_sql.SWISS_ENDED, {})
         return (len(finished) > 0) and (finished[0] > 0)
 
+    def get_tournament_results(self):
+        try:
+            return self.__get_db_results()
+        except (mysql.connector.Error, TypeError, IndexError, KeyError):
+            try:
+                return self.__get_html_results()
+            except (TypeError, IndexError, KeyError, IOError, ValueError):
+                pass
+        return []
+
+    def is_finished(self):
+        try:
+            return self.__get_db_finished()
+        except (mysql.connector.Error, TypeError, IndexError, KeyError):
+            try:
+                return self.__get_html_finished()
+            except (TypeError, IndexError, KeyError, IOError, ValueError):
+                pass
+        return True
+
     def get_results_link(self, suffix='leaderb.html'):
         if self.database is None:
+            return None
+        if 'database' not in self.settings:
             return None
         try:
             row = self.database.fetch(
