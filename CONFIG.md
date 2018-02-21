@@ -56,17 +56,20 @@ Jako czwarty element każdej tablicy można wpisać liczbę naturalną, która o
 Co zrobić, gdy jest taki team, a turniej nie ma ustawionych obrazków z flagami? Ustawić flagę na `null` - nie zostanie wyświetlona.
 
 
-Ustawienia teamów - wariant pobierania z bazy danych
-----------------------------------------------------
+Ustawienia teamów - wariant pobierania z istniejącego turnieju
+--------------------------------------------------------------
 
 Sekcja `"teams"` może również być **obiektem**, określającym turniej (np. fazy zasadniczej), z którego zostanie pobrana lista teamów. Pobierane są: pełna nazwa, nazwa skrócona oraz nazwa pliku flagi.
 
 Składa się z następujących pól:
- - `"database"` - nazwa bazy danych turnieju, z której pobierana jest lista teamów
+ - `"database"` - nazwa bazy danych turnieju, z której pobierana jest lista teamów ALBO
+ - `"link"` - URL do strony wyników (`PREFIXleaderb.html`) turnieju, dostępnej zdalnie
  - opcjonalne pole `"final_positions"` - tablica numerów miejsc, dla drużyn, które zakończyły rozgrywki (odpowiednik czwartego pola tablicy w tekstowej wersji listy teamów)
- - opcjonalne pole `"ties"` - tablica pełnych nazw drużyn w kolejności, w jakiej rozstrzygane powinny być remisy w VP w turnieju źródłowym (program nie potrafi ich rozstzygać samodzielnie)
+ - przy użyciu `"database"`: opcjonalne pole `"ties"` - tablica pełnych nazw drużyn w kolejności, w jakiej rozstrzygane powinny być remisy w VP w turnieju źródłowym
 
 Miejsca w tabeli końcowej dla drużyn zdefiniowanych jako kończące rozgrywki będą zgodne z miejscami zajętymi w zdefiniowanym turnieju. Jeśli potrzeba zmapować te miejsca na inne miejsca klasyfikacji końcowej, należy użyć sekcji `"swiss"`, opisanej poniżej.
+
+Program nie potrafi ich rozstrzygać samodzielnie remisów podczas pobierania wyników z bazy danych. Dla listy teamów pobranej ze strony wyników, zachowana jest kolejność na stronie (więc remisy rozstrzygnięte przez Teamy przed wygenerowaniem wyników).
 
 
 Ustawienia drabinki
@@ -130,6 +133,7 @@ Gdyby turniej nie był gotowy i rozstawiony, i tak wiadomo, że w meczu gra CKM 
 
 W końcu, przegrany tego meczu zajmie jedno z miejsc 7-8.
 Tu uwaga: jeśli okaże się, że żaden inny mecz nie ma dokładnie tego samego warunku - miejsc 7-8 - klasyfikacja prawdopodobnie nie wypełni się, tj. nie można określić, że przegrany jednego meczu zajmie miejsca 7-8, drugiego 8-9, a trzeciego 9-10 i liczyć, że program sam rozwiąże zagadkę.
+Nie jest również obsługiwana sytuacja, w której po rozstrzygnięciu jednego z meczów wiadomo już, że wygrany/przegrany zajmie konkretne miejsce w tabeli (bo np. obie drużyny z drugiego meczu "do pary" były niż w klasyfikacji), program zawsze czeka z wypełnieniem klasyfikacji na komplet rozstrzygnięć dotyczących konkretnych miejsc.
 
 ```
 {
@@ -156,24 +160,25 @@ Zwycięzca zajmie 15. miejsce w lidze, a przegrany - 16.
 Ustawienia swissów
 ------------------
 
-W sekcji `swiss` można zdefiniować pobieranie pozycji drużyn w klasyfikacji końcowej z klasyfikacji wybranych (zakończonych) turniejów JFR Teamy.
+W sekcji `"swiss"` można zdefiniować pobieranie pozycji drużyn w klasyfikacji końcowej z klasyfikacji wybranych (zakończonych) turniejów JFR Teamy - z ich bazy danych lub strony z wynikami.
 
 Sekcja jest tablicą obiektów określonych przy pomocy następujących właściwości:
 
- - `database`: nazwa bazy danych turnieju źródłowego
- - `position`: pozycja klasyfikacji końcowej, od której wypełniane są miejsca, kolejnymi teamami z klasyfikacji turnieju źródłowego
- - `position_to`: opcjonalnie - ostatnia pozycja klasyfikacji końcowej, która ma zostać wypełniona teamami ze swissa (domyślnie - program wypełnia kolejne miejsca, dopóki ma teamy lub miejsca w tabeli)
- - `swiss_position`: opcjonalnie - pozycja klasyfikacji swissa, od której program ma rozpocząć pobieranie teamów (domyślnie: od początku tabeli)
- - `relative_path`: opcjonalnie - względna ścieżka katalogu WWW turnieju źródłowego (względem katalogu, do którego generowana jest wizualizacja play-off), na potrzeby linku do wyników turnieju
- - `label`: opcjonalnie - tekst wyświetlany jako link do swissa nad tabelą klasyfikacji końcowej (domyślnie: `Turniej o []. miejsce`)
+ - `"database"`: nazwa bazy danych turnieju źródłowego ALBO
+ - `"link"`: URL strony z wynikami (`PREFIXleaderb.html`) swissa
+ - `"position"`: pozycja klasyfikacji końcowej, od której wypełniane są miejsca, kolejnymi teamami z klasyfikacji turnieju źródłowego
+ - `"position_to"`: opcjonalnie - ostatnia pozycja klasyfikacji końcowej, która ma zostać wypełniona teamami ze swissa (domyślnie - program wypełnia kolejne miejsca, dopóki ma teamy lub miejsca w tabeli)
+ - `"swiss_position"`: opcjonalnie - pozycja klasyfikacji swissa, od której program ma rozpocząć pobieranie teamów (domyślnie: od początku tabeli)
+ - `"relative_path"`: opcjonalnie - względna ścieżka katalogu WWW turnieju źródłowego (względem katalogu, do którego generowana jest wizualizacja play-off), na potrzeby linku do wyników turnieju
+ - `"label"`: opcjonalnie - tekst wyświetlany jako link do swissa nad tabelą klasyfikacji końcowej (domyślnie: `Turniej o []. miejsce`)
 
 Każdy tak zdefiniowany turniej musi być w całości zakończony, a pełne nazwy teamów w nim uczestniczących muszą być zgodne ze zdefiniowanymi w sekcji `teams`.
 
 UWAGA: program nie rozstryga remisów w VP. Teamy o równej liczbie VP klasyfikowane są według kolejności, w jakiej są zdefiniowane w sekcji `teams`.
 
 
-Pełen plik konfiguracyjny
--------------------------
+Przykładowy plik konfiguracyjny
+-------------------------------
 
 ```
 {
