@@ -90,6 +90,8 @@ class MatchInfo:
         return None
 
     def __get_html_teams(self, teams, fetch_score):
+        if self.info.link is None:
+            raise ValueError('link not set')
         row = self.__find_table_row(self.info.link)
         if row is None:
             raise ValueError('table row not found')
@@ -205,6 +207,8 @@ class MatchInfo:
         return 0, False
 
     def __get_html_board_count(self):
+        if self.info.link is None:
+            raise ValueError('link not set')
         row = self.__find_table_row(self.info.link)
         if row is None:
             raise ValueError('table row not found')
@@ -265,6 +269,8 @@ class MatchInfo:
             prefix, round_no, self.config['table'], current_segment)
 
     def __get_html_running_link(self):
+        if self.info.link is None:
+            raise ValueError('link not set')
         row = self.__find_table_row(self.info.link)
         running_link = row.select('td.bdcg a[href]')
         if len(running_link) == 0:
@@ -272,6 +278,8 @@ class MatchInfo:
         return urljoin(self.info.link, running_link[0]['href'])
 
     def __determine_running_link(self):
+        if self.info.link is None:
+            return
         link_match = re.match(r'^(.*)runda(\d+)\.html$', self.info.link)
         if link_match:
             try:

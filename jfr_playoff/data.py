@@ -36,7 +36,7 @@ class PlayoffData(object):
                 phase_count += len(phase['dummies'])
             phase_object = Phase()
             phase_object.title = phase['title']
-            phase_object.link = phase['link']
+            phase_object.link = phase['link'] if 'link' in phase else None
             phase_object.matches = [None] * phase_count
             phase_pos = 0
             for match in phase['matches']:
@@ -53,7 +53,8 @@ class PlayoffData(object):
         for phase in self.phases:
             for match in phase['matches']:
                 match_info = MatchInfo(match, self.teams, self.database)
-                match_info.set_phase_link(phase['link'])
+                if 'link' in phase:
+                    match_info.set_phase_link(phase['link'])
                 self.match_info[match['id']] = match_info.get_info()
                 if self.match_info[match['id']].running > 0:
                     for phase_obj in self.grid:

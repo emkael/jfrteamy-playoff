@@ -10,23 +10,37 @@ MATCH_TABLE = '''
 </table>
 '''
 
+MATCH_LINK = '''
+<a href="%s" target="_top">
+%s
+</a>
+'''
+
+MATCH_SCORE = '''
+&nbsp;%.1f&nbsp;
+'''
+
+MATCH_TEAM_LINK = '''
+<a href="%s" onmouseover="Tip('%s')" onmouseout="UnTip()">%s</a>
+'''
+
+MATCH_TEAM_NON_LINK = '''
+<a onmouseover="Tip('%s')" onmouseout="UnTip()">%s</a>
+'''
+
 MATCH_TEAM_ROW = '''
 <tr class="%s">
-<td class="bd1">&nbsp;<a href="%s" onmouseover="Tip('%s')" onmouseout="UnTip()">%s</a>&nbsp;</td>
+<td class="bd1">&nbsp;%s&nbsp;</td>
 <td class="bdc">
-<a href="%s" target="_top">
-&nbsp;%.1f&nbsp;
-</a>
+%s
 </td>
 </tr>
 '''
 
 MATCH_RUNNING = '''
-<a href="%s" target="_top">
 <img src="images/A.gif" />
-%d
+<span style="font-size: 10pt">%d</span>
 <img src="images/A.gif" />
-</a>
 '''
 
 MATCH_GRID = '''
@@ -37,18 +51,26 @@ MATCH_GRID = '''
 </div>
 '''
 
-MATCH_GRID_PHASE = '''
+MATCH_GRID_PHASE_LINK = '''
 <a href="%s" target="_top" style="display: inline-block; width: %dpx; text-align: center; position: absolute; top: 0; left: %dpx">
-<font size="4">%s</font>
+%s
 </a>
 '''
 
+MATCH_GRID_PHASE_NON_LINK = '''
+<span class="phase_header" style="display: inline-block; width: %dpx; text-align: center; position: absolute; top: 0; left: %dpx">
+<p style="margin: 0">%s</p>
+</span>
+'''
+
+MATCH_GRID_PHASE = '''
+<font size="4">%s</font>
+'''
+
 MATCH_GRID_PHASE_RUNNING = '''
-<a href="%s" target="_top" style="display: inline-block; width: %dpx; text-align: center; position: absolute; top: 0; left: %dpx">
 <img src="images/A.gif" />
 <font size="4">%s</font>
 <img src="images/A.gif" />
-</a>
 '''
 
 MATCH_BOX = '''

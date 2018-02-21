@@ -33,24 +33,28 @@ class PlayoffGenerator(object):
     def get_match_table(self, match):
         rows = ''
         for team in match.teams:
+            score_html = p_temp.MATCH_SCORE % (team.score)
+            team_label = ' / '.join([
+                self.data.get_shortname(name) for name in
+                team.name.split('<br />')])
+            team_html = p_temp.MATCH_TEAM_LINK % (
+                match.link, team.name, team_label) if match.link is not None \
+                else p_temp.MATCH_TEAM_NON_LINK % (
+                        team.name, team_label)
             rows += p_temp.MATCH_TEAM_ROW % (
                 ' '.join([
                     'winner' if team.name == match.winner else '',
                     'loser' if team.name == match.loser else ''
                 ]).strip(),
-                match.link,
-                team.name,
-                ' / '.join([
-                    self.data.get_shortname(name) for name in
-                    team.name.split('<br />')]),
-                match.link,
-                team.score)
+                team_html,
+                p_temp.MATCH_LINK % (match.link, score_html) if match.link is not None else score_html)
         html = p_temp.MATCH_TABLE.decode('utf8') % (
             int(self.page['width'] * 0.75),
             int(self.page['width'] * 0.25),
             rows)
         if match.running > 0:
-            html += p_temp.MATCH_RUNNING % (match.link, match.running)
+            running_html = p_temp.MATCH_RUNNING % (match.running)
+            html += p_temp.MATCH_LINK % (match.link, running_html) if match.link is not None else running_html
         return html
 
     def get_phase_header(self, phase, position):
@@ -58,11 +62,16 @@ class PlayoffGenerator(object):
             grid_header = p_temp.MATCH_GRID_PHASE_RUNNING
         else:
             grid_header = p_temp.MATCH_GRID_PHASE
-        return grid_header % (
-            phase.link,
-            self.page['width'],
-            position,
-            phase.title)
+        grid_header = grid_header % (phase.title)
+        if phase.link is not None:
+            return p_temp.MATCH_GRID_PHASE_LINK % (
+                phase.link,
+                self.page['width'], position,
+                grid_header)
+        else:
+            return p_temp.MATCH_GRID_PHASE_NON_LINK % (
+                self.page['width'], position,
+                grid_header)
 
     def get_match_box(self, match, position):
         if match is not None:

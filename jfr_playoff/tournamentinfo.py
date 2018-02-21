@@ -123,7 +123,7 @@ class TournamentInfo:
                 teams = self.__get_html_results()
             except (TypeError, IndexError, KeyError, IOError, ValueError):
                 pass
-        if 'final_positions' in self.settings:
+        if self.is_finished() and 'final_positions' in self.settings:
             for position in self.settings['final_positions']:
                 if len(teams) >= position:
                     teams[position-1].append(position)
