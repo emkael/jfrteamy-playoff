@@ -13,6 +13,8 @@ Dla wersji skompilowanej: jakiś współczesny system rodziny MS Windows.
 Dla wersji skryptowej:
  * Python 2.x ze standardowym zestawem bibliotek
  * MySQL connector dla Pythona
+ * moduł requests
+ * moduł BeautifulSoup4
 
 Instalacja
 ----------

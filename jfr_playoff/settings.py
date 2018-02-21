@@ -1,8 +1,8 @@
 import glob
 import json
 import readline
+import requests
 import sys
-import urllib
 
 
 def complete_filename(text, state):
@@ -26,8 +26,7 @@ class PlayoffSettings(object):
                        overwrite=True):
         try:
             remote_config = new_config if new_config is not None else \
-                            json.loads(urllib.urlopen(
-                                remote_url).read().decode('utf-8-sig'))
+                            json.loads(requests.get(remote_url).text)
             for key, value in remote_config.iteritems():
                 if (key not in base_config) or overwrite:
                     base_config[key] = value

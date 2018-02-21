@@ -1,4 +1,4 @@
-import urllib
+import requests
 
 from bs4 import BeautifulSoup as bs
 
@@ -9,5 +9,5 @@ class RemoteUrl:
     @classmethod
     def fetch(cls, url):
         if url not in cls.url_cache:
-            cls.url_cache[url] = urllib.urlopen(url).read()
+            cls.url_cache[url] = requests.get(url).text
         return bs(cls.url_cache[url], 'lxml')
