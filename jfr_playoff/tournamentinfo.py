@@ -63,6 +63,25 @@ class TournamentInfo:
             self.settings['database'], p_sql.SWISS_ENDED, {})
         return (len(finished) > 0) and (finished[0] > 0)
 
+    def __get_html_link(self, suffix='leaderb.html'):
+        if 'link' not in self.settings:
+            raise KeyError('link not configured')
+        if not self.settings['link'].endswith('leaderb.html'):
+            raise ValueError('unable to determine html link')
+        return re.sub(r'leaderb.html$', suffix, self.settings['link'])
+
+    def __get_db_link(self, suffix='leaderb.html'):
+        if self.database is None:
+            raise KeyError('database not configured')
+        if 'database' not in self.settings:
+            raise KeyError('database not configured')
+        row = self.database.fetch(
+            self.settings['database'], p_sql.PREFIX, ())
+        if row is not None:
+            if len(row) > 0:
+                return row[0] + suffix
+        raise ValueError('unable to fetch db link')
+
     def get_tournament_results(self):
         try:
             return self.__get_db_results()
@@ -84,16 +103,11 @@ class TournamentInfo:
         return True
 
     def get_results_link(self, suffix='leaderb.html'):
-        if self.database is None:
-            return None
-        if 'database' not in self.settings:
-            return None
         try:
-            row = self.database.fetch(
-                self.settings['database'], p_sql.PREFIX, ())
-            if row is not None:
-                if len(row) > 0:
-                    return row[0] + suffix
-        except mysql.connector.Error:
-            return None
+            return self.__get_db_link(suffix)
+        except (mysql.connector.Error, TypeError, IndexError, KeyError):
+            try:
+                return self.__get_html_link(suffix)
+            except (KeyError, ValueError):
+                pass
         return None
