@@ -1,3 +1,6 @@
+from math import ceil
+import re
+
 import mysql
 
 import jfr_playoff.sql as p_sql
@@ -15,7 +18,39 @@ class TournamentInfo:
         self.database = database
 
     def __get_html_results(self):
-        return []
+        if 'link' not in self.settings:
+            raise KeyError('link not configured')
+        if not self.settings['link'].endswith('leaderb.html'):
+            raise ValueError('unable to determine tournament results')
+        leaderboard = p_remote.fetch(self.settings['link'])
+        result_links = [row.select('a[onmouseover]') for row in leaderboard.find_all('tr') if len(row.select('a[onmouseover]')) > 0]
+        results = [None] * (len(result_links) * max([len(links) for links in result_links]))
+        for i in range(0, len(result_links)):
+            for j in range(0, len(result_links[i])):
+                results[len(result_links) * j + i] = result_links[i][j]
+        teams = []
+        team_links = {}
+        for team in results:
+            if team is not None:
+                team_info = []
+                fullname = team.text.strip(u'\xa0')
+                team_links[team['href']] = fullname
+                team_info.append(fullname)
+                team_info.append('')
+                team_image = team.find('img')
+                if team_image is not None:
+                    team_info.append(team_image['src'].replace('images/', ''))
+                teams.append(team_info)
+        for table in range(1, int(ceil(len(teams)/2.0))+1):
+            table_url = self.get_results_link('1t%d-1.html' % (table))
+            table_content = p_remote.fetch(table_url)
+            for link in table_content.select('a.br'):
+                if link['href'] in team_links:
+                    for team in teams:
+                        if team[0] == team_links[link['href']]:
+                            team[1] = link.text.strip(u'\xa0')
+                            break
+        return teams
 
     def __get_db_results(self):
         if self.database is None:
@@ -39,9 +74,6 @@ class TournamentInfo:
                 print SWISS_TIE_WARNING % (self.settings['database'])
             prev_result = team[1]
         db_teams = [[team[0], team[3], team[4]] for team in swiss_results]
-        if 'final_positions' in self.settings:
-            for position in self.settings['final_positions']:
-                db_teams[position-1].append(position)
         return db_teams
 
     def __get_html_finished(self):
@@ -83,14 +115,19 @@ class TournamentInfo:
         raise ValueError('unable to fetch db link')
 
     def get_tournament_results(self):
+        teams = []
         try:
-            return self.__get_db_results()
+            teams = self.__get_db_results()
         except (mysql.connector.Error, TypeError, IndexError, KeyError):
             try:
-                return self.__get_html_results()
+                teams = self.__get_html_results()
             except (TypeError, IndexError, KeyError, IOError, ValueError):
                 pass
-        return []
+        if 'final_positions' in self.settings:
+            for position in self.settings['final_positions']:
+                if len(teams) >= position:
+                    teams[position-1].append(position)
+        return teams
 
     def is_finished(self):
         try:
