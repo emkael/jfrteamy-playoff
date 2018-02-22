@@ -200,7 +200,7 @@ class MatchInfo:
                 board_count = len(board_rows)
                 played_boards = len([
                     row for row in board_rows if len(
-                        ''.join([cell.text.strip() for cell in row.select('td.bdn') + row.select('td.bde')])) > 0])
+                        ''.join([cell.text.strip() for cell in row.select('td.bdc')])) > 0])
                 return board_count, played_boards >= board_count
             except IOError:
                 return 0, False
