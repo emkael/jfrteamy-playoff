@@ -137,7 +137,7 @@ PAGE_BODY = '''
 '''
 
 PAGE_BODY_FOOTER = '''
-<p class="f">&nbsp;Admin&nbsp;&copy;Jan Romański&#39;2005, PlayOff&nbsp;&copyMichał Klichowicz&#39;2017, strona wygenerowana %s</p>
+<p class="f">&nbsp;Admin&nbsp;&copy;Jan Romański&#39;2005, PlayOff&nbsp;&copyMichał Klichowicz&#39;2017-2018, strona wygenerowana %s</p>
 '''
 
 PAGE = '''
