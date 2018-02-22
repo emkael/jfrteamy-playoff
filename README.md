@@ -11,10 +11,9 @@ Wymagania systemowe
 Dla wersji skompilowanej: jakiś współczesny system rodziny MS Windows.
 
 Dla wersji skryptowej:
- * Python 2.x ze standardowym zestawem bibliotek
+ * Python 2.7.x, co najmniej 2.7.9, ze standardowym zestawem bibliotek
  * MySQL connector dla Pythona
- * moduł requests
- * moduł BeautifulSoup4
+ * `pip install -r requirements.txt`
 
 Instalacja
 ----------
