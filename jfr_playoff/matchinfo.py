@@ -180,9 +180,6 @@ class MatchInfo:
     def __has_towel_image(self, cell):
         return len(cell.select('img[alt="towel"]')) > 0
 
-    def __has_running_board_count(self, cell):
-        return len(cell.select('img[alt="running..."]')) > 0
-
     def __get_html_running_boards(self, cell):
         return int(cell.contents[-1].strip())
 
@@ -218,7 +215,7 @@ class MatchInfo:
                 return 1, 1 # entire match is toweled, so mark as finished
             else:
                 raise ValueError('segments not found')
-        running_segments = [cell for cell in row.select('td.bdca') if self.__has_running_board_count(cell)]
+        running_segments = row.select('td.bdca')
         running_boards = sum([self.__get_html_running_boards(segment) for segment in running_segments])
         finished_segments = []
         boards_in_segment = None
