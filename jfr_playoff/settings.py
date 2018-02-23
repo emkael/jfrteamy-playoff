@@ -11,12 +11,12 @@ def complete_filename(text, state):
 
 class PlayoffSettings(object):
 
-    def __init__(self):
+    def __init__(self, config_file):
         self.settings = None
         self.interactive = False
         self.settings_file = None
-        if len(sys.argv) > 1:
-            self.settings_file = sys.argv[1].decode(
+        if config_file is not None:
+            self.settings_file = config_file.decode(
                 sys.getfilesystemencoding())
         else:
             self.interactive = True
