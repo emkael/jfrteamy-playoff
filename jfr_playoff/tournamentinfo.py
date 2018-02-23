@@ -1,8 +1,6 @@
 from math import ceil
 import re
 
-import mysql
-
 import jfr_playoff.sql as p_sql
 from jfr_playoff.remote import RemoteUrl as p_remote
 
@@ -118,7 +116,7 @@ class TournamentInfo:
         teams = []
         try:
             teams = self.__get_db_results()
-        except (mysql.connector.Error, TypeError, IndexError, KeyError):
+        except (IOError, TypeError, IndexError, KeyError):
             try:
                 teams = self.__get_html_results()
             except (TypeError, IndexError, KeyError, IOError, ValueError):
@@ -132,7 +130,7 @@ class TournamentInfo:
     def is_finished(self):
         try:
             return self.__get_db_finished()
-        except (mysql.connector.Error, TypeError, IndexError, KeyError):
+        except (IOError, TypeError, IndexError, KeyError):
             try:
                 return self.__get_html_finished()
             except (TypeError, IndexError, KeyError, IOError, ValueError):
@@ -142,7 +140,7 @@ class TournamentInfo:
     def get_results_link(self, suffix='leaderb.html'):
         try:
             return self.__get_db_link(suffix)
-        except (mysql.connector.Error, TypeError, IndexError, KeyError):
+        except (IOError, TypeError, IndexError, KeyError):
             try:
                 return self.__get_html_link(suffix)
             except (KeyError, ValueError):

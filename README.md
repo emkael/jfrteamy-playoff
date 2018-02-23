@@ -12,7 +12,7 @@ Dla wersji skompilowanej: jakiś współczesny system rodziny MS Windows.
 
 Dla wersji skryptowej:
  * Python 2.7.x, co najmniej 2.7.9, ze standardowym zestawem bibliotek
- * MySQL connector dla Pythona
+ * MySQL connector dla Pythona (opcjonalnie, w przypadku użycia bazy danych jako źródła wyników)
  * `pip install -r requirements.txt`
 
 Instalacja

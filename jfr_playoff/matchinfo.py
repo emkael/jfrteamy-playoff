@@ -1,8 +1,6 @@
 import re
 from urlparse import urljoin
 
-import mysql
-
 import jfr_playoff.sql as p_sql
 from jfr_playoff.dto import Match, Team
 from jfr_playoff.remote import RemoteUrl as p_remote
@@ -153,7 +151,7 @@ class MatchInfo:
                         raise KeyError('database not configured')
                     self.info.teams = self.__get_db_teams(
                         self.info.teams, not scores_fetched)
-                except (mysql.connector.Error, TypeError, IndexError, KeyError):
+                except (IOError, TypeError, IndexError, KeyError):
                     self.info.teams = self.__get_html_teams(
                         self.info.teams, not scores_fetched)
             except (TypeError, IndexError, KeyError, IOError, ValueError):
@@ -242,7 +240,7 @@ class MatchInfo:
             if self.database is None:
                 raise KeyError('database not configured')
             boards_played, boards_to_play = self.__get_db_board_count()
-        except (mysql.connector.Error, TypeError, IndexError, KeyError):
+        except (IOError, TypeError, IndexError, KeyError):
             try:
                 boards_played, boards_to_play = self.__get_html_board_count()
             except (TypeError, IndexError, KeyError, IOError, ValueError):
@@ -287,7 +285,7 @@ class MatchInfo:
                     raise KeyError('database not configured')
                 self.info.link = self.__get_db_running_link(
                     link_match.group(1), link_match.group(2))
-            except (mysql.connector.Error, TypeError, IndexError, KeyError):
+            except (IOError, TypeError, IndexError, KeyError):
                 try:
                     self.info.link = self.__get_html_running_link()
                 except (TypeError, IndexError, KeyError, IOError, ValueError):
