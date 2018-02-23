@@ -1,8 +1,5 @@
 import sys
 
-import mysql.connector
-
-
 class PlayoffDB(object):
 
     db_cursor = None
@@ -11,6 +8,7 @@ class PlayoffDB(object):
     def __init__(self, settings):
         reload(sys)
         sys.setdefaultencoding("latin1")
+        import mysql.connector
         self.database = mysql.connector.connect(
             user=settings['user'],
             password=settings['pass'],
@@ -25,11 +23,23 @@ class PlayoffDB(object):
         self.db_cursor.execute(sql.replace('#db#', db_name), params)
 
     def fetch(self, db_name, sql, params):
-        self.__execute_query(db_name, sql, params)
-        row = self.db_cursor.fetchone()
-        return row
+        import mysql.connector
+        try:
+            self.__execute_query(db_name, sql, params)
+            row = self.db_cursor.fetchone()
+            return row
+        except mysql.connector.Error as e:
+            raise IOError(
+                message=str(e), filename=db_name,
+                errno=e.errno, strerror=str(e))
 
     def fetch_all(self, db_name, sql, params):
-        self.__execute_query(db_name, sql, params)
-        results = self.db_cursor.fetchall()
-        return results
+        import mysql.connector
+        try:
+            self.__execute_query(db_name, sql, params)
+            results = self.db_cursor.fetchall()
+            return results
+        except mysql.connector.Error as e:
+            raise IOError(
+                message=str(e), filename=db_name,
+                errno=e.errno, strerror=str(e))

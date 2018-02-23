@@ -1,4 +1,3 @@
-import mysql
 from cached_property import cached_property
 
 from jfr_playoff.db import PlayoffDB
