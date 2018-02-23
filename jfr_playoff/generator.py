@@ -2,15 +2,20 @@ from datetime import datetime
 
 import jfr_playoff.template as p_temp
 from jfr_playoff.data import PlayoffData
+from jfr_playoff.logger import PlayoffLogger
 
 
 class PlayoffGenerator(object):
     def __init__(self, settings):
         self.data = PlayoffData(settings)
         self.page = settings.get('page')
+        PlayoffLogger.get('generator').info(
+            'page settings: %s', self.page)
         self.canvas = {}
         if settings.has_section('canvas'):
             self.canvas = settings.get('canvas')
+        PlayoffLogger.get('generator').info(
+            'canvas settings: %s', self.canvas)
 
     def generate_content(self):
         return p_temp.PAGE % (
@@ -55,6 +60,8 @@ class PlayoffGenerator(object):
         if match.running > 0:
             running_html = p_temp.MATCH_RUNNING % (match.running)
             html += p_temp.MATCH_LINK % (match.link, running_html) if match.link is not None else running_html
+        PlayoffLogger.get('generator').info(
+            'match table for #%d generated: %d bytes', match.id, len(html))
         return html
 
     def get_phase_header(self, phase, position):
@@ -95,6 +102,8 @@ class PlayoffGenerator(object):
             dimensions[1] * (
                 self.page['height'] + self.page['margin']
             ) - self.page['margin'])
+        PlayoffLogger.get('generator').info(
+            'canvas size: %s', canvas_size)
         grid_boxes = ''
         col_no = 0
         for phase in grid:
@@ -105,6 +114,9 @@ class PlayoffGenerator(object):
             for match in phase.matches:
                 grid_y = int(row_no * match_height +
                              0.5 * (match_height - self.page['height']))
+                PlayoffLogger.get('generator').info(
+                    'grid box (%d, %d) position: (%d, %d)',
+                    col_no, row_no, grid_x, grid_y)
                 grid_boxes += self.get_match_box(
                     matches[match] if match is not None else None,
                     (grid_x, grid_y))
@@ -130,6 +142,8 @@ class PlayoffGenerator(object):
                 position, self.get_flag(team), team or '')
             position += 1
         html = p_temp.LEADERBOARD.decode('utf8') % (rows)
+        PlayoffLogger.get('generator').info(
+            'leaderboard HTML generated: %d bytes', len(html))
         return html
 
     def get_swiss_links(self):
@@ -141,7 +155,10 @@ class PlayoffGenerator(object):
             info.append((p_temp.SWISS_LINK if event['finished'] else p_temp.SWISS_RUNNING_LINK) % (
                 event['link'], event_label
             ))
-        return '\n'.join(info)
+        html = '\n'.join(info)
+        PlayoffLogger.get('generator').info(
+            'swiss HTML generated: %d bytes', len(html))
+        return html
 
     def get_flag(self, team):
         flag = self.data.get_team_image(team)

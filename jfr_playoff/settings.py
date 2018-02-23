@@ -4,6 +4,8 @@ import readline
 import requests
 import sys
 
+from jfr_playoff.logger import PlayoffLogger
+
 
 def complete_filename(text, state):
     return (glob.glob(text+'*')+[None])[state]
@@ -31,9 +33,9 @@ class PlayoffSettings(object):
                 if (key not in base_config) or overwrite:
                     base_config[key] = value
         except Exception as e:
-            print 'WARNING: unable to merge remote config: %s' % (str(e))
-            if remote_url is not None:
-                print 'Offending URL: %s' % (remote_url)
+            PlayoffLogger.get('settings').warning(
+                'unable to merge remote config %s: %s(%s)',
+                remote_url, type(e).__name__, e.message)
         return base_config
 
     def load(self):
@@ -45,16 +47,24 @@ class PlayoffSettings(object):
                 'JSON settings file: ').decode(sys.stdin.encoding)
 
         if self.settings is None:
+            PlayoffLogger.get('settings').info(
+                'loading config file: %s', unicode(self.settings_file))
             self.settings = json.loads(
                 open(unicode(self.settings_file)).read().decode('utf-8-sig'))
             if self.has_section('remotes'):
                 remote_config = {}
                 for remote in self.get('remotes'):
+                    PlayoffLogger.get('settings').info(
+                        'merging remote config: %s', remote)
                     remote_config = self.__merge_config(
                         remote_config, remote_url=remote)
+                    PlayoffLogger.get('settings').debug(
+                        'remote config: %s', remote_config)
                 self.settings = self.__merge_config(
                     self.settings, new_config=remote_config,
                     overwrite=False)
+            PlayoffLogger.get('settings').debug(
+                'parsed config: %s', self.settings)
 
     def has_section(self, key):
         self.load()
