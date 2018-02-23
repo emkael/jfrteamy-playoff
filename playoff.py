@@ -15,6 +15,8 @@ def main():
             description='Generate play-off HTML for JFR Teamy tournaments')
         output_args = arg_parser.add_mutually_exclusive_group()
         output_args.add_argument('-v', '--verbose', action='store_true',
+                                 help='display info on STDERR')
+        output_args.add_argument('-vv', '--debug', action='store_true',
                                  help='display debug info on STDERR')
         output_args.add_argument('-q', '--quiet', action='store_true',
                                  help='suppress warnings on STDERR')
