@@ -3,6 +3,7 @@ import traceback
 from jfr_playoff.filemanager import PlayoffFileManager
 from jfr_playoff.generator import PlayoffGenerator
 from jfr_playoff.settings import PlayoffSettings
+from jfr_playoff.logger import PlayoffLogger
 
 
 def main():
@@ -24,6 +25,12 @@ def main():
                                 help='path to config JSON file',
                                 type=str, nargs='?', default=None)
         arguments = arg_parser.parse_args()
+
+        PlayoffLogger.setup('ERROR' if arguments.quiet else (
+            'INFO' if arguments.verbose else (
+                'DEBUG' if arguments.debug else 'WARNING')))
+
+        PlayoffLogger.get().debug('started with arguments: %s', arguments)
 
         settings = PlayoffSettings(arguments.config_file)
         interactive = settings.interactive
