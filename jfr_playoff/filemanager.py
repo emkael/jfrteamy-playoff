@@ -26,8 +26,9 @@ class PlayoffFileManager(object):
 
     def write_content(self, content):
         output_dir = os.path.dirname(self.output_file)
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
+        if len(output_dir) > 0:
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
         output = open(self.output_file, 'w')
         output.write(content.encode('utf8'))
         output.close()
@@ -37,8 +38,9 @@ class PlayoffFileManager(object):
     def copy_scripts(self, script_path='sklady/playoff.js'):
         script_output_path = os.path.join(self.output_path, script_path)
         script_output_dir = os.path.dirname(script_output_path)
-        if not os.path.exists(script_output_dir):
-            os.makedirs(script_output_dir)
+        if len(script_output_dir) > 0:
+            if not os.path.exists(script_output_dir):
+                os.makedirs(script_output_dir)
         shutil.copy(
             unicode(os.path.join(
                 os.path.dirname(__main__.__file__), 'playoff.js')),
