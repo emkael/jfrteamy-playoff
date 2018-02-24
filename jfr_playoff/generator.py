@@ -33,7 +33,7 @@ class PlayoffGenerator(object):
                 self.get_swiss_links(),
                 self.get_leaderboard_table(),
                 p_temp.PAGE_BODY_FOOTER.decode('utf8') % (
-                    datetime.now().strftime('%Y-%m-%d o %H:%M'))))
+                    datetime.now().strftime('%Y-%m-%d o %H:%M:%S'))))
 
     def get_match_table(self, match):
         rows = ''
