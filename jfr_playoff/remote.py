@@ -1,3 +1,5 @@
+import re
+
 import requests
 
 from bs4 import BeautifulSoup as bs
@@ -12,7 +14,13 @@ class RemoteUrl:
         PlayoffLogger.get('remote').info(
             'fetching content for: %s', url)
         if url not in cls.url_cache:
-            cls.url_cache[url] = requests.get(url).text
+            request = requests.get(url)
+            encoding_match = re.search(
+                'content=".*;( )?charset=(.*)"',
+                request.content, re.IGNORECASE)
+            if encoding_match:
+                request.encoding = encoding_match.group(2)
+            cls.url_cache[url] = request.text
             PlayoffLogger.get('remote').info(
                 'content for %s not in cache: retrieved %d bytes',
                 url, len(cls.url_cache[url]))
