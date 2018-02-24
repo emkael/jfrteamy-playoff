@@ -18,7 +18,4 @@ class RemoteUrl:
             if encoding_match:
                 request.encoding = encoding_match.group(2)
             cls.url_cache[url] = request.text
-            PlayoffLogger.get('remote').info(
-                'content for %s not in cache: retrieved %d bytes',
-                url, len(cls.url_cache[url]))
         return bs(cls.url_cache[url], 'lxml')
