@@ -162,13 +162,13 @@ class TournamentInfo:
         except (IOError, TypeError, IndexError, KeyError) as e:
             PlayoffLogger.get('tournamentinfo').warning(
                 'cannot determine tournament results from DB: %s(%s)',
-                type(e).__name__, e.message)
+                type(e).__name__, str(e))
             try:
                 teams = self.__get_html_results()
             except (TypeError, IndexError, KeyError, IOError, ValueError) as e:
                 PlayoffLogger.get('tournamentinfo').warning(
                     'cannot determine tournament results from HTML: %s(%s)',
-                    type(e).__name__, e.message)
+                    type(e).__name__, str(e))
         if self.is_finished() and 'final_positions' in self.settings:
             PlayoffLogger.get('tournamentinfo').info(
                 'setting final positions from tournament results: %s',
@@ -184,13 +184,13 @@ class TournamentInfo:
         except (IOError, TypeError, IndexError, KeyError) as e:
             PlayoffLogger.get('tournamentinfo').warning(
                 'cannot determine tournament finished status from DB: %s(%s)',
-                type(e).__name__, e.message)
+                type(e).__name__, str(e))
             try:
                 return self.__get_html_finished()
             except (TypeError, IndexError, KeyError, IOError, ValueError) as e:
                 PlayoffLogger.get('tournamentinfo').warning(
                     'cannot determine tournament finished status from HTML: %s(%s)',
-                    type(e).__name__, e.message)
+                    type(e).__name__, str(e))
         PlayoffLogger.get('tournamentinfo').info(
             'assuming tournament is finished')
         return True
@@ -201,11 +201,11 @@ class TournamentInfo:
         except (IOError, TypeError, IndexError, KeyError) as e:
             PlayoffLogger.get('tournamentinfo').warning(
                 'cannot determine tournament link from DB: %s(%s)',
-                type(e).__name__, e.message)
+                type(e).__name__, str(e))
             try:
                 return self.__get_html_link(suffix)
             except (KeyError, ValueError):
                 PlayoffLogger.get('tournamentinfo').warning(
                     'cannot determine tournament link from HTML: %s(%s)',
-                    type(e).__name__, e.message)
+                    type(e).__name__, str(e))
         return None

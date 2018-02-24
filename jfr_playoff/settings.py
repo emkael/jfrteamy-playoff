@@ -35,7 +35,7 @@ class PlayoffSettings(object):
         except Exception as e:
             PlayoffLogger.get('settings').warning(
                 'unable to merge remote config %s: %s(%s)',
-                remote_url, type(e).__name__, e.message)
+                remote_url, type(e).__name__, str(e))
         return base_config
 
     def load(self):

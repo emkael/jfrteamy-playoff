@@ -179,13 +179,13 @@ class MatchInfo:
                 except (IOError, TypeError, IndexError, KeyError) as e:
                     PlayoffLogger.get('matchinfo').warning(
                         'fetching DB scores for match #%d failed: %s(%s)',
-                        self.info.id, type(e).__name__, e.message)
+                        self.info.id, type(e).__name__, str(e))
                     self.info.teams = self.__get_html_teams(
                         self.info.teams, not scores_fetched)
             except (TypeError, IndexError, KeyError, IOError, ValueError) as e:
                 PlayoffLogger.get('matchinfo').warning(
                     'fetching HTML scores for match #%d failed: %s(%s)',
-                    self.info.id, type(e).__name__, e.message)
+                    self.info.id, type(e).__name__, str(e))
                 self.info.teams = self.__get_config_teams(self.info.teams)
 
     def __get_db_board_count(self):
@@ -237,7 +237,7 @@ class MatchInfo:
             except IOError as e:
                 PlayoffLogger.get('matchinfo').info(
                     'cannot fetch HTML played boards count for segment: %s(%s)',
-                    self.info.id, type(e).__name__, e.message)
+                    self.info.id, type(e).__name__, str(e))
                 return 0, False
         return 0, False
 
@@ -288,13 +288,13 @@ class MatchInfo:
         except (IOError, TypeError, IndexError, KeyError) as e:
             PlayoffLogger.get('matchinfo').warning(
                 'fetching board count from DB for match #%d failed: %s(%s)',
-                self.info.id, type(e).__name__, e.message)
+                self.info.id, type(e).__name__, str(e))
             try:
                 boards_played, boards_to_play = self.__get_html_board_count()
             except (TypeError, IndexError, KeyError, IOError, ValueError) as e:
                 PlayoffLogger.get('matchinfo').warning(
                     'fetching board count from HTML for match #%d failed: %s(%s)',
-                    self.info.id, type(e).__name__, e.message)
+                    self.info.id, type(e).__name__, str(e))
                 pass
         if boards_played > 0:
             self.info.running = -1 \
@@ -345,13 +345,13 @@ class MatchInfo:
             except (IOError, TypeError, IndexError, KeyError) as e:
                 PlayoffLogger.get('matchinfo').warning(
                     'cannot determine running link from DB for match #%d: %s(%s)',
-                    self.info.id, type(e).__name__, e.message)
+                    self.info.id, type(e).__name__, str(e))
                 try:
                     self.info.link = self.__get_html_running_link()
                 except (TypeError, IndexError, KeyError, IOError, ValueError) as e:
                     PlayoffLogger.get('matchinfo').warning(
                         'cannot determine running link from HTML for match #%d: %s(%s)',
-                        self.info.id, type(e).__name__, e.message)
+                        self.info.id, type(e).__name__, str(e))
 
     def set_phase_link(self, phase_link):
         if self.info.link is None:
