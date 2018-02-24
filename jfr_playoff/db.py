@@ -29,9 +29,7 @@ class PlayoffDB(object):
             row = self.db_cursor.fetchone()
             return row
         except mysql.connector.Error as e:
-            raise IOError(
-                message=str(e), filename=db_name,
-                errno=e.errno, strerror=str(e))
+            raise IOError(e.errno, str(e), db_name)
 
     def fetch_all(self, db_name, sql, params):
         import mysql.connector
