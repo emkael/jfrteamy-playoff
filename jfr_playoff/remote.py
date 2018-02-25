@@ -3,6 +3,7 @@ import re
 import requests
 
 from bs4 import BeautifulSoup as bs
+from jfr_playoff.logger import PlayoffLogger
 
 class RemoteUrl:
 
@@ -10,6 +11,8 @@ class RemoteUrl:
 
     @classmethod
     def fetch(cls, url):
+        PlayoffLogger.get('remote').info(
+            'fetching content for: %s', url)
         if url not in cls.url_cache:
             request = requests.get(url)
             encoding_match = re.search(

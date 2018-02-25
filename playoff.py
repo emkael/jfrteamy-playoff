@@ -30,7 +30,7 @@ def main():
             'INFO' if arguments.verbose else (
                 'DEBUG' if arguments.debug else 'WARNING')))
 
-        PlayoffLogger.get().debug('started with arguments: %s', arguments)
+        PlayoffLogger.get().info('started with arguments: %s', arguments)
 
         settings = PlayoffSettings(arguments.config_file)
         interactive = settings.interactive
