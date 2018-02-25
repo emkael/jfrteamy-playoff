@@ -191,7 +191,7 @@ class MatchInfo:
                 urljoin(self.info.link, segment_link[0]['href']))
             try:
                 segment_content = p_remote.fetch(segment_url)
-                board_rows = [row for row in segment_content.find_all('tr') if len(row.select('a.zb')) > 0]
+                board_rows = [row for row in segment_content.find_all('tr') if len(row.select('td.bdcc a.zb')) > 0]
                 board_count = len(board_rows)
                 played_boards = len([
                     row for row in board_rows if len(
