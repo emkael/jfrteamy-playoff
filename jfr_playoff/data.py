@@ -79,8 +79,6 @@ class PlayoffData(object):
 
     def fill_swiss_leaderboard(self, swiss, teams):
         teams = [team[0] for team in teams]
-        if self.database is None:
-            return
         for event in swiss:
             event['ties'] = teams
             event_info = TournamentInfo(event, self.database)
