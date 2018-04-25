@@ -108,6 +108,22 @@ LEADERBOARD_ROW_FLAG = '''
 <img class="fl" src="images/%s" />
 '''
 
+LEADERBOARD_CAPTION_TABLE = '''
+<table class="caption_table" border="0" cellspacing="0">
+<tr><td class="e">&nbsp;</td></tr>
+<tr><td class="bdnl12" align="center"><b>&nbsp;LEGENDA&nbsp;</b></td></tr>
+%s
+</table>
+'''
+
+LEADERBOARD_CAPTION_TABLE_ROW = '''
+<tr class="%s">
+<td class="bd1">
+&nbsp;%s&nbsp;
+</td>
+</tr>
+'''
+
 PAGE_HEAD = '''
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Cache-Control" content="no-cache" />
@@ -132,6 +148,7 @@ PAGE_BODY = '''
 <p>
 %s
 </p>
+%s
 %s
 %s
 '''

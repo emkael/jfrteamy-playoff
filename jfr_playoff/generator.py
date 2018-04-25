@@ -16,6 +16,11 @@ class PlayoffGenerator(object):
             self.leaderboard_classes = settings.get('position_styles')
 
     def generate_content(self):
+        match_grid = self.get_match_grid(
+            self.data.get_dimensions(),
+            self.data.generate_phases(),
+            self.data.fill_match_info())
+        leaderboard_table = self.get_leaderboard_table()
         return p_temp.PAGE % (
             p_temp.PAGE_HEAD % (
                 p_temp.PAGE_HEAD_REFRESH % (
@@ -24,12 +29,10 @@ class PlayoffGenerator(object):
                 self.page['title']),
             p_temp.PAGE_BODY % (
                 self.page['logoh'],
-                self.get_match_grid(
-                    self.data.get_dimensions(),
-                    self.data.generate_phases(),
-                    self.data.fill_match_info()),
+                match_grid,
                 self.get_swiss_links(),
-                self.get_leaderboard_table(),
+                leaderboard_table,
+                self.get_leaderboard_caption_table() if leaderboard_table else '',
                 p_temp.PAGE_BODY_FOOTER.decode('utf8') % (
                     datetime.now().strftime('%Y-%m-%d o %H:%M:%S'))))
 
@@ -128,6 +131,14 @@ class PlayoffGenerator(object):
             if position in style['positions']:
                 classes.append(style['class'])
         return ' '.join(classes)
+
+    def get_leaderboard_caption_table(self):
+        rows = ''
+        for style in self.leaderboard_classes:
+            if 'caption' in style:
+                rows += p_temp.LEADERBOARD_CAPTION_TABLE_ROW % (
+                    style['class'], style['caption'])
+        return p_temp.LEADERBOARD_CAPTION_TABLE % (rows) if rows else ''
 
     def get_leaderboard_table(self):
         leaderboard = self.data.fill_leaderboard()
