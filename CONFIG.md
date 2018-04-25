@@ -72,6 +72,17 @@ Miejsca w tabeli końcowej dla drużyn zdefiniowanych jako kończące rozgrywki 
 Program nie potrafi ich rozstrzygać samodzielnie remisów podczas pobierania wyników z bazy danych. Dla listy teamów pobranej ze strony wyników, zachowana jest kolejność na stronie (więc remisy rozstrzygnięte przez Teamy przed wygenerowaniem wyników).
 
 
+Ustawienia stylów klasyfikacji końcowej
+---------------------------------------
+
+Sekcja `"position_styles"` pozwala wyróżnić określone pozycje tabeli klasyfikacji końcowej, nadając im dowolnie zdefiniowaną klasę CSS.
+
+Jest to tablica obiektów o następujących składowych:
+ - `"class"` - nazwa klasy CSS ustawianej na odpowiednich elementach `<tr>` tabeli klasyfikacji
+ - `"positions"` - tablica liczb naturalnych określających pozycje tabeli, do których klasa CSS jest dodawana
+ - `"caption"` - opcjonalny opis wyświetlany w legendzie pod klasyfikacją końcową
+
+
 Ustawienia drabinki
 -------------------
 
