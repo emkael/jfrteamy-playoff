@@ -11,6 +11,9 @@ class PlayoffGenerator(object):
         self.canvas = {}
         if settings.has_section('canvas'):
             self.canvas = settings.get('canvas')
+        self.leaderboard_classes = {}
+        if settings.has_section('position_styles'):
+            self.leaderboard_classes = settings.get('position_styles')
 
     def generate_content(self):
         return p_temp.PAGE % (
@@ -119,6 +122,13 @@ class PlayoffGenerator(object):
             grid_boxes
         )
 
+    def get_leaderboard_row_class(self, position):
+        classes = []
+        for style in self.leaderboard_classes:
+            if position in style['positions']:
+                classes.append(style['class'])
+        return ' '.join(classes)
+
     def get_leaderboard_table(self):
         leaderboard = self.data.fill_leaderboard()
         if len([t for t in leaderboard if t is not None]) == 0:
@@ -127,6 +137,7 @@ class PlayoffGenerator(object):
         rows = ''
         for team in leaderboard:
             rows += p_temp.LEADERBOARD_ROW % (
+                self.get_leaderboard_row_class(position),
                 position, self.get_flag(team), team or '')
             position += 1
         html = p_temp.LEADERBOARD.decode('utf8') % (rows)

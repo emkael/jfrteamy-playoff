@@ -96,7 +96,7 @@ LEADERBOARD = '''
 '''
 
 LEADERBOARD_ROW = '''
-<tr>
+<tr class="%s">
 <td class="bdc1">%d</td>
 <td class="bd">
 &nbsp;%s&nbsp;&nbsp;%s&nbsp;
