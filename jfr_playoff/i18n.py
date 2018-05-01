@@ -28,4 +28,4 @@ class PlayoffI18N(object):
         for dictionary in [self.settings, PLAYOFF_I18N_DEFAULTS]:
             if string in dictionary:
                 return dictionary[string].decode('utf8')
-        return string
+        return '{{%s}}' % (string)
