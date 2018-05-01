@@ -1,180 +1,188 @@
 # -*- coding: utf-8 -*-
 
-MATCH_TABLE = '''
-<table border="0" cellspacing="0">
-<tr>
-<td class="s12" width="%d">&nbsp;</td>
-<td class="bdcc2" width="%d">&nbsp;wynik&nbsp;</td>
-</tr>
-%s
-</table>
-'''
+class TemplateStrings(object):
 
-MATCH_LINK = '''
-<a href="%s" target="_top">
-%s
-</a>
-'''
+    MATCH_TABLE = '''
+    <table border="0" cellspacing="0">
+    <tr>
+    <td class="s12" width="%d">&nbsp;</td>
+    <td class="bdcc2" width="%d">&nbsp;wynik&nbsp;</td>
+    </tr>
+    %s
+    </table>
+    '''
 
-MATCH_SCORE = '''
-&nbsp;%.1f&nbsp;
-'''
+    MATCH_LINK = '''
+    <a href="%s" target="_top">
+    %s
+    </a>
+    '''
 
-MATCH_TEAM_LINK = '''
-<a href="%s" onmouseover="Tip('%s')" onmouseout="UnTip()">%s</a>
-'''
+    MATCH_SCORE = '''
+    &nbsp;%.1f&nbsp;
+    '''
 
-MATCH_TEAM_NON_LINK = '''
-<a onmouseover="Tip('%s')" onmouseout="UnTip()">%s</a>
-'''
+    MATCH_TEAM_LINK = '''
+    <a href="%s" onmouseover="Tip('%s')" onmouseout="UnTip()">%s</a>
+    '''
 
-MATCH_TEAM_ROW = '''
-<tr class="%s">
-<td class="bd1">&nbsp;%s&nbsp;</td>
-<td class="bdc">
-%s
-</td>
-</tr>
-'''
+    MATCH_TEAM_NON_LINK = '''
+    <a onmouseover="Tip('%s')" onmouseout="UnTip()">%s</a>
+    '''
 
-MATCH_RUNNING = '''
-<img src="images/A.gif" />
-<span style="font-size: 10pt">%d</span>
-<img src="images/A.gif" />
-'''
+    MATCH_TEAM_ROW = '''
+    <tr class="%s">
+    <td class="bd1">&nbsp;%s&nbsp;</td>
+    <td class="bdc">
+    %s
+    </td>
+    </tr>
+    '''
 
-MATCH_GRID = '''
-<div style="position: relative; width: %dpx; height: %dpx; margin: 10px">
-<canvas width="%d" height="%d" id="playoff_canvas" %s></canvas>
-%s
-<script src="sklady/playoff.js" type="text/javascript"></script>
-</div>
-'''
+    MATCH_RUNNING = '''
+    <img src="images/A.gif" />
+    <span style="font-size: 10pt">%d</span>
+    <img src="images/A.gif" />
+    '''
 
-MATCH_GRID_PHASE_LINK = '''
-<a href="%s" target="_top" style="display: inline-block; width: %dpx; text-align: center; position: absolute; top: 0; left: %dpx">
-%s
-</a>
-'''
+    MATCH_GRID = '''
+    <div style="position: relative; width: %dpx; height: %dpx; margin: 10px">
+    <canvas width="%d" height="%d" id="playoff_canvas" %s></canvas>
+    %s
+    <script src="sklady/playoff.js" type="text/javascript"></script>
+    </div>
+    '''
 
-MATCH_GRID_PHASE_NON_LINK = '''
-<span class="phase_header" style="display: inline-block; width: %dpx; text-align: center; position: absolute; top: 0; left: %dpx">
-<p style="margin: 0">%s</p>
-</span>
-'''
+    MATCH_GRID_PHASE_LINK = '''
+    <a href="%s" target="_top" style="display: inline-block; width: %dpx; text-align: center; position: absolute; top: 0; left: %dpx">
+    %s
+    </a>
+    '''
 
-MATCH_GRID_PHASE = '''
-<font size="4">%s</font>
-'''
+    MATCH_GRID_PHASE_NON_LINK = '''
+    <span class="phase_header" style="display: inline-block; width: %dpx; text-align: center; position: absolute; top: 0; left: %dpx">
+    <p style="margin: 0">%s</p>
+    </span>
+    '''
 
-MATCH_GRID_PHASE_RUNNING = '''
-<img src="images/A.gif" />
-<font size="4">%s</font>
-<img src="images/A.gif" />
-'''
+    MATCH_GRID_PHASE = '''
+    <font size="4">%s</font>
+    '''
 
-MATCH_BOX = '''
-<div style="text-align: center; position: absolute; left: %dpx; top: %dpx" data-id="%d" data-winner="%s" data-loser="%s" class="playoff_matchbox">
-%s
-</div>
-'''
+    MATCH_GRID_PHASE_RUNNING = '''
+    <img src="images/A.gif" />
+    <font size="4">%s</font>
+    <img src="images/A.gif" />
+    '''
 
-LEADERBOARD = '''
-<table border="0" cellspacing="0">
-<tr>
-<td class="bdnl12" colspan="2" align="center"><b>&nbsp;KLASYFIKACJA KOŃCOWA&nbsp;</b></td>
-</tr>
-<tr>
-<td class="e" colspan="2">&nbsp;</td>
-</tr>
-<tr>
-<td class="bdcc12">&nbsp;miejsce&nbsp;</td>
-<td class="bdcc2">&nbsp;drużyna&nbsp;</td>
-</tr>
-%s
-</table>
-'''
+    MATCH_BOX = '''
+    <div style="text-align: center; position: absolute; left: %dpx; top: %dpx" data-id="%d" data-winner="%s" data-loser="%s" class="playoff_matchbox">
+    %s
+    </div>
+    '''
 
-LEADERBOARD_ROW = '''
-<tr class="%s">
-<td class="bdc1">%d</td>
-<td class="bd">
-&nbsp;%s&nbsp;&nbsp;%s&nbsp;
-</td>
-</tr>
-'''
+    LEADERBOARD = '''
+    <table border="0" cellspacing="0">
+    <tr>
+    <td class="bdnl12" colspan="2" align="center" style="text-transform: uppercase"><b>&nbsp;KLASYFIKACJA KOŃCOWA&nbsp;</b></td>
+    </tr>
+    <tr>
+    <td class="e" colspan="2">&nbsp;</td>
+    </tr>
+    <tr>
+    <td class="bdcc12">&nbsp;miejsce&nbsp;</td>
+    <td class="bdcc2">&nbsp;drużyna&nbsp;</td>
+    </tr>
+    %s
+    </table>
+    '''
 
-LEADERBOARD_ROW_FLAG = '''
-<img class="fl" src="images/%s" />
-'''
+    LEADERBOARD_ROW = '''
+    <tr class="%s">
+    <td class="bdc1">%d</td>
+    <td class="bd">
+    &nbsp;%s&nbsp;&nbsp;%s&nbsp;
+    </td>
+    </tr>
+    '''
 
-LEADERBOARD_CAPTION_TABLE = '''
-<table class="caption_table" border="0" cellspacing="0">
-<tr><td class="e">&nbsp;</td></tr>
-<tr><td class="bdnl12" align="center"><b>&nbsp;LEGENDA&nbsp;</b></td></tr>
-%s
-</table>
-'''
+    LEADERBOARD_ROW_FLAG = '''
+    <img class="fl" src="images/%s" />
+    '''
 
-LEADERBOARD_CAPTION_TABLE_ROW = '''
-<tr class="%s">
-<td class="bd1">
-&nbsp;%s&nbsp;
-</td>
-</tr>
-'''
+    LEADERBOARD_CAPTION_TABLE = '''
+    <table class="caption_table" border="0" cellspacing="0">
+    <tr><td class="e">&nbsp;</td></tr>
+    <tr><td class="bdnl12" align="center" style="text-transform: uppercase"><b>&nbsp;LEGENDA&nbsp;</b></td></tr>
+    %s
+    </table>
+    '''
 
-PAGE_HEAD = '''
-<meta http-equiv="Pragma" content="no-cache" />
-<meta http-equiv="Cache-Control" content="no-cache" />
-<meta name="robots" content="noarchive" />
-<meta http-equiv="expires" content="0" />
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="Generator" content="PlayOff" />
-%s
-<title>%s</title>
-<link rel="stylesheet" type="text/css" href="css/kolorki.css" />
-<script type="text/javascript" src="sklady/myAjax.js"></script>
-'''
+    LEADERBOARD_CAPTION_TABLE_ROW = '''
+    <tr class="%s">
+    <td class="bd1">
+    &nbsp;%s&nbsp;
+    </td>
+    </tr>
+    '''
 
-PAGE_HEAD_REFRESH = '''
-<meta http-equiv="Refresh" content="%d" />
-'''
+    PAGE_HEAD = '''
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache" />
+    <meta name="robots" content="noarchive" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="Generator" content="PlayOff" />
+    %s
+    <title>%s</title>
+    <link rel="stylesheet" type="text/css" href="css/kolorki.css" />
+    <script type="text/javascript" src="sklady/myAjax.js"></script>
+    '''
 
-PAGE_BODY = '''
-<script type="text/javascript" src="sklady/wz_tooltip.js"></script>
-%s
-%s
-<p>
-%s
-</p>
-%s
-%s
-%s
-'''
+    PAGE_HEAD_REFRESH = '''
+    <meta http-equiv="Refresh" content="%d" />
+    '''
 
-PAGE_BODY_FOOTER = '''
-<p class="f">&nbsp;Admin&nbsp;&copy;Jan Romański&#39;2005, PlayOff&nbsp;&copyMichał Klichowicz&#39;2017-2018, strona wygenerowana %s</p>
-'''
+    PAGE_BODY = '''
+    <script type="text/javascript" src="sklady/wz_tooltip.js"></script>
+    %s
+    %s
+    <p>
+    %s
+    </p>
+    %s
+    %s
+    %s
+    '''
 
-PAGE = '''
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-%s
-</head>
-<body class="all">
-%s
-</body>
-</html>
-'''
+    PAGE_BODY_FOOTER = '''
+    <p class="f">&nbsp;Admin&nbsp;&copy;Jan Romański&#39;2005, PlayOff&nbsp;&copyMichał Klichowicz&#39;2017-2018, strona wygenerowana %s</p>
+    '''
 
-SWISS_LINK = '''
-[<a href="%s" class="zb" target="_top">&nbsp;%s&nbsp;</a>]<br /><br />
-'''
+    PAGE = '''
+    <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+    <html>
+    <head>
+    %s
+    </head>
+    <body class="all">
+    %s
+    </body>
+    </html>
+    '''
 
-SWISS_RUNNING_LINK = '''
-[<a href="%s" class="zb" target="_top">&nbsp;<img src="images/A.gif" />&nbsp;%s&nbsp;<img src="images/A.gif" />&nbsp;</a>]<br /><br />
-'''
+    SWISS_LINK = '''
+    [<a href="%s" class="zb" target="_top">&nbsp;%s&nbsp;</a>]<br /><br />
+    '''
 
-SWISS_DEFAULT_LABEL = 'Turniej o&nbsp;%d.&nbsp;miejsce'
+    SWISS_RUNNING_LINK = '''
+    [<a href="%s" class="zb" target="_top">&nbsp;<img src="images/A.gif" />&nbsp;%s&nbsp;<img src="images/A.gif" />&nbsp;</a>]<br /><br />
+    '''
+
+    SWISS_DEFAULT_LABEL = 'Turniej o&nbsp;%d.&nbsp;miejsce'
+
+class Template(object):
+
+    @staticmethod
+    def get(string, *params):
+        return getattr(TemplateStrings, string).decode('utf8') % params
