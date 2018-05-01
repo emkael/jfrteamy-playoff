@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from jfr_playoff.template import Template as p_temp
+from jfr_playoff.template import PlayoffTemplate as p_temp
 from jfr_playoff.data import PlayoffData
 
 

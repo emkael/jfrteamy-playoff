@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-class TemplateStrings(object):
+class PlayoffTemplateStrings(object):
 
     MATCH_TABLE = '''
     <table border="0" cellspacing="0">
@@ -181,8 +181,8 @@ class TemplateStrings(object):
 
     SWISS_DEFAULT_LABEL = 'Turniej o&nbsp;%d.&nbsp;miejsce'
 
-class Template(object):
+class PlayoffTemplate(object):
 
     @staticmethod
     def get(string, *params):
-        return getattr(TemplateStrings, string).decode('utf8') % params
+        return getattr(PlayoffTemplateStrings, string).decode('utf8') % params
