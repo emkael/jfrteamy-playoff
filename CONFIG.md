@@ -36,6 +36,25 @@ Ustawienia bazy danych nie są wymagane, program potrafi sobie poradzić bez nic
 
 Ustawienia Gońca nie są wymagane, domyślnie jest on wyłączony, a przy włączeniu - domyślnie komunikuje się z `localhost` na porcie `8090`.
 
+Tłumaczenia tekstów
+-------------------
+
+Program obsługuje możliwość ustawienia własnych łańcuchów znaków wyświetlanych w różnych miejscach wynikowej strony. Teksty te opcjonalnie określa sekcja `"i18n"` pliku konfiguracyjnego.
+
+Domyślna postać wszystkich obsługiwanych łańcuchów to:
+
+```
+{
+    "SCORE": "wynik",
+    "FINAL_STANDINGS": "klasyfikacja końcowa",
+    "STANDINGS_PLACE": "miejsce",
+    "STANDINGS_TEAM": "drużyna",
+    "STANDINGS_CAPTIONS": "legenda",
+    "FOOTER_GENERATED": "strona wygenerowana",
+    "SWISS_DEFAULT_LABEL": "Turniej o&nbsp;%d.&nbsp;miejsce"
+}
+```
+
 Zdalne pliki konfiguracyjne
 ---------------------------
 
