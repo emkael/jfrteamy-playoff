@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import jfr_playoff.template as p_temp
+from jfr_playoff.template import PlayoffTemplate
 from jfr_playoff.data import PlayoffData
 from jfr_playoff.logger import PlayoffLogger
 
@@ -21,6 +21,8 @@ class PlayoffGenerator(object):
             self.leaderboard_classes = settings.get('position_styles')
         PlayoffLogger.get('generator').info(
             'leaderboard classes settings: %s', self.leaderboard_classes)
+        self.p_temp = PlayoffTemplate(
+            settings.get('i18n') if settings.has_section('i18n') else {})
 
     def generate_content(self):
         match_grid = self.get_match_grid(
@@ -28,69 +30,84 @@ class PlayoffGenerator(object):
             self.data.generate_phases(),
             self.data.fill_match_info())
         leaderboard_table = self.get_leaderboard_table()
-        return p_temp.PAGE % (
-            p_temp.PAGE_HEAD % (
-                p_temp.PAGE_HEAD_REFRESH % (
-                    self.page['refresh'])
+        return self.p_temp.get(
+            'PAGE',
+            self.p_temp.get(
+                'PAGE_HEAD',
+                self.p_temp.get(
+                    'PAGE_HEAD_REFRESH',
+                    self.page['refresh']) \
                 if self.page['refresh'] > 0 else '',
                 self.page['title']),
-            p_temp.PAGE_BODY % (
+            self.p_temp.get(
+                'PAGE_BODY',
                 self.page['logoh'],
                 match_grid,
                 self.get_swiss_links(),
                 leaderboard_table,
                 self.get_leaderboard_caption_table() if leaderboard_table else '',
-                p_temp.PAGE_BODY_FOOTER.decode('utf8') % (
+                self.p_temp.get(
+                    'PAGE_BODY_FOOTER',
                     datetime.now().strftime('%Y-%m-%d o %H:%M:%S'))))
 
     def get_match_table(self, match):
         rows = ''
         for team in match.teams:
-            score_html = p_temp.MATCH_SCORE % (team.score)
+            score_html = self.p_temp.get('MATCH_SCORE', team.score)
             team_label = ' / '.join([
                 self.data.get_shortname(name) for name in
                 team.name.split('<br />')])
-            team_html = p_temp.MATCH_TEAM_LINK % (
-                match.link, team.name, team_label) if match.link is not None \
-                else p_temp.MATCH_TEAM_NON_LINK % (
-                        team.name, team_label)
-            rows += p_temp.MATCH_TEAM_ROW % (
+            team_html = self.p_temp.get(
+                'MATCH_TEAM_LINK',
+                match.link, team.name, team_label) \
+                if match.link is not None \
+                   else self.p_temp.get(
+                           'MATCH_TEAM_NON_LINK',
+                           team.name, team_label)
+            rows += self.p_temp.get(
+                'MATCH_TEAM_ROW',
                 ' '.join([
                     'winner' if team.name == match.winner else '',
                     'loser' if team.name == match.loser else ''
                 ]).strip(),
                 team_html,
-                p_temp.MATCH_LINK % (match.link, score_html) if match.link is not None else score_html)
-        html = p_temp.MATCH_TABLE.decode('utf8') % (
+                self.p_temp.get(
+                    'MATCH_LINK',
+                    match.link, score_html) \
+                if match.link is not None else score_html)
+        html = self.p_temp.get(
+            'MATCH_TABLE',
             int(self.page['width'] * 0.75),
             int(self.page['width'] * 0.25),
             rows)
         if match.running > 0:
-            running_html = p_temp.MATCH_RUNNING % (match.running)
-            html += p_temp.MATCH_LINK % (match.link, running_html) if match.link is not None else running_html
+            running_html = self.p_temp.get('MATCH_RUNNING', match.running)
+            html += self.p_temp.get('MATCH_LINK', match.link, running_html) if match.link is not None else running_html
         PlayoffLogger.get('generator').info(
             'match table for #%d generated: %d bytes', match.id, len(html))
         return html
 
     def get_phase_header(self, phase, position):
-        if phase.running:
-            grid_header = p_temp.MATCH_GRID_PHASE_RUNNING
-        else:
-            grid_header = p_temp.MATCH_GRID_PHASE
-        grid_header = grid_header % (phase.title)
+        grid_header = self.p_temp.get(
+            'MATCH_GRID_PHASE_RUNNING' if phase.running \
+            else 'MATCH_GRID_PHASE',
+            phase.title)
         if phase.link is not None:
-            return p_temp.MATCH_GRID_PHASE_LINK % (
+            return self.p_temp.get(
+                'MATCH_GRID_PHASE_LINK',
                 phase.link,
                 self.page['width'], position,
                 grid_header)
         else:
-            return p_temp.MATCH_GRID_PHASE_NON_LINK % (
+            return self.p_temp.get(
+                'MATCH_GRID_PHASE_NON_LINK',
                 self.page['width'], position,
                 grid_header)
 
     def get_match_box(self, match, position):
         if match is not None:
-            return p_temp.MATCH_BOX % (
+            return self.p_temp.get(
+                'MATCH_BOX',
                 position[0], position[1],
                 match.id,
                 ' '.join([
@@ -130,7 +147,8 @@ class PlayoffGenerator(object):
                     (grid_x, grid_y))
                 row_no += 1
             col_no += 1
-        return p_temp.MATCH_GRID % (
+        return self.p_temp.get(
+            'MATCH_GRID',
             canvas_size[0], canvas_size[1],
             canvas_size[0], canvas_size[1],
             ' '.join(['data-%s="%s"' % (
@@ -150,9 +168,10 @@ class PlayoffGenerator(object):
         rows = ''
         for style in self.leaderboard_classes:
             if 'caption' in style:
-                rows += p_temp.LEADERBOARD_CAPTION_TABLE_ROW % (
+                rows += self.p_temp.get(
+                    'LEADERBOARD_CAPTION_TABLE_ROW',
                     style['class'], style['caption'])
-        return p_temp.LEADERBOARD_CAPTION_TABLE % (rows) if rows else ''
+        return self.p_temp.get('LEADERBOARD_CAPTION_TABLE', rows) if rows else ''
 
     def get_leaderboard_table(self):
         leaderboard = self.data.fill_leaderboard()
@@ -161,11 +180,12 @@ class PlayoffGenerator(object):
         position = 1
         rows = ''
         for team in leaderboard:
-            rows += p_temp.LEADERBOARD_ROW % (
+            rows += self.p_temp.get(
+                'LEADERBOARD_ROW',
                 self.get_leaderboard_row_class(position),
                 position, self.get_flag(team), team or '')
             position += 1
-        html = p_temp.LEADERBOARD.decode('utf8') % (rows)
+        html = self.p_temp.get('LEADERBOARD', rows)
         PlayoffLogger.get('generator').info(
             'leaderboard HTML generated: %d bytes', len(html))
         return html
@@ -173,12 +193,14 @@ class PlayoffGenerator(object):
     def get_swiss_links(self):
         info = []
         for event in self.data.get_swiss_info():
-            event_label = p_temp.SWISS_DEFAULT_LABEL % (event['position'])
+            event_label = self.p_temp.get('SWISS_DEFAULT_LABEL', event['position'])
             if 'label' in event and event['label'] is not None:
                 event_label = event['label']
-            info.append((p_temp.SWISS_LINK if event['finished'] else p_temp.SWISS_RUNNING_LINK) % (
-                event['link'], event_label
-            ))
+            info.append((self.p_temp.get('SWISS_LINK') \
+                         if event['finished'] \
+                         else self.p_temp.get(
+                                 'SWISS_RUNNING_LINK',
+                                 event['link'], event_label)))
         html = '\n'.join(info)
         PlayoffLogger.get('generator').info(
             'swiss HTML generated: %d bytes', len(html))
@@ -186,4 +208,4 @@ class PlayoffGenerator(object):
 
     def get_flag(self, team):
         flag = self.data.get_team_image(team)
-        return '' if flag is None else p_temp.LEADERBOARD_ROW_FLAG % (flag)
+        return '' if flag is None else self.p_temp.get('LEADERBOARD_ROW_FLAG', flag)
