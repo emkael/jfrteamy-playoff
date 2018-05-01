@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from jfr_playoff.template import PlayoffTemplate as p_temp
+from jfr_playoff.template import PlayoffTemplate
 from jfr_playoff.data import PlayoffData
 
 
@@ -14,6 +14,8 @@ class PlayoffGenerator(object):
         self.leaderboard_classes = {}
         if settings.has_section('position_styles'):
             self.leaderboard_classes = settings.get('position_styles')
+        self.p_temp = PlayoffTemplate(
+            settings.get('i18n') if settings.has_section('i18n') else {})
 
     def generate_content(self):
         match_grid = self.get_match_grid(
@@ -21,81 +23,81 @@ class PlayoffGenerator(object):
             self.data.generate_phases(),
             self.data.fill_match_info())
         leaderboard_table = self.get_leaderboard_table()
-        return p_temp.get(
+        return self.p_temp.get(
             'PAGE',
-            p_temp.get(
+            self.p_temp.get(
                 'PAGE_HEAD',
-                p_temp.get(
+                self.p_temp.get(
                     'PAGE_HEAD_REFRESH',
                     self.page['refresh']) \
                 if self.page['refresh'] > 0 else '',
                 self.page['title']),
-            p_temp.get(
+            self.p_temp.get(
                 'PAGE_BODY',
                 self.page['logoh'],
                 match_grid,
                 self.get_swiss_links(),
                 leaderboard_table,
                 self.get_leaderboard_caption_table() if leaderboard_table else '',
-                p_temp.get(
+                self.p_temp.get(
                     'PAGE_BODY_FOOTER',
                     datetime.now().strftime('%Y-%m-%d o %H:%M:%S'))))
 
     def get_match_table(self, match):
         rows = ''
         for team in match.teams:
-            score_html = p_temp.get('MATCH_SCORE', team.score)
+            score_html = self.p_temp.get('MATCH_SCORE', team.score)
             team_label = ' / '.join([
                 self.data.get_shortname(name) for name in
                 team.name.split('<br />')])
-            team_html = p_temp.get(
+            team_html = self.p_temp.get(
                 'MATCH_TEAM_LINK',
                 match.link, team.name, team_label) \
                 if match.link is not None \
-                   else p_temp.get(
+                   else self.p_temp.get(
                            'MATCH_TEAM_NON_LINK',
                            team.name, team_label)
-            rows += p_temp.get(
+            rows += self.p_temp.get(
                 'MATCH_TEAM_ROW',
                 ' '.join([
                     'winner' if team.name == match.winner else '',
                     'loser' if team.name == match.loser else ''
                 ]).strip(),
                 team_html,
-                p_temp.get(
+                self.p_temp.get(
                     'MATCH_LINK',
                     match.link, score_html) \
                 if match.link is not None else score_html)
-        html = p_temp.get(
+        html = self.p_temp.get(
             'MATCH_TABLE',
             int(self.page['width'] * 0.75),
             int(self.page['width'] * 0.25),
             rows)
         if match.running > 0:
-            running_html = p_temp.get('MATCH_RUNNING', match.running)
-            html += p_temp.get('MATCH_LINK', match.link, running_html) if match.link is not None else running_html
+            running_html = self.p_temp.get('MATCH_RUNNING', match.running)
+            html += self.p_temp.get('MATCH_LINK', match.link, running_html) if match.link is not None else running_html
         return html
 
     def get_phase_header(self, phase, position):
-        grid_header = p_temp.get(
+        grid_header = self.p_temp.get(
             'MATCH_GRID_PHASE_RUNNING' if phase.running \
             else 'MATCH_GRID_PHASE',
             phase.title)
         if phase.link is not None:
-            return p_temp.get(
+            return self.p_temp.get(
                 'MATCH_GRID_PHASE_LINK',
                 phase.link,
                 self.page['width'], position,
                 grid_header)
         else:
-            return p_temp.get(
+            return self.p_temp.get(
                 'MATCH_GRID_PHASE_NON_LINK',
                 self.page['width'], position,
                 grid_header)
 
     def get_match_box(self, match, position):
         if match is not None:
-            return p_temp.get(
+            return self.p_temp.get(
                 'MATCH_BOX',
                 position[0], position[1],
                 match.id,
@@ -131,7 +133,7 @@ class PlayoffGenerator(object):
                     (grid_x, grid_y))
                 row_no += 1
             col_no += 1
-        return p_temp.get(
+        return self.p_temp.get(
             'MATCH_GRID',
             canvas_size[0], canvas_size[1],
             canvas_size[0], canvas_size[1],
@@ -152,10 +154,10 @@ class PlayoffGenerator(object):
         rows = ''
         for style in self.leaderboard_classes:
             if 'caption' in style:
-                rows += p_temp.get(
+                rows += self.p_temp.get(
                     'LEADERBOARD_CAPTION_TABLE_ROW',
                     style['class'], style['caption'])
-        return p_temp.get('LEADERBOARD_CAPTION_TABLE', rows) if rows else ''
+        return self.p_temp.get('LEADERBOARD_CAPTION_TABLE', rows) if rows else ''
 
     def get_leaderboard_table(self):
         leaderboard = self.data.fill_leaderboard()
@@ -164,27 +166,27 @@ class PlayoffGenerator(object):
         position = 1
         rows = ''
         for team in leaderboard:
-            rows += p_temp.get(
+            rows += self.p_temp.get(
                 'LEADERBOARD_ROW',
                 self.get_leaderboard_row_class(position),
                 position, self.get_flag(team), team or '')
             position += 1
-        html = p_temp.get('LEADERBOARD', rows)
+        html = self.p_temp.get('LEADERBOARD', rows)
         return html
 
     def get_swiss_links(self):
         info = []
         for event in self.data.get_swiss_info():
-            event_label = p_temp.get('SWISS_DEFAULT_LABEL', event['position'])
+            event_label = self.p_temp.get('SWISS_DEFAULT_LABEL', event['position'])
             if 'label' in event and event['label'] is not None:
                 event_label = event['label']
-            info.append((p_temp.get('SWISS_LINK') \
+            info.append((self.p_temp.get('SWISS_LINK') \
                          if event['finished'] \
-                         else p_temp.get(
+                         else self.p_temp.get(
                                  'SWISS_RUNNING_LINK',
                                  event['link'], event_label)))
         return '\n'.join(info)
 
     def get_flag(self, team):
         flag = self.data.get_team_image(team)
-        return '' if flag is None else p_temp.get('LEADERBOARD_ROW_FLAG', flag)
+        return '' if flag is None else self.p_temp.get('LEADERBOARD_ROW_FLAG', flag)

@@ -183,6 +183,8 @@ class PlayoffTemplateStrings(object):
 
 class PlayoffTemplate(object):
 
-    @staticmethod
-    def get(string, *params):
+    def __init__(self, settings):
+        self.settings = settings
+
+    def get(self, string, *params):
         return getattr(PlayoffTemplateStrings, string).decode('utf8') % params
