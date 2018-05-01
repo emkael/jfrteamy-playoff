@@ -2,6 +2,8 @@
 
 import re
 
+from jfr_playoff.logger import PlayoffLogger
+
 PLAYOFF_I18N_DEFAULTS = {
     'SCORE': 'wynik',
     'FINAL_STANDINGS': 'klasyfikacja końcowa',
@@ -27,5 +29,10 @@ class PlayoffI18N(object):
     def __get_translation(self, string):
         for dictionary in [self.settings, PLAYOFF_I18N_DEFAULTS]:
             if string in dictionary:
-                return dictionary[string].decode('utf8')
+                translation = dictionary[string].decode('utf8')
+                PlayoffLogger.get('i18n').info(
+                    'translation for %s: %s', string, translation)
+                return translation
+        PlayoffLogger.get('i18n').info(
+            'translation for %s not found', string)
         return '{{%s}}' % (string)
