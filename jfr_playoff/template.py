@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
+from jfr_playoff.i18n import PlayoffI18N
+
 class PlayoffTemplateStrings(object):
 
     MATCH_TABLE = '''
     <table border="0" cellspacing="0">
     <tr>
     <td class="s12" width="%d">&nbsp;</td>
-    <td class="bdcc2" width="%d">&nbsp;wynik&nbsp;</td>
+    <td class="bdcc2" width="%d">&nbsp;{{SCORE}}&nbsp;</td>
     </tr>
     %s
     </table>
@@ -84,14 +86,14 @@ class PlayoffTemplateStrings(object):
     LEADERBOARD = '''
     <table border="0" cellspacing="0">
     <tr>
-    <td class="bdnl12" colspan="2" align="center" style="text-transform: uppercase"><b>&nbsp;KLASYFIKACJA KOŃCOWA&nbsp;</b></td>
+    <td class="bdnl12" colspan="2" align="center" style="text-transform: uppercase"><b>&nbsp;{{FINAL_STANDINGS}}&nbsp;</b></td>
     </tr>
     <tr>
     <td class="e" colspan="2">&nbsp;</td>
     </tr>
     <tr>
-    <td class="bdcc12">&nbsp;miejsce&nbsp;</td>
-    <td class="bdcc2">&nbsp;drużyna&nbsp;</td>
+    <td class="bdcc12">&nbsp;{{STANDINGS_PLACE}}&nbsp;</td>
+    <td class="bdcc2">&nbsp;{{STANDINGS_TEAM}}&nbsp;</td>
     </tr>
     %s
     </table>
@@ -113,7 +115,7 @@ class PlayoffTemplateStrings(object):
     LEADERBOARD_CAPTION_TABLE = '''
     <table class="caption_table" border="0" cellspacing="0">
     <tr><td class="e">&nbsp;</td></tr>
-    <tr><td class="bdnl12" align="center" style="text-transform: uppercase"><b>&nbsp;LEGENDA&nbsp;</b></td></tr>
+    <tr><td class="bdnl12" align="center" style="text-transform: uppercase"><b>&nbsp;{{STANDINGS_CAPTIONS}}&nbsp;</b></td></tr>
     %s
     </table>
     '''
@@ -156,7 +158,7 @@ class PlayoffTemplateStrings(object):
     '''
 
     PAGE_BODY_FOOTER = '''
-    <p class="f">&nbsp;Admin&nbsp;&copy;Jan Romański&#39;2005, PlayOff&nbsp;&copyMichał Klichowicz&#39;2017-2018, strona wygenerowana %s</p>
+    <p class="f">&nbsp;Admin&nbsp;&copy;Jan Romański&#39;2005, PlayOff&nbsp;&copyMichał Klichowicz&#39;2017-2018, {{FOOTER_GENERATED}} %s</p>
     '''
 
     PAGE = '''
@@ -179,12 +181,13 @@ class PlayoffTemplateStrings(object):
     [<a href="%s" class="zb" target="_top">&nbsp;<img src="images/A.gif" />&nbsp;%s&nbsp;<img src="images/A.gif" />&nbsp;</a>]<br /><br />
     '''
 
-    SWISS_DEFAULT_LABEL = 'Turniej o&nbsp;%d.&nbsp;miejsce'
+    SWISS_DEFAULT_LABEL = '{{SWISS_DEFAULT_LABEL}}'
 
 class PlayoffTemplate(object):
 
     def __init__(self, settings):
-        self.settings = settings
+        self.i18n = PlayoffI18N(settings)
 
     def get(self, string, *params):
-        return getattr(PlayoffTemplateStrings, string).decode('utf8') % params
+        return self.i18n.localize(
+            getattr(PlayoffTemplateStrings, string).decode('utf8')) % params
