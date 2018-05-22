@@ -137,7 +137,8 @@ class PlayoffGenerator(object):
             match_height = canvas_size[1] / len(phase.matches)
             row_no = 0
             for match in phase.matches:
-                grid_y = int(row_no * match_height +
+                grid_y = self.page['margin'] / 2 if dimensions[1] == 1 else \
+                         int(row_no * match_height +
                              0.5 * (match_height - self.page['height']))
                 PlayoffLogger.get('generator').info(
                     'grid box (%d, %d) position: (%d, %d)',
