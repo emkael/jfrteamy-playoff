@@ -6,7 +6,13 @@ var playoff = {
         'winner_v_offset': -10,
         'loser_v_offset': 10,
         'loser_colour': '#ff0000',
-        'winner_colour': '#00ff00'
+        'winner_colour': '#00ff00',
+        'place_winner_h_offset': 10,
+        'place_loser_h_offset': 15,
+        'place_winner_v_offset': 8,
+        'place_loser_v_offset': 14,
+        'place_loser_colour': '#dddd00',
+        'place_winner_colour': '#00dddd'
     },
 
     drawLine: function(ctx, line) {
@@ -31,7 +37,9 @@ var playoff = {
         var boxes = document.getElementsByClassName('playoff_matchbox');
         var lines = {
             'winner': {},
-            'loser': {}
+            'loser': {},
+            'place-winner': {},
+            'place-loser': {}
         };
         var boxes_idx = {};
         for (var b = 0; b < boxes.length; b++) {
@@ -50,6 +58,8 @@ var playoff = {
         var canvas = document.getElementById('playoff_canvas');
         this.settings = this.loadSettings(canvas, this.settings);
         var lineMethods = {
+            'place-winner': 'to',
+            'place-loser': 'to',
             'winner': 'midpoint',
             'loser': 'midpoint'
         };
@@ -75,6 +85,66 @@ var playoff = {
                     vTo: [canvas.width, canvas.height, canvas.width, 0],
                     midpoints: []
                 }
+            },
+            from: function(from, to, hOffset, vOffset) {
+                var lines = this.template();
+                for (var f = 0; f < from.length; f++) {
+                    var box = boxes_idx[from[f]];
+                    var line = [
+                        Math.floor(parseInt(box.style.left) + parseInt(box.clientWidth)),
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset),
+                        Math.floor(parseInt(box.style.left) + parseInt(box.clientWidth) + hOffset),
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset)
+                    ];
+                    lines.hFrom.push(line);
+                }
+                this.correctLines(lines.hFrom, lines.vFrom, Math.max);
+                for (var t = 0; t < to.length; t++) {
+                    var box = boxes_idx[to[t]];
+                    var line = [
+                        lines.vFrom[0],
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset),
+                        Math.floor(parseInt(box.style.left) - hOffset),
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset)
+                    ];
+                    lines.hTo.push(line);
+                }
+                this.correctLines(lines.hTo, lines.vTo, Math.min);
+                lines.midpoints = [
+                    [lines.vFrom[0], lines.vFrom[1]],
+                    [lines.vTo[0], lines.vTo[1]]
+                ];
+                return lines;
+            },
+            to: function(from, to, hOffset, vOffset) {
+                var lines = this.template();
+                for (var t = 0; t < to.length; t++) {
+                    var box = boxes_idx[to[t]];
+                    var line = [
+                        parseInt(box.style.left),
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset),
+                        Math.floor(parseInt(box.style.left) - hOffset),
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset)
+                    ];
+                    lines.hTo.push(line);
+                }
+                this.correctLines(lines.hTo, lines.vTo, Math.min);
+                for (var f = 0; f < from.length; f++) {
+                    var box = boxes_idx[from[f]];
+                    var line = [
+                        Math.floor(parseInt(box.style.left) + parseInt(box.clientWidth)),
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset),
+                        lines.vTo[0],
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset)
+                    ];
+                    lines.hFrom.push(line);
+                }
+                this.correctLines(lines.hFrom, lines.vFrom, Math.max);
+                lines.midpoints = [
+                    [lines.vFrom[0], lines.vFrom[1]],
+                    [lines.vTo[0], lines.vTo[1]]
+                ];
+                return lines;
             },
             midpoint: function(from, to, hOffset, vOffset) {
                 var lines = this.template();
