@@ -187,6 +187,10 @@ class MatchInfo:
                     'fetching HTML scores for match #%d failed: %s(%s)',
                     self.info.id, type(e).__name__, str(e))
                 self.info.teams = self.__get_config_teams(self.info.teams)
+        for team in range(0, len(self.info.teams)):
+            if 'place' in self.config['teams'][team]:
+                self.info.teams[team].place = self.config['teams'][team]['place']
+
 
     def __get_db_board_count(self):
         towels = self.database.fetch(
