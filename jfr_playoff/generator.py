@@ -55,8 +55,8 @@ class PlayoffGenerator(object):
                 team_html,
                 p_temp.MATCH_LINK % (match.link, score_html) if match.link is not None else score_html)
         html = p_temp.MATCH_TABLE.decode('utf8') % (
-            int(self.page['width'] * 0.75),
-            int(self.page['width'] * 0.25),
+            int(self.page['width'] * 0.7),
+            int(self.page['width'] * 0.2),
             rows)
         if match.running > 0:
             running_html = p_temp.MATCH_RUNNING % (match.running)
