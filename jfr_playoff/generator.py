@@ -106,16 +106,31 @@ class PlayoffGenerator(object):
 
     def get_match_box(self, match, position):
         if match is not None:
+            winner_link = [
+                str(m) for m in match.winner_matches
+            ] if match.winner_matches is not None else []
+            loser_link = [
+                str(m) for m in match.loser_matches
+            ] if match.loser_matches is not None else []
+            place_loser_link = []
+            place_winner_link = []
+            if 'starting_position_indicators' in self.page \
+               and self.page['starting_position_indicators']:
+                for team in match.teams:
+                    if len(team.place) > 0:
+                        place_link = ['place-' + str(pl) for pl in team.place]
+                        if len(team.place) > 1:
+                            place_loser_link += place_link
+                        else:
+                            place_winner_link += place_link
             return self.p_temp.get(
                 'MATCH_BOX',
                 position[0], position[1],
                 match.id,
-                ' '.join([
-                    str(m) for m in match.winner_matches
-                ]) if match.winner_matches is not None else '',
-                ' '.join([
-                    str(m) for m in match.loser_matches
-                ]) if match.loser_matches is not None else '',
+                ' '.join(winner_link),
+                ' '.join(loser_link),
+                ' '.join(place_winner_link),
+                ' '.join(place_loser_link),
                 self.get_match_table(match))
         return ''
 

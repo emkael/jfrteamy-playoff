@@ -92,7 +92,7 @@ class PlayoffTemplateStrings(object):
     '''
 
     MATCH_BOX = '''
-    <div style="text-align: center; position: absolute; left: %dpx; top: %dpx" data-id="%d" data-winner="%s" data-loser="%s" class="playoff_matchbox">
+    <div style="text-align: center; position: absolute; left: %dpx; top: %dpx" data-id="%d" data-winner="%s" data-loser="%s" data-place-winner="%s" data-place-loser="%s" class="playoff_matchbox">
     %s
     </div>
     '''
