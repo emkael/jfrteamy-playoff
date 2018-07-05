@@ -49,99 +49,100 @@ var playoff = {
         }
         var canvas = document.getElementById('playoff_canvas');
         this.settings = this.loadSettings(canvas, this.settings);
-        var ctx = canvas.getContext('2d');
-        for (var type in lines) {
-            ctx.strokeStyle = this.settings[type + '_colour'];
-            for (var from in lines[type]) {
-                var to = lines[type][from];
-                from = from.split(' ');
-                var horizontal_from = [];
-                var vertical_from = [0, canvas.height, 0, 0];
+        var lineMethods = {
+            'winner': 'midpoint',
+            'loser': 'midpoint'
+        };
+        var lineCalculator = {
+            correctLines: function(hLines, vLine, comparator) {
+                for (var l1 in hLines) {
+                    for (var l2 in hLines) {
+                        hLines[l1][2] = comparator(hLines[l1][2], hLines[l2][2]);
+                        hLines[l2][2] = hLines[l1][2];
+                    }
+                }
+                for (var l1 in hLines) {
+                    vLine[0] = vLine[2] = comparator(hLines[l1][2], vLine[2]);
+                    vLine[1] = Math.min(vLine[1], hLines[l1][3]);
+                    vLine[3] = Math.max(vLine[3], hLines[l1][3]);
+                }
+            },
+            template: function() {
+                return {
+                    hFrom: [],
+                    vFrom: [0, canvas.height, 0, 0],
+                    hTo: [],
+                    vTo: [canvas.width, canvas.height, canvas.width, 0],
+                    midpoints: []
+                }
+            },
+            midpoint: function(from, to, hOffset, vOffset) {
+                var lines = this.template();
                 for (var f = 0; f < from.length; f++) {
                     var box = boxes_idx[from[f]];
                     var line = [
                         Math.floor(parseInt(box.style.left) + parseInt(box.clientWidth)),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + parseFloat(this.settings[type + '_v_offset'])),
-                        Math.floor(parseInt(box.style.left) + parseInt(box.clientWidth) + parseFloat(this.settings[type + '_h_offset'])),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + parseFloat(this.settings[type + '_v_offset']))
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset),
+                        Math.floor(parseInt(box.style.left) + parseInt(box.clientWidth) + hOffset),
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset)
                     ];
-                    horizontal_from.push(line);
-                    for (var l in horizontal_from) {
-                        if (horizontal_from[l][2] < line[2]) {
-                            horizontal_from[l][2] = line[2];
-                        } else {
-                            line[2] = horizontal_from[l][2];
-                        }
-                        if (vertical_from[0] < horizontal_from[l][2]) {
-                            vertical_from[0] = horizontal_from[l][2];
-                            vertical_from[2] = horizontal_from[l][2];
-                        }
-                        if (vertical_from[1] > horizontal_from[l][3]) {
-                            vertical_from[1] = horizontal_from[l][3];
-                        }
-                        if (vertical_from[3] < horizontal_from[l][3]) {
-                            vertical_from[3] = horizontal_from[l][3];
-                        }
-                    }
+                    lines.hFrom.push(line);
                 }
-                var horizontal_to = [];
-                var vertical_to = [canvas.width, canvas.height, canvas.width, 0];
+                this.correctLines(lines.hFrom, lines.vFrom, Math.max);
                 for (var t = 0; t < to.length; t++) {
                     var box = boxes_idx[to[t]];
                     var line = [
                         parseInt(box.style.left),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + parseFloat(this.settings[type + '_v_offset'])),
-                        Math.floor(parseInt(box.style.left) - parseFloat(this.settings[type + '_h_offset'])),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + parseFloat(this.settings[type + '_v_offset']))
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset),
+                        Math.floor(parseInt(box.style.left) - hOffset),
+                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset)
                     ];
-                    horizontal_to.push(line);
-                    for (var l in horizontal_to) {
-                        if (horizontal_to[l][2] > line[2]) {
-                            horizontal_to[l][2] = line[2];
-                        } else {
-                            line[2] = horizontal_to[l][2];
-                        }
-                        if (vertical_to[0] > horizontal_to[l][2]) {
-                            vertical_to[0] = horizontal_to[l][2];
-                            vertical_to[2] = horizontal_to[l][2];
-                        }
-                        if (vertical_to[1] > horizontal_to[l][3]) {
-                            vertical_to[1] = horizontal_to[l][3];
-                        }
-                        if (vertical_to[3] < horizontal_to[l][3]) {
-                            vertical_to[3] = horizontal_to[l][3];
-                        }
-                    }
+                    lines.hTo.push(line);
                 }
-                var midpoints = [
+                this.correctLines(lines.hTo, lines.vTo, Math.min);
+                lines.midpoints = [
                     [
-                        (vertical_from[0] + vertical_from[2]) / 2,
-                        (vertical_from[1] + vertical_from[3]) / 2
+                        (lines.vFrom[0] + lines.vFrom[2]) / 2,
+                        (lines.vFrom[1] + lines.vFrom[3]) / 2
                     ],
                     [
-                        parseFloat(this.settings[type + '_h_offset']) / 2 + (vertical_from[0] + vertical_from[2] + vertical_to[0] + vertical_to[2]) / 4,
-                        (vertical_from[1] + vertical_from[3]) / 2
+                        hOffset / 2 + (lines.vFrom[0] + lines.vFrom[2] + lines.vTo[0] + lines.vTo[2]) / 4,
+                        (lines.vFrom[1] + lines.vFrom[3]) / 2
                     ],
                     [
-                        parseFloat(this.settings[type + '_h_offset']) / 2 + (vertical_from[0] + vertical_from[2] + vertical_to[0] + vertical_to[2]) / 4,
-                        (vertical_to[1] + vertical_to[3]) / 2
+                        hOffset / 2 + (lines.vFrom[0] + lines.vFrom[2] + lines.vTo[0] + lines.vTo[2]) / 4,
+                        (lines.vTo[1] + lines.vTo[3]) / 2
                     ],
                     [
-                        (vertical_to[0] + vertical_to[2]) / 2,
-                        (vertical_to[1] + vertical_to[3]) / 2
+                        (lines.vTo[0] + lines.vTo[2]) / 2,
+                        (lines.vTo[1] + lines.vTo[3]) / 2
                     ]
                 ]
-                for (var l in horizontal_from) {
-                    this.drawLine(ctx, horizontal_from[l]);
+                return lines;
+            }
+        };
+        var ctx = canvas.getContext('2d');
+        for (var type in lines) {
+            styleType = type.replace('-', '_');
+            ctx.strokeStyle = this.settings[styleType + '_colour'];
+            for (var from in lines[type]) {
+                var to = lines[type][from];
+                from = from.split(' ');
+                var linesToDraw = lineCalculator[lineMethods[type]](
+                    from, to,
+                    this.settings[styleType + '_h_offset'], this.settings[styleType + '_v_offset']);
+                for (var l in linesToDraw.hFrom) {
+                    this.drawLine(ctx, linesToDraw.hFrom[l]);
                 }
-                this.drawLine(ctx, vertical_from);
-                for (var l in horizontal_to) {
-                    this.drawLine(ctx, horizontal_to[l]);
+                this.drawLine(ctx, linesToDraw.vFrom);
+                for (var l in linesToDraw.hTo) {
+                    this.drawLine(ctx, linesToDraw.hTo[l]);
                 }
-                this.drawLine(ctx, vertical_to);
-                for (var m = 0; m < midpoints.length-1; m++) {
+                this.drawLine(ctx, linesToDraw.vTo);
+                for (var m = 0; m < linesToDraw.midpoints.length-1; m++) {
                     this.drawLine(ctx, [
-                        midpoints[m][0], midpoints[m][1], midpoints[m+1][0], midpoints[m+1][1]
+                        linesToDraw.midpoints[m][0], linesToDraw.midpoints[m][1],
+                        linesToDraw.midpoints[m+1][0], linesToDraw.midpoints[m+1][1]
                     ]);
                 }
             }
