@@ -1,10 +1,10 @@
 var playoff = {
 
     settings: {
-        'winner_h_offset': 8,
-        'loser_h_offset': 14,
-        'winner_v_offset': -6,
-        'loser_v_offset': 6,
+        'winner_h_offset': 5,
+        'loser_h_offset': 20,
+        'winner_v_offset': -10,
+        'loser_v_offset': 10,
         'loser_colour': '#ff0000',
         'winner_colour': '#00ff00'
     },
