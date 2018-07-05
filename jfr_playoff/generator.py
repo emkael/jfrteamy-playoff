@@ -119,6 +119,22 @@ class PlayoffGenerator(object):
                 self.get_match_table(match))
         return ''
 
+    def get_starting_position_box(self, positions, dimensions):
+        if 'starting_position_indicators' not in self.page \
+           or not self.page['starting_position_indicators']:
+            return ''
+        boxes = ''
+        order = 0
+        for place in sorted(positions):
+            boxes += self.p_temp.get(
+                'STARTING_POSITION_BOX',
+                0,
+                int(float(order) / float(len(positions)) * dimensions[1]),
+                place, place)
+            order += 1
+        return boxes
+
+
     def get_match_grid(self, dimensions, grid, matches):
         canvas_size = [
             dimensions[0] * (
@@ -134,6 +150,7 @@ class PlayoffGenerator(object):
             'canvas size: %s', canvas_size)
         grid_boxes = ''
         col_no = 0
+        starting_positions = set()
         for phase in grid:
             grid_x = col_no * self.page['width'] + (col_no + 1) * self.page['margin'] \
                      if self.page['starting_position_indicators'] \
@@ -151,8 +168,13 @@ class PlayoffGenerator(object):
                 grid_boxes += self.get_match_box(
                     matches[match] if match is not None else None,
                     (grid_x, grid_y))
+                if match is not None:
+                    for team in matches[match].teams:
+                        starting_positions.update(team.place)
                 row_no += 1
             col_no += 1
+        starting_positions_boxes = self.get_starting_position_box(
+            starting_positions, canvas_size)
         return self.p_temp.get(
             'MATCH_GRID',
             canvas_size[0], canvas_size[1],
@@ -160,6 +182,7 @@ class PlayoffGenerator(object):
             ' '.join(['data-%s="%s"' % (
                 setting.replace('_', '-'), str(value)
             ) for setting, value in self.canvas.iteritems()]),
+            starting_positions_boxes,
             grid_boxes
         )
 
