@@ -120,19 +120,24 @@ class PlayoffGenerator(object):
         return ''
 
     def get_match_grid(self, dimensions, grid, matches):
-        canvas_size = (
+        canvas_size = [
             dimensions[0] * (
                 self.page['width'] + self.page['margin']
-            ) - self.page['margin'],
+            ),
             dimensions[1] * (
                 self.page['height'] + self.page['margin']
-            ) - self.page['margin'])
+            ) - self.page['margin']]
+        if 'starting_position_indicators' not in self.page \
+           or not self.page['starting_position_indicators']:
+            canvas_size[0] -= self.page['margin']
         PlayoffLogger.get('generator').info(
             'canvas size: %s', canvas_size)
         grid_boxes = ''
         col_no = 0
         for phase in grid:
-            grid_x = col_no * (self.page['width'] + self.page['margin'])
+            grid_x = col_no * self.page['width'] + (col_no + 1) * self.page['margin'] \
+                     if self.page['starting_position_indicators'] \
+                        else col_no * (self.page['width'] + self.page['margin'])
             grid_boxes += self.get_phase_header(phase, grid_x)
             match_height = canvas_size[1] / len(phase.matches)
             row_no = 0
