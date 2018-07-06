@@ -155,12 +155,15 @@ class PlayoffGenerator(object):
         canvas_size = [
             dimensions[0] * (
                 self.page['width'] + self.page['margin']
-            ),
+            ) + self.page['margin'],
             dimensions[1] * (
                 self.page['height'] + self.page['margin']
             ) - self.page['margin']]
         if 'starting_position_indicators' not in self.page \
            or not self.page['starting_position_indicators']:
+            canvas_size[0] -= self.page['margin']
+        if 'finishing_position_indicators' not in self.page \
+           or not self.page['finishing_position_indicators']:
             canvas_size[0] -= self.page['margin']
         PlayoffLogger.get('generator').info(
             'canvas size: %s', canvas_size)
