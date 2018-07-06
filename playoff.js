@@ -91,10 +91,10 @@ var playoff = {
                 for (var f = 0; f < from.length; f++) {
                     var box = boxes_idx[from[f]];
                     var line = [
-                        Math.floor(parseInt(box.style.left) + parseInt(box.clientWidth)),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset),
-                        Math.floor(parseInt(box.style.left) + parseInt(box.clientWidth) + hOffset),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset)
+                        Math.floor(parseInt(box.offsetLeft) + parseInt(box.clientWidth)),
+                        Math.floor(parseInt(box.offsetTop) + 0.5 * parseInt(box.clientHeight) + vOffset),
+                        Math.floor(parseInt(box.offsetLeft) + parseInt(box.clientWidth) + hOffset),
+                        Math.floor(parseInt(box.offsetTop) + 0.5 * parseInt(box.clientHeight) + vOffset)
                     ];
                     lines.hFrom.push(line);
                 }
@@ -102,10 +102,10 @@ var playoff = {
                 for (var t = 0; t < to.length; t++) {
                     var box = boxes_idx[to[t]];
                     var line = [
+                        Math.floor(parseInt(box.offsetLeft)),
+                        Math.floor(parseInt(box.offsetTop) + 0.5 * parseInt(box.clientHeight) + vOffset),
                         lines.vFrom[0],
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset),
-                        Math.floor(parseInt(box.style.left) - hOffset),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset)
+                        Math.floor(parseInt(box.offsetTop) + 0.5 * parseInt(box.clientHeight) + vOffset)
                     ];
                     lines.hTo.push(line);
                 }
@@ -121,10 +121,10 @@ var playoff = {
                 for (var t = 0; t < to.length; t++) {
                     var box = boxes_idx[to[t]];
                     var line = [
-                        parseInt(box.style.left),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset),
-                        Math.floor(parseInt(box.style.left) - hOffset),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset)
+                        parseInt(box.offsetLeft),
+                        Math.floor(parseInt(box.offsetTop) + 0.5 * parseInt(box.clientHeight) + vOffset),
+                        Math.floor(parseInt(box.offsetLeft) - hOffset),
+                        Math.floor(parseInt(box.offsetTop) + 0.5 * parseInt(box.clientHeight) + vOffset)
                     ];
                     lines.hTo.push(line);
                 }
@@ -132,10 +132,10 @@ var playoff = {
                 for (var f = 0; f < from.length; f++) {
                     var box = boxes_idx[from[f]];
                     var line = [
-                        Math.floor(parseInt(box.style.left) + parseInt(box.clientWidth)),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset),
+                        Math.floor(parseInt(box.offsetLeft) + parseInt(box.clientWidth)),
+                        Math.floor(parseInt(box.offsetTop) + 0.5 * parseInt(box.clientHeight) + vOffset),
                         lines.vTo[0],
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset)
+                        Math.floor(parseInt(box.offsetTop) + 0.5 * parseInt(box.clientHeight) + vOffset)
                     ];
                     lines.hFrom.push(line);
                 }
@@ -151,10 +151,10 @@ var playoff = {
                 for (var f = 0; f < from.length; f++) {
                     var box = boxes_idx[from[f]];
                     var line = [
-                        Math.floor(parseInt(box.style.left) + parseInt(box.clientWidth)),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset),
-                        Math.floor(parseInt(box.style.left) + parseInt(box.clientWidth) + hOffset),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset)
+                        Math.floor(parseInt(box.offsetLeft) + parseInt(box.clientWidth)),
+                        Math.floor(parseInt(box.offsetTop) + 0.5 * parseInt(box.clientHeight) + vOffset),
+                        Math.floor(parseInt(box.offsetLeft) + parseInt(box.clientWidth) + hOffset),
+                        Math.floor(parseInt(box.offsetTop) + 0.5 * parseInt(box.clientHeight) + vOffset)
                     ];
                     lines.hFrom.push(line);
                 }
@@ -162,10 +162,10 @@ var playoff = {
                 for (var t = 0; t < to.length; t++) {
                     var box = boxes_idx[to[t]];
                     var line = [
-                        parseInt(box.style.left),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset),
-                        Math.floor(parseInt(box.style.left) - hOffset),
-                        Math.floor(parseInt(box.style.top) + 0.5 * parseInt(box.clientHeight) + vOffset)
+                        parseInt(box.offsetLeft),
+                        Math.floor(parseInt(box.offsetTop) + 0.5 * parseInt(box.clientHeight) + vOffset),
+                        Math.floor(parseInt(box.offsetLeft) - hOffset),
+                        Math.floor(parseInt(box.offsetTop) + 0.5 * parseInt(box.clientHeight) + vOffset)
                     ];
                     lines.hTo.push(line);
                 }
