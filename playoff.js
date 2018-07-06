@@ -3,8 +3,12 @@ var playoff = {
     settings: {
         'winner_h_offset': 5,
         'loser_h_offset': 20,
+        'finish_winner_h_offset': 5,
+        'finish_loser_h_offset': 20,
         'winner_v_offset': -10,
         'loser_v_offset': 10,
+        'finish_winner_v_offset': -4,
+        'finish_loser_v_offset': 4,
         'loser_colour': '#ff0000',
         'winner_colour': '#00ff00',
         'place_winner_h_offset': 10,
@@ -12,7 +16,9 @@ var playoff = {
         'place_winner_v_offset': 8,
         'place_loser_v_offset': 14,
         'place_loser_colour': '#dddd00',
-        'place_winner_colour': '#00dddd'
+        'place_winner_colour': '#00dddd',
+        'finish_loser_colour': '#ff0000',
+        'finish_winner_colour': '#00ff00'
     },
 
     drawLine: function(ctx, line) {
@@ -39,7 +45,9 @@ var playoff = {
             'winner': {},
             'loser': {},
             'place-winner': {},
-            'place-loser': {}
+            'place-loser': {},
+            'finish-winner': {},
+            'finish-loser': {}
         };
         var boxes_idx = {};
         for (var b = 0; b < boxes.length; b++) {
@@ -60,6 +68,8 @@ var playoff = {
         var lineMethods = {
             'place-winner': 'to',
             'place-loser': 'to',
+            'finish-winner': 'midpoint',
+            'finish-loser': 'midpoint',
             'winner': 'midpoint',
             'loser': 'midpoint'
         };
