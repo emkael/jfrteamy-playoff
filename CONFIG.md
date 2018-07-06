@@ -25,10 +25,14 @@ Konfiguracja składa się, po kolei, z:
    + `"refresh"` - parametr odświeżania strony drabinki: `0` = wyłączone, liczba naturalna = interwał odświeżania, w sekundach
    + `"width"` i `"height"` - wymiary (w pikselach) miejsca rezerwowanego dla każdego meczu w widoku drabinki (`"width"` bezpośrednio wpływa na rozmieszczanie kolumn, wewnątrz każdej z kolumn mecze rozmieszczane są równomiernie, w zależnie od ich liczby)
    + `"margin"` - odstęp między w/w miejscem (minimalny - jak widać, w przypadku mniejszej liczby meczów w fazie, odstępy się dopasują)
+   + `"starting_position_indicators"`, `"finishing_position_indicators"` - włączają znaczniki miejsc początkowych/końcowych, wynikających ze zdefiniowanego schematu
  - sekcji `"canvas"`: ustawień rysowania linii
+   + `"winner_colour"`, `"loser_colour"` - kolory linii zwycięzców i przegranych
+   + `"place_winner_colour"`, `"place_loser_colour"` - kolory linii łączących początkowe miejsca drużyn z pierwszymi meczami (`loser` - drużyny mogące zagrać w więcej niż jednym meczu, czyli wybierane)
+   + `"finish_winner_colour"`, `"finish_loser_colour"` - kolory linii łączących końcowe miejsca drużyn z ich ostatnimi meczami
    + `"winner_h_offset"`, `"winner_v_offset"` - marginesy (poziomy i pionowy) rysowania linii zwycięzców (odpowiednio: pionowych i poziomych, względem środka obszaru)
    + `"loser_h_offset"`, `"loser_v_offset"` - analogiczne marginesy rysowania linii przegranych
-   + `"winner_colour"`, `"loser_colour"` - kolory linii zwycięzców i przegranych
+   + `"place_winner_h_offset"`, `"place_winner_v_offset"`, `"place_loser_h_offset"`, `"place_loser_v_offset"`, `"finish_winner_h_offset"`, `"finish_winner_v_offset"`, `"finish_loser_h_offset"`, `"finish_loser_v_offset"` - marginesy rysowania linii łączących mecze z miejscami początkowymi/końcowymi
  - sekcji `"database"`, zawierającej ustawienia połączenia bazy danych
  - sekcji `"goniec"`, zawierającej ustawienia Gońca (`"enabled"` przyjmuje wartości `0`/`1`)
 
