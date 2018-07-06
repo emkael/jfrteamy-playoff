@@ -144,7 +144,7 @@ class PlayoffGenerator(object):
             boxes += self.p_temp.get(
                 'STARTING_POSITION_BOX',
                 0,
-                int(float(order) / float(len(positions)) * dimensions[1]),
+                self.page['margin'] / 2 + int(float(order) / float(len(positions)) * dimensions[1]),
                 place,
                 self.p_temp.get('POSITION_BOX', place))
             order += 1
