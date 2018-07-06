@@ -200,8 +200,17 @@ class PlayoffGenerator(object):
                          int(row_no * match_height +
                              0.5 * (match_height - self.page['height']))
                 PlayoffLogger.get('generator').info(
-                    'grid box (%d, %d) position: (%d, %d)',
+                    'calculated grid box (%d, %d) position: (%d, %d)',
                     col_no, row_no, grid_x, grid_y)
+                if 'box_positioning' in self.canvas \
+                   and str(match) in self.canvas['box_positioning']:
+                    if isinstance(self.canvas['box_positioning'][str(match)], list):
+                        grid_x, grid_y = self.canvas['box_positioning'][str(match)][0:2]
+                    else:
+                        grid_y = float(self.canvas['box_positioning'][str(match)])
+                    PlayoffLogger.get('generator').info(
+                        'overridden box #%d position: (%d, %d)',
+                        match, grid_x, grid_y)
                 grid_boxes += self.get_match_box(
                     matches[match] if match is not None else None,
                     (grid_x, grid_y))
@@ -227,7 +236,7 @@ class PlayoffGenerator(object):
             canvas_size[0], canvas_size[1],
             ' '.join(['data-%s="%s"' % (
                 setting.replace('_', '-'), str(value)
-            ) for setting, value in self.canvas.iteritems()]),
+            ) for setting, value in self.canvas.iteritems() if not isinstance(value, dict)]),
             self.get_starting_position_box(starting_positions, canvas_size),
             grid_boxes,
             self.get_finishing_position_box(
