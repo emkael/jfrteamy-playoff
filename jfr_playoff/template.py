@@ -80,15 +80,16 @@ class PlayoffTemplateStrings(object):
 
     STARTING_POSITION_BOX = '''
     <div style="position: absolute; left: %dpx; top: %dpx" class="playoff_matchbox" data-id="place-%d">
+    %s
+    </div>
+    '''
+
+    POSITION_BOX = '''
     <table border="0" cellspacing="0">
-    <tr>
-    <td class="bdcc1" style="opacity: 0">&nbsp;</td>
-    </tr>
     <tr>
     <td class="bdc12" width="20">%d</td>
     </tr>
     </table>
-    </div>
     '''
 
     MATCH_BOX = '''
