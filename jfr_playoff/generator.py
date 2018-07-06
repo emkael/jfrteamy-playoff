@@ -150,6 +150,22 @@ class PlayoffGenerator(object):
             order += 1
         return boxes
 
+    def get_finishing_position_box(self, positions, position_info, dimensions, margin):
+        if 'finishing_position_indicators' not in self.page \
+           or not self.page['finishing_position_indicators']:
+            return ''
+        boxes = ''
+        order = 0
+        for place in sorted(positions):
+            boxes += self.p_temp.get(
+                'FINISHING_POSITION_BOX',
+                self.page['margin'] / 2 + int(float(order) / float(len(positions)) * dimensions[1]),
+                place,
+                ' '.join([str(p) for p in position_info[place]['winner']]),
+                ' '.join([str(p) for p in position_info[place]['loser']]),
+                self.p_temp.get('POSITION_BOX', place))
+            order += 1
+        return boxes
 
     def get_match_grid(self, dimensions, grid, matches):
         canvas_size = [
@@ -170,6 +186,8 @@ class PlayoffGenerator(object):
         grid_boxes = ''
         col_no = 0
         starting_positions = set()
+        finishing_positions = {}
+        finishing_places = set()
         for phase in grid:
             grid_x = col_no * self.page['width'] + (col_no + 1) * self.page['margin'] \
                      if self.page['starting_position_indicators'] \
@@ -190,10 +208,19 @@ class PlayoffGenerator(object):
                 if match is not None:
                     for team in matches[match].teams:
                         starting_positions.update(team.place)
+                    for place in matches[match].loser_place + matches[match].winner_place:
+                        if place not in finishing_positions:
+                            finishing_positions[place] = {
+                                'winner': [],
+                                'loser': []
+                            }
+                        finishing_places.add(place)
+                    for place in matches[match].winner_place:
+                        finishing_positions[place]['winner'].append(match)
+                    for place in matches[match].loser_place:
+                        finishing_positions[place]['loser'].append(match)
                 row_no += 1
             col_no += 1
-        starting_positions_boxes = self.get_starting_position_box(
-            starting_positions, canvas_size)
         return self.p_temp.get(
             'MATCH_GRID',
             canvas_size[0], canvas_size[1],
@@ -201,8 +228,11 @@ class PlayoffGenerator(object):
             ' '.join(['data-%s="%s"' % (
                 setting.replace('_', '-'), str(value)
             ) for setting, value in self.canvas.iteritems()]),
-            starting_positions_boxes,
-            grid_boxes
+            self.get_starting_position_box(starting_positions, canvas_size),
+            grid_boxes,
+            self.get_finishing_position_box(
+                finishing_places, finishing_positions, canvas_size, self.page['margin']
+            )
         )
 
     def get_leaderboard_row_class(self, position):

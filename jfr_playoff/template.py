@@ -52,6 +52,7 @@ class PlayoffTemplateStrings(object):
     <canvas width="%d" height="%d" id="playoff_canvas" %s></canvas>
     %s
     %s
+    %s
     <script src="sklady/playoff.js" type="text/javascript"></script>
     </div>
     '''
@@ -80,6 +81,12 @@ class PlayoffTemplateStrings(object):
 
     STARTING_POSITION_BOX = '''
     <div style="position: absolute; left: %dpx; top: %dpx" class="playoff_matchbox" data-id="place-%d">
+    %s
+    </div>
+    '''
+
+    FINISHING_POSITION_BOX = '''
+    <div style="position: absolute; right: 0px; top: %dpx" class="playoff_matchbox" data-id="finish-%d" data-finish-winner="%s" data-finish-loser="%s">
     %s
     </div>
     '''
