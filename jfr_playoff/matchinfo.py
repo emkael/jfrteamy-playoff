@@ -32,6 +32,8 @@ class MatchInfo:
                 self.info.loser_matches += self.config['teams'][i]['loser']
         self.info.winner_matches = list(set(self.info.winner_matches))
         self.info.loser_matches = list(set(self.info.loser_matches))
+        self.info.winner_place = self.config['winner'] if 'winner' in self.config else []
+        self.info.loser_place = self.config['loser'] if 'loser' in self.config else []
         self.info.teams = []
 
     def __fetch_match_link(self):

@@ -31,6 +31,8 @@ class Match(object):
     loser = None
     winner_matches = None
     loser_matches = None
+    winner_place = None
+    loser_place = None
 
     def __repr__(self):
         return (u'#%d (%s) %s [%s]' % (
