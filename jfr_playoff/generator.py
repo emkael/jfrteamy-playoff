@@ -190,7 +190,8 @@ class PlayoffGenerator(object):
         finishing_places = set()
         for phase in grid:
             grid_x = col_no * self.page['width'] + (col_no + 1) * self.page['margin'] \
-                     if self.page['starting_position_indicators'] \
+                     if 'starting_position_indicators' in self.page \
+                        and self.page['starting_position_indicators'] \
                         else col_no * (self.page['width'] + self.page['margin'])
             grid_boxes += self.get_phase_header(phase, grid_x)
             match_height = canvas_size[1] / len(phase.matches)
