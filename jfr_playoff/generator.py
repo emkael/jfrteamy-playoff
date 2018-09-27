@@ -57,6 +57,7 @@ class PlayoffGenerator(object):
             team_label = ' / '.join([
                 self.data.get_shortname(name) for name in
                 team.name.split('<br />')])
+            team_label = team_label[:30] + (team_label[30:] and '(...)')
             team_html = self.p_temp.get(
                 'MATCH_TEAM_LINK',
                 match.link, team.name, team_label) \
@@ -284,7 +285,8 @@ class PlayoffGenerator(object):
             event_label = self.p_temp.get('SWISS_DEFAULT_LABEL', event['position'])
             if 'label' in event and event['label'] is not None:
                 event_label = event['label']
-            info.append((self.p_temp.get('SWISS_LINK') \
+            info.append((self.p_temp.get('SWISS_LINK',
+                                         event['link'], event_label) \
                          if event['finished'] \
                          else self.p_temp.get(
                                  'SWISS_RUNNING_LINK',

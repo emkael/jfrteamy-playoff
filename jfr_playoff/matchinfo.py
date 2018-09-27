@@ -112,11 +112,31 @@ class MatchInfo:
         row = self.__find_table_row(self.info.link)
         if row is None:
             raise ValueError('table row not found')
-        score_cell = row.select('td.bdc')[-1]
-        scores = [
-            float(text) for text
-            in score_cell.contents
-            if isinstance(text, unicode)]
+        try:
+            scores = [
+                float(text) for text
+                in row.select('td.bdc')[-1].contents
+                if isinstance(text, unicode)]
+        except ValueError:
+            try:
+                # running single-segment
+                scores = [
+                    float(text.strip()) for text
+                    in row.select('td.bdcg a')[-1].contents
+                    if isinstance(text, unicode)]
+            except IndexError:
+                # static single-segment
+                scores = [
+                    float(text.strip()) for text
+                    in row.select('td.bdc a')[-1].contents
+                    if isinstance(text, unicode)]
+            # carry-over
+            carry_over = [
+                float(text.strip()) if len(text.strip()) > 0 else 0.0 for text
+                in row.select('td.bdc')[0].contents
+                if isinstance(text, unicode)]
+            for i in range(0, 2):
+                scores[i] += carry_over[i]
         team_names = [[text for text in link.contents
                        if isinstance(text, unicode)][0].strip(u'\xa0')
                       for link in row.select('a[onmouseover]')]
@@ -253,17 +273,21 @@ class MatchInfo:
         row = self.__find_table_row(self.info.link)
         if row is None:
             raise ValueError('table row not found')
-        cells = row.select('td.bdc')
-        segments = [cell for cell in cells if self.__has_segment_link(cell)]
-        towels = [cell for cell in cells if self.__has_towel_image(cell)]
-        if len(segments) == 0:
-            if len(towels) > 0:
-                PlayoffLogger.get('matchinfo').info(
-                    'HTML board count for match #%d: all towels', self.info.id)
-                return 1, 1 # entire match is toweled, so mark as finished
+        for selector in ['td.bdc', 'td.bdcg']:
+            cells = row.select(selector)
+            segments = [cell for cell in cells if self.__has_segment_link(cell)]
+            towels = [cell for cell in cells if self.__has_towel_image(cell)]
+            if len(segments) == 0:
+                if len(towels) > 0:
+                    PlayoffLogger.get('matchinfo').info(
+                        'HTML board count for match #%d: all towels', self.info.id)
+                    return 1, 1 # entire match is toweled, so mark as finished
             else:
-                raise ValueError('segments not found')
+                break
+        if len(segments) == 0:
+            raise ValueError('segments not found')
         running_segments = row.select('td.bdca')
+        # FIXME: running single-segment match board count
         running_boards = sum([self.__get_html_running_boards(segment) for segment in running_segments])
         finished_segments = []
         boards_in_segment = None
