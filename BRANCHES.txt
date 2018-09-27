@@ -13,9 +13,8 @@ Względem ostatniego sezonu
 [devel]:
  - [i18n]
  - [bugfixes]
- - obszerne logowanie
+ - obszerne komunikaty diagnostyczne
  - poprawki z Sopotu:
-   + bugfix dla linków do swissów
    + skracanie wyświetlania długich nazw teamów (> 30 znaków, TODO: parametryzacja długości)
    + obsługa meczów jednosegmentowych
 
