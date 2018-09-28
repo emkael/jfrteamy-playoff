@@ -245,6 +245,15 @@ class MatchInfo:
     def __get_html_running_boards(self, cell):
         return int(cell.contents[-1].strip())
 
+    def __get_html_segment_board_count(self, segment_url):
+        segment_content = p_remote.fetch(segment_url)
+        board_rows = [row for row in segment_content.find_all('tr') if len(row.select('td.bdcc a.zb')) > 0]
+        board_count = len(board_rows)
+        played_boards = len([
+            row for row in board_rows if len(
+                ''.join([cell.text.strip() for cell in row.select('td.bdc')])) > 0])
+        return played_boards, board_count
+
     def __get_finished_info(self, cell):
         segment_link = cell.select('a[href]')
         if len(segment_link) > 0:
@@ -252,12 +261,7 @@ class MatchInfo:
                 r'\.htm$', '.html',
                 urljoin(self.info.link, segment_link[0]['href']))
             try:
-                segment_content = p_remote.fetch(segment_url)
-                board_rows = [row for row in segment_content.find_all('tr') if len(row.select('td.bdcc a.zb')) > 0]
-                board_count = len(board_rows)
-                played_boards = len([
-                    row for row in board_rows if len(
-                        ''.join([cell.text.strip() for cell in row.select('td.bdc')])) > 0])
+                played_boards, board_count = self.__get_html_segment_board_count(segment_url)
                 PlayoffLogger.get('matchinfo').info(
                     'HTML played boards count for segment: %d/%d',
                     played_boards, board_count)
@@ -373,6 +377,7 @@ class MatchInfo:
     def __determine_running_link(self):
         if self.info.link is None:
             return
+        match_link = self.info.link
         link_match = re.match(r'^(.*)runda(\d+)\.html$', self.info.link)
         if link_match:
             try:
@@ -390,6 +395,21 @@ class MatchInfo:
                     PlayoffLogger.get('matchinfo').warning(
                         'cannot determine running link from HTML for match #%d: %s(%s)',
                         self.info.id, type(e).__name__, str(e))
+            if self.info.link != match_link:
+                # we've detected a running segment link
+                # we should check if the segment's uploaded live
+                try:
+                    boards_played, board_count = self.__get_html_segment_board_count(re.sub('\.htm$', '.html', self.info.link))
+                except IOError as e:
+                    PlayoffLogger.get('matchinfo').warning(
+                        'cannot determine running link (%s) board count for match #%d: %s(%s)',
+                        self.info.link, self.info.id, type(e).__name__, str(e))
+                    boards_played = 0
+                if not boards_played:
+                    PlayoffLogger.get('matchinfo').warning(
+                        'running link (%s) for match #%d is not live, reverting to match link (%s)',
+                        self.info.link, self.info.id, match_link)
+                    self.info.link = match_link
 
     def set_phase_link(self, phase_link):
         if self.info.link is None:
