@@ -17,6 +17,7 @@ Względem ostatniego sezonu
  - poprawki z Sopotu:
    + skracanie wyświetlania długich nazw teamów (> 30 znaków, TODO: parametryzacja długości)
    + obsługa meczów jednosegmentowych
+ - nielinkowanie do segmentów, które nie wysyłają wyników na żywo
 
 [position-boxes]:
  - [devel]
