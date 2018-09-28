@@ -117,8 +117,7 @@ class PlayoffGenerator(object):
             ] if match.loser_matches is not None else []
             place_loser_link = []
             place_winner_link = []
-            if 'starting_position_indicators' in self.page \
-               and self.page['starting_position_indicators']:
+            if self.page.get('starting_position_indicators', None):
                 for team in match.teams:
                     if len(team.place) > 0:
                         place_link = ['place-' + str(pl) for pl in team.place]
@@ -193,8 +192,7 @@ class PlayoffGenerator(object):
         finishing_places = set()
         for phase in grid:
             grid_x = col_no * self.page['width'] + (col_no + 1) * self.page['margin'] \
-                     if 'starting_position_indicators' in self.page \
-                        and self.page['starting_position_indicators'] \
+                     if self.page.get('starting_position_indicators', None) \
                         else col_no * (self.page['width'] + self.page['margin'])
             grid_boxes += self.get_phase_header(phase, grid_x)
             match_height = canvas_size[1] / len(phase.matches)
@@ -206,8 +204,7 @@ class PlayoffGenerator(object):
                 PlayoffLogger.get('generator').info(
                     'calculated grid box (%d, %d) position: (%d, %d)',
                     col_no, row_no, grid_x, grid_y)
-                if 'box_positioning' in self.canvas \
-                   and str(match) in self.canvas['box_positioning']:
+                if str(match) in self.canvas.get('box_positioning', {}):
                     if isinstance(self.canvas['box_positioning'][str(match)], list):
                         grid_x, grid_y = self.canvas['box_positioning'][str(match)][0:2]
                     else:

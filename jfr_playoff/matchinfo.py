@@ -32,8 +32,8 @@ class MatchInfo:
                 self.info.loser_matches += self.config['teams'][i]['loser']
         self.info.winner_matches = list(set(self.info.winner_matches))
         self.info.loser_matches = list(set(self.info.loser_matches))
-        self.info.winner_place = self.config['winner'] if 'winner' in self.config else []
-        self.info.loser_place = self.config['loser'] if 'loser' in self.config else []
+        self.info.winner_place = self.config.get('winner', [])
+        self.info.loser_place = self.config.get('loser', [])
         self.info.teams = []
 
     def __fetch_match_link(self):
@@ -215,8 +215,8 @@ class MatchInfo:
                     self.info.id, type(e).__name__, str(e))
                 self.info.teams = self.__get_config_teams(self.info.teams)
         for team in range(0, len(self.info.teams)):
-            if 'place' in self.config['teams'][team]:
-                self.info.teams[team].place = self.config['teams'][team]['place']
+            self.info.teams[team].place = self.config['teams'][team].get(
+                'place', self.info.teams[team].place)
 
 
     def __get_db_board_count(self):
