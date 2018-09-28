@@ -193,10 +193,7 @@ class MatchInfo:
         if scores_fetched:
             PlayoffLogger.get('matchinfo').info(
                 'pre-defined scores for match #%d fetched', self.info.id)
-            if 'running' in self.config:
-                self.info.running = int(self.config['running'])
-            else:
-                self.info.running = -1
+            self.info.running = int(self.config.get('running', -1))
         if not teams_fetched:
             try:
                 try:

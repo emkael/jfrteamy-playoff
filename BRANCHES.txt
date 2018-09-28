@@ -15,7 +15,7 @@ Względem ostatniego sezonu
  - [bugfixes]
  - obszerne komunikaty diagnostyczne
  - poprawki z Sopotu:
-   + skracanie wyświetlania długich nazw teamów (> 30 znaków, TODO: parametryzacja długości)
+   + skracanie wyświetlania długich nazw teamów
    + obsługa meczów jednosegmentowych
  - nielinkowanie do segmentów, które nie wysyłają wyników na żywo
 

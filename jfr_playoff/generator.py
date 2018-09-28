@@ -57,8 +57,7 @@ class PlayoffGenerator(object):
             team_label = ' / '.join([
                 self.data.get_shortname(name) for name in
                 team.name.split('<br />')])
-            label_max_length = self.page['label_length_limit'] \
-                               if 'label_length_limit' in self.page else 0
+            label_max_length = self.page.get('label_length_limit', 0)
             if label_max_length:
                 team_label = team_label[:label_max_length] + (team_label[label_max_length:] and '(...)')
             team_html = self.p_temp.get(
@@ -286,7 +285,7 @@ class PlayoffGenerator(object):
         info = []
         for event in self.data.get_swiss_info():
             event_label = self.p_temp.get('SWISS_DEFAULT_LABEL', event['position'])
-            if 'label' in event and event['label'] is not None:
+            if event.get('label', None):
                 event_label = event['label']
             info.append((self.p_temp.get('SWISS_LINK',
                                          event['link'], event_label) \
