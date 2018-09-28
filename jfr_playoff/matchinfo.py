@@ -138,6 +138,9 @@ class MatchInfo:
                 float(text.strip()) if len(text.strip()) > 0 else 0.0 for text
                 in row.select('td.bdc')[0].contents
                 if isinstance(text, unicode)]
+            if len(carry_over) < 2:
+                # no carry-over, possibly no carry-over cells or empty
+                carry_over = [0.0, 0.0]
             for i in range(0, 2):
                 scores[i] += carry_over[i]
         team_names = [[text for text in link.contents
