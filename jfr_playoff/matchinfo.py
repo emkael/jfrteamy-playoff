@@ -292,7 +292,6 @@ class MatchInfo:
         if len(segments) == 0:
             raise ValueError('segments not found')
         running_segments = row.select('td.bdca')
-        # FIXME: running single-segment match board count
         running_boards = sum([self.__get_html_running_boards(segment) for segment in running_segments])
         finished_segments = []
         boards_in_segment = None
@@ -303,10 +302,14 @@ class MatchInfo:
                     finished_segments.append(segment)
                 if boards_in_segment is None and boards > 0:
                     boards_in_segment = boards
-        PlayoffLogger.get('matchinfo').info(
-            'HTML board count for match #%d, found: %d finished segments, %d towels, %d boards per segment and %d boards in running segment',
-            self.info.id, len(finished_segments), len(towels), boards_in_segment, running_boards)
-        total_boards = (len(segments) + len(towels) + len(running_segments)) * boards_in_segment
+        if 'bdcg' in segments[0]['class']:
+            # only a single-segment match will yield td.bdcg cells with segment scores
+            total_boards = boards_in_segment
+        else:
+            PlayoffLogger.get('matchinfo').info(
+                'HTML board count for match #%d, found: %d finished segments, %d towels, %d boards per segment and %d boards in running segment',
+                self.info.id, len(finished_segments), len(towels), boards_in_segment, running_boards)
+            total_boards = (len(segments) + len(towels) + len(running_segments)) * boards_in_segment
         played_boards = (len(towels) + len(finished_segments)) * boards_in_segment + running_boards
         PlayoffLogger.get('matchinfo').info(
             'HTML board count for match #%d: %d/%d',
