@@ -1,0 +1,25 @@
+Względem ostatniego sezonu
+
+[master] [v1.1.2]:
+ - oznaczenia (style) w tabeli końcowej
+
+[bugfixes]:
+ - poprawki wymiarów (całego obszaru rysowania oraz odstępów między obszarami poszczególnych meczów)
+
+[i18n]:
+ - nowy silnik szablonów
+ - tłumaczenia
+
+[devel]:
+ - [i18n]
+ - [bugfixes]
+ - obszerne komunikaty diagnostyczne
+ - poprawki z Sopotu:
+   + skracanie wyświetlania długich nazw teamów (> 30 znaków, TODO: parametryzacja długości)
+   + obsługa meczów jednosegmentowych
+ - nielinkowanie do segmentów, które nie wysyłają wyników na żywo
+
+[position-boxes]:
+ - [devel]
+ - możliwość wyświetlania elementów grafu dla pozycji początkowych i pozycji końcowych
+ - możliwość dowolnego pozycjonowania meczów (zarówno w pionie w ramach fazy, jak i o zupełnie dowolnych współrzędnych)

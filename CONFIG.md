@@ -25,6 +25,7 @@ Konfiguracja składa się, po kolei, z:
    + `"refresh"` - parametr odświeżania strony drabinki: `0` = wyłączone, liczba naturalna = interwał odświeżania, w sekundach
    + `"width"` i `"height"` - wymiary (w pikselach) miejsca rezerwowanego dla każdego meczu w widoku drabinki (`"width"` bezpośrednio wpływa na rozmieszczanie kolumn, wewnątrz każdej z kolumn mecze rozmieszczane są równomiernie, w zależnie od ich liczby)
    + `"margin"` - odstęp między w/w miejscem (minimalny - jak widać, w przypadku mniejszej liczby meczów w fazie, odstępy się dopasują)
+   + `"label_length_limit"` - maksymalna liczba znaków wyświetlanych jako skrócona nazwa drużyn(y) w schemacie (`0` lub brak wartości oznacza brak limitu)
    + `"starting_position_indicators"`, `"finishing_position_indicators"` - włączają znaczniki miejsc początkowych/końcowych, wynikających ze zdefiniowanego schematu
  - sekcji `"canvas"`: ustawień rysowania linii
    + `"winner_colour"`, `"loser_colour"` - kolory linii zwycięzców i przegranych

@@ -57,7 +57,10 @@ class PlayoffGenerator(object):
             team_label = ' / '.join([
                 self.data.get_shortname(name) for name in
                 team.name.split('<br />')])
-            team_label = team_label[:30] + (team_label[30:] and '(...)')
+            label_max_length = self.page['label_length_limit'] \
+                               if 'label_length_limit' in self.page else 0
+            if label_max_length:
+                team_label = team_label[:label_max_length] + (team_label[label_max_length:] and '(...)')
             team_html = self.p_temp.get(
                 'MATCH_TEAM_LINK',
                 match.link, team.name, team_label) \
