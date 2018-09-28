@@ -169,11 +169,12 @@ class TournamentInfo:
                 PlayoffLogger.get('tournamentinfo').warning(
                     'cannot determine tournament results from HTML: %s(%s)',
                     type(e).__name__, str(e))
-        if self.is_finished() and 'final_positions' in self.settings:
+        if self.is_finished():
+            final_positions = self.settings.get('final_positions', [])
             PlayoffLogger.get('tournamentinfo').info(
                 'setting final positions from tournament results: %s',
-                self.settings['final_positions'])
-            for position in self.settings['final_positions']:
+                final_positions)
+            for position in final_positions:
                 if len(teams) >= position:
                     teams[position-1].append(position)
         return teams
