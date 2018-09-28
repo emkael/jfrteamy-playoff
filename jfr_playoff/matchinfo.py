@@ -116,6 +116,7 @@ class MatchInfo:
                 in row.select('td.bdc')[-1].contents
                 if isinstance(text, unicode)]
         except ValueError:
+            # single-segment match
             try:
                 # running single-segment
                 scores = [
@@ -272,11 +273,14 @@ class MatchInfo:
             segments = [cell for cell in cells if self.__has_segment_link(cell)]
             towels = [cell for cell in cells if self.__has_towel_image(cell)]
             if len(segments) == 0:
+                # in single-segment match, there are no td.bdc cells with segment links
+                # but maybe it's a multi-segment match with towels
                 if len(towels) > 0:
                     PlayoffLogger.get('matchinfo').info(
                         'HTML board count for match #%d: all towels', self.info.id)
                     return 1, 1 # entire match is toweled, so mark as finished
             else:
+                # not a single-segment match, no need to look for td.bdcg cells
                 break
         if len(segments) == 0:
             raise ValueError('segments not found')
