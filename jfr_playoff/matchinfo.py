@@ -124,11 +124,15 @@ class MatchInfo:
                     in row.select('td.bdcg a')[-1].contents
                     if isinstance(text, unicode)]
             except IndexError:
-                # static single-segment
-                scores = [
-                    float(text.strip()) for text
-                    in row.select('td.bdc a')[-1].contents
-                    if isinstance(text, unicode)]
+                try:
+                    # static single-segment
+                    scores = [
+                        float(text.strip()) for text
+                        in row.select('td.bdc a')[-1].contents
+                        if isinstance(text, unicode)]
+                except IndexError:
+                    # toweled single-segment
+                    scores = [0.0, 0.0]
             # carry-over
             carry_over = [
                 float(text.strip()) if len(text.strip()) > 0 else 0.0 for text
