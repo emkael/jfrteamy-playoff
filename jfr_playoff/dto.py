@@ -8,8 +8,11 @@ def coalesce(*arg):
 
 
 class Team(object):
-    name = ''
+    name = None
     score = 0.0
+
+    def __init__(self):
+        self.name = []
 
     def __unicode__(self):
         return u'%s (%.1f)' % (coalesce(self.name, '<None>'), self.score)

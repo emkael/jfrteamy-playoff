@@ -55,23 +55,23 @@ class PlayoffGenerator(object):
         for team in match.teams:
             score_html = self.p_temp.get('MATCH_SCORE', team.score)
             team_label = ' / '.join([
-                self.data.get_shortname(name) for name in
-                team.name.split('<br />')])
+                self.data.get_shortname(name) for name in team.name])
+            team_name = '<br />'.join(team.name)
             label_max_length = self.page.get('label_length_limit', 0)
             if label_max_length:
                 team_label = team_label[:label_max_length] + (team_label[label_max_length:] and '(...)')
             team_html = self.p_temp.get(
                 'MATCH_TEAM_LINK',
-                match.link, team.name, team_label) \
+                match.link, team_name, team_label) \
                 if match.link is not None \
                    else self.p_temp.get(
                            'MATCH_TEAM_NON_LINK',
-                           team.name, team_label)
+                           team_name, team_label)
             rows += self.p_temp.get(
                 'MATCH_TEAM_ROW',
                 ' '.join([
-                    'winner' if team.name == match.winner else '',
-                    'loser' if team.name == match.loser else ''
+                    'winner' if match.winner in team.name else '',
+                    'loser' if match.loser in team.name else ''
                 ]).strip(),
                 team_html,
                 self.p_temp.get(
