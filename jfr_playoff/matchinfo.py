@@ -77,8 +77,9 @@ class MatchInfo:
         row = self.database.fetch(
             self.config['database'], p_sql.MATCH_RESULTS,
             (self.config['table'], self.config['round']))
-        teams[0].name = [row[0]]
-        teams[1].name = [row[1]]
+        for i in range(0, 2):
+            teams[i].name = [row[i]]
+            teams[i].known_teams = 1
         if fetch_scores:
             teams[0].score = row[3] + row[5]
             teams[1].score = row[4] + row[6]
@@ -148,6 +149,7 @@ class MatchInfo:
                       for link in row.select('a[onmouseover]')]
         for i in range(0, 2):
             teams[i].name = [team_names[i]]
+            teams[i].known_teams = 1
             teams[i].score = scores[i]
         PlayoffLogger.get('matchinfo').info(
             'HTML scores for match #%d: %s',
@@ -174,12 +176,8 @@ class MatchInfo:
                     match_teams += [
                         self.teams[place-1][0]
                         for place in self.config['teams'][i]['place']]
-            known_teams = [team for team in match_teams if team is not None]
-            if len(known_teams) > 0:
-                teams[i].name = [team if team is not None
-                                 else '??' for team in match_teams]
-            else:
-                teams[i].name = ['']
+            teams[i].name = match_teams
+            teams[i].known_teams = len([team for team in match_teams if team is not None])
         PlayoffLogger.get('matchinfo').info(
             'config scores for match #%d: %s',
             self.info.id, teams)
@@ -340,8 +338,8 @@ class MatchInfo:
                                    else boards_played
 
     def __determine_outcome(self):
-        if (len(self.info.teams[0].name) == 1) \
-           and (len(self.info.teams[1].name) == 1):
+        if (self.info.teams[0].known_teams == 1) \
+           and (self.info.teams[1].known_teams == 1):
             if self.info.running == -1:
                 if self.info.teams[0].score > self.info.teams[1].score:
                     self.info.winner = self.info.teams[0].name[0]

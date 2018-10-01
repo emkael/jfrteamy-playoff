@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from jfr_playoff.dto import coalesce
 from jfr_playoff.template import PlayoffTemplate
 from jfr_playoff.data import PlayoffData
 from jfr_playoff.logger import PlayoffLogger
@@ -54,9 +55,11 @@ class PlayoffGenerator(object):
         rows = ''
         for team in match.teams:
             score_html = self.p_temp.get('MATCH_SCORE', team.score)
+            teams = [coalesce(name, '??') for name in team.name]
             team_label = ' / '.join([
-                self.data.get_shortname(name) for name in team.name])
-            team_name = '<br />'.join(team.name)
+                self.data.get_shortname(name) if name is not None else '??' for name in team.name]) \
+                if team.known_teams > 0 else ''
+            team_name = '<br />'.join(teams)
             label_max_length = self.page.get('label_length_limit', 0)
             if label_max_length:
                 team_label = team_label[:label_max_length] + (team_label[label_max_length:] and '(...)')
@@ -70,8 +73,8 @@ class PlayoffGenerator(object):
             rows += self.p_temp.get(
                 'MATCH_TEAM_ROW',
                 ' '.join([
-                    'winner' if match.winner in team.name else '',
-                    'loser' if match.loser in team.name else ''
+                    'winner' if match.winner in teams else '',
+                    'loser' if match.loser in teams else ''
                 ]).strip(),
                 team_html,
                 self.p_temp.get(

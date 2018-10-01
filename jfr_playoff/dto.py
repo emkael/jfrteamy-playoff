@@ -10,6 +10,7 @@ def coalesce(*arg):
 class Team(object):
     name = None
     score = 0.0
+    known_teams = 0
 
     def __init__(self):
         self.name = []
