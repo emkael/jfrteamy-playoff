@@ -57,6 +57,30 @@ class PlayoffGenerator(object):
             template = 'MATCH_TEAM_LABEL'
         return self.p_temp.get(template, team_name)
 
+    def __shorten_labels(self, labels, limit, separator, ellipsis):
+        if limit > 0:
+            current_length = 0
+            shortened = []
+            for l in range(0, len(labels)):
+                if current_length + len(labels[l]) > limit:
+                    # current label won't fit within limit, shorten it and stop
+                    shortened.append(labels[l][0:limit-current_length] + ellipsis)
+                    break
+                else:
+                    # current label fits, add it to output
+                    shortened.append(labels[l])
+                    current_length += len(labels[l])
+                    if l < len(labels) - 1:
+                        # if it's not the last label, separator will be added
+                        # if it was the last label, next condition won't run and ellipsis won't be added
+                        current_length += len(separator)
+                    if current_length > limit:
+                        # if separator puts us over the limit, add ellipsis and stop
+                        shortened.append(ellipsis)
+                        break
+            labels = shortened
+        return labels
+
     def get_match_table(self, match):
         rows = ''
         for team in match.teams:
@@ -97,6 +121,9 @@ class PlayoffGenerator(object):
                     for l in range(0, len(labels)):
                         # fill any remaining empty labels (i.e. these which had empty predictions available) with placeholders
                         labels[l] = coalesce(labels[l], '??')
+                    # shorten concatenated label to specified combined length
+                    labels = self.__shorten_labels(labels, self.page.get('label_length_limit', 0), label_separator, '(...)')
+                    for l in range(0, len(labels)):
                         # concatenate labels, assigning appropriate classes to predicted teams
                         team_label.append(self.__get_team_label(
                             labels[l],
