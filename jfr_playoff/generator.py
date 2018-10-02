@@ -51,6 +51,12 @@ class PlayoffGenerator(object):
                     'PAGE_BODY_FOOTER',
                     datetime.now().strftime('%Y-%m-%d o %H:%M:%S'))))
 
+    def __get_team_label(self, team_name, template='MATCH_TEAM_LABEL'):
+        if not self.page.get('predict_teams', None):
+            # override template if team predictions are not enabled
+            template = 'MATCH_TEAM_LABEL'
+        return self.p_temp.get(template, team_name)
+
     def get_match_table(self, match):
         rows = ''
         for team in match.teams:
