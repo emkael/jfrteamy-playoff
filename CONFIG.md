@@ -26,6 +26,7 @@ Konfiguracja składa się, po kolei, z:
    + `"width"` i `"height"` - wymiary (w pikselach) miejsca rezerwowanego dla każdego meczu w widoku drabinki (`"width"` bezpośrednio wpływa na rozmieszczanie kolumn, wewnątrz każdej z kolumn mecze rozmieszczane są równomiernie, w zależnie od ich liczby)
    + `"margin"` - odstęp między w/w miejscem (minimalny - jak widać, w przypadku mniejszej liczby meczów w fazie, odstępy się dopasują)
    + `"label_length_limit"` - maksymalna liczba znaków wyświetlanych jako skrócona nazwa drużyn(y) w schemacie (`0` lub brak wartości oznacza brak limitu)
+   + `"predict_teams"` - flaga, jeśli włączona (`1`), w kolejnej fazie wypełniane są nazwy drużyn prowadzących/przegrywających w trwających meczach tak, jakby mecz miał się skończyć aktualnym wynikiem (etykiety takich drużyn mają nadaną osobną klasę CSS)
  - sekcji `"canvas"`: ustawień rysowania linii
    + `"winner_h_offset"`, `"winner_v_offset"` - marginesy (poziomy i pionowy) rysowania linii zwycięzców (odpowiednio: pionowych i poziomych, względem środka obszaru)
    + `"loser_h_offset"`, `"loser_v_offset"` - analogiczne marginesy rysowania linii przegranych

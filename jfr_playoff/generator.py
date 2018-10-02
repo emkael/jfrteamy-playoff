@@ -87,6 +87,7 @@ class PlayoffGenerator(object):
             # the easy part: team score cell
             score_html = self.p_temp.get('MATCH_SCORE', team.score)
             # the hard part begins here.
+            # TODO: should separators and ellipsis indicators be configurable?
             team_label = [] # label is what's shown in the table cell
             label_separator = ' / '
             team_name = []  # name is what's shown in the tooltip
