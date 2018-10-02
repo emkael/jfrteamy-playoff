@@ -159,6 +159,7 @@ class MatchInfo:
     def __get_config_teams(self, teams):
         for i in range(0, 2):
             match_teams = []
+            possible_teams = []
             if isinstance(self.config['teams'][i], basestring):
                 teams[i].name = [self.config['teams'][i]]
             elif isinstance(self.config['teams'][i], list):
@@ -168,15 +169,22 @@ class MatchInfo:
                     match_teams += [
                         MatchInfo.matches[winner_match].winner
                         for winner_match in self.config['teams'][i]['winner']]
+                    possible_teams += [
+                        MatchInfo.matches[winner_match].possible_winner
+                        for winner_match in self.config['teams'][i]['winner']]
                 if 'loser' in self.config['teams'][i]:
                     match_teams += [
                         MatchInfo.matches[loser_match].loser
+                        for loser_match in self.config['teams'][i]['loser']]
+                    possible_teams += [
+                        MatchInfo.matches[loser_match].possible_loser
                         for loser_match in self.config['teams'][i]['loser']]
                 if 'place' in self.config['teams'][i]:
                     match_teams += [
                         self.teams[place-1][0]
                         for place in self.config['teams'][i]['place']]
             teams[i].name = match_teams
+            teams[i].possible_name = possible_teams
             teams[i].known_teams = len([team for team in match_teams if team is not None])
         PlayoffLogger.get('matchinfo').info(
             'config scores for match #%d: %s',
@@ -347,6 +355,13 @@ class MatchInfo:
                 else:
                     self.info.loser = self.info.teams[0].name[0]
                     self.info.winner = self.info.teams[1].name[0]
+            elif self.info.running > 0:
+                if self.info.teams[0].score > self.info.teams[1].score:
+                    self.info.possible_winner = self.info.teams[0].name[0]
+                    self.info.possible_loser = self.info.teams[1].name[0]
+                elif self.info.teams[0].score < self.info.teams[1].score:
+                    self.info.possible_loser = self.info.teams[0].name[0]
+                    self.info.possible_winner = self.info.teams[1].name[0]
 
     def __get_db_running_link(self, prefix, round_no):
         current_segment = int(
