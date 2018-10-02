@@ -23,3 +23,7 @@ Względem ostatniego sezonu
  - [devel]
  - możliwość wyświetlania elementów grafu dla pozycji początkowych i pozycji końcowych
  - możliwość dowolnego pozycjonowania meczów (zarówno w pionie w ramach fazy, jak i o zupełnie dowolnych współrzędnych)
+
+[next-round-prognosis]
+ - [devel]
+ - wypełnianie wyszarszonym kolorem nazw drużyn następnej rundy, gdy mecz obecnej rundy już trwa
