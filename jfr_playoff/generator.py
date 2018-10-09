@@ -95,6 +95,7 @@ class PlayoffGenerator(object):
             team_label = [] # label is what's shown in the table cell
             label_separator = self.team_box_settings.get('label_separator', ' / ')
             label_placeholder = self.team_box_settings.get('label_placeholder', '??')
+            label_length_limit = self.team_box_settings.get('label_length_limit', self.page.get('label_length_limit', 0))
             label_ellipsis = self.team_box_settings.get('label_ellipsis', '(...)')
             team_name = []  # name is what's shown in the tooltip
             name_separator = self.team_box_settings.get('name_separator', '<br />')
@@ -134,7 +135,7 @@ class PlayoffGenerator(object):
                         # fill any remaining empty labels (i.e. these which had empty predictions available) with placeholders
                         labels[l] = coalesce(labels[l], label_placeholder)
                     # shorten concatenated label to specified combined length
-                    labels = self.__shorten_labels(labels, self.team_box_settings.get('label_length_limit', 0), label_separator, label_ellipsis)
+                    labels = self.__shorten_labels(labels, label_length_limit, label_separator, label_ellipsis)
                     PlayoffLogger.get('generator').info('shortened team labels: %s', labels)
                     for l in range(0, len(labels)):
                         # concatenate labels, assigning appropriate classes to predicted teams
