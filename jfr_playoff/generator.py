@@ -122,11 +122,11 @@ class PlayoffGenerator(object):
                             labels[l] = label_placeholder
                 # count how many teams are eligible (how many non-predicted teams are there)
                 known_teams = len(is_label_predicted) - sum(is_label_predicted)
-                PlayoffLogger.get('generator').info('detected %d known teams, predicted mask: %s', known_teams, is_label_predicted)
-                # sort labels to move eligible teams in front of predicted teams
-                # TODO: should this be optional?
-                labels = [label for i, label in enumerate(labels) if not is_label_predicted[i]] \
-                         + [label for i, label in enumerate(labels) if is_label_predicted[i]]
+                PlayoffLogger.get('generator').info('detected %d known team(s), predicted mask: %s', known_teams, is_label_predicted)
+                if self.team_box_settings.get('sort_eligible_first', True):
+                    # sort labels to move eligible teams in front of predicted teams
+                    labels = [label for i, label in enumerate(labels) if not is_label_predicted[i]] \
+                             + [label for i, label in enumerate(labels) if is_label_predicted[i]]
                 PlayoffLogger.get('generator').info('team labels: %s', labels)
                 if len([label for label in labels if label is not None]):
                     # we have at least one known/predicted team
@@ -138,9 +138,14 @@ class PlayoffGenerator(object):
                     PlayoffLogger.get('generator').info('shortened team labels: %s', labels)
                     for l in range(0, len(labels)):
                         # concatenate labels, assigning appropriate classes to predicted teams
-                        team_label.append(self.__get_team_label(
-                            labels[l],
-                            'MATCH_PREDICTED_TEAM_LABEL' if l >= known_teams else 'MATCH_TEAM_LABEL'))
+                        if self.team_box_settings.get('sort_eligible_first', True):
+                            team_label.append(self.__get_team_label(
+                                labels[l],
+                                'MATCH_PREDICTED_TEAM_LABEL' if l >= known_teams else 'MATCH_TEAM_LABEL'))
+                        else:
+                            team_label.append(self.__get_team_label(
+                                labels[l],
+                                'MATCH_PREDICTED_TEAM_LABEL' if is_label_predicted[l] else 'MATCH_TEAM_LABEL'))
                 # team names for tooltip
                 for name in team.name:
                     if name:

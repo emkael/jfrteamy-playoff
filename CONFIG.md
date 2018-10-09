@@ -33,6 +33,7 @@ Konfiguracja składa się, po kolei, z:
      * `"label_ellipsis"` - ciąg wyświetlany na końcu skróconej etykiety teamów, gdy ustawienie `label_length_limit` ją skróciło (domyślnie `(...)`)
      * `"name_separator"` - ciąg rozdzielający pełne nazwy teamów w etykiecie po najechaniu na skrócone nazwy w schemacie (domyślnie `<br />`)
      * `"name_prefix"` - ciąg poprzedzający każdą pełną nazwę teamów w etykiecie po najechaniu (domyślnie wcięcie `&nbsp;&nbsp;`)
+     * `"sort_eligible_first"` - flaga włączająca wyświetlanie teamów zakwalifikowanych do danej fazy (tj. z zakończonym meczem bieżącej fazy) przed teamami z trwających meczów (domyślnie włączona)
  - sekcji `"canvas"`: ustawień rysowania linii
    + `"winner_h_offset"`, `"winner_v_offset"` - marginesy (poziomy i pionowy) rysowania linii zwycięzców (odpowiednio: pionowych i poziomych, względem środka obszaru)
    + `"loser_h_offset"`, `"loser_v_offset"` - analogiczne marginesy rysowania linii przegranych
