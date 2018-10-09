@@ -85,8 +85,12 @@ class PlayoffGenerator(object):
     def get_match_table(self, match):
         rows = ''
         for team in match.teams:
+            PlayoffLogger.get('generator').info(
+                'generating HTML for team object: %s', team)
             # the easy part: team score cell
             score_html = self.p_temp.get('MATCH_SCORE', team.score)
+            PlayoffLogger.get('generator').info(
+                'score HTML for team object: %s', score_html.strip())
             # the hard part begins here.
             team_label = [] # label is what's shown in the table cell
             label_separator = self.team_box_settings.get('label_separator', ' / ')
@@ -96,6 +100,7 @@ class PlayoffGenerator(object):
             name_separator = self.team_box_settings.get('name_separator', '<br />')
             name_prefix = self.team_box_settings.get('name_prefix', '&nbsp;&nbsp;') # prefix (indent) for team names in the tooltip
             if (team.known_teams == 0) and not self.team_box_settings.get('predict_teams', False):
+                PlayoffLogger.get('generator').info('no eligible teams and predictions are disabled')
                 # we've got no teams eligible for the match and the prediction option is disabled
                 team_label = ''
                 team_name = ''
@@ -104,7 +109,9 @@ class PlayoffGenerator(object):
                 is_label_predicted = [name is None for name in team.name]
                 # fetch labels (shortnames) for teams in both lists
                 labels = [self.data.get_shortname(name) if name else None for name in team.name]
+                PlayoffLogger.get('generator').info('eligible team labels: %s', labels)
                 predicted_labels = [self.data.get_shortname(name) if name else None for name in team.possible_name]
+                PlayoffLogger.get('generator').info('predicted team labels: %s', predicted_labels)
                 for l in range(0, len(labels)):
                     if labels[l] is None:
                         if self.team_box_settings.get('predict_teams', False) and (len(predicted_labels) > l):
@@ -115,10 +122,12 @@ class PlayoffGenerator(object):
                             labels[l] = label_placeholder
                 # count how many teams are eligible (how many non-predicted teams are there)
                 known_teams = len(is_label_predicted) - sum(is_label_predicted)
+                PlayoffLogger.get('generator').info('detected %d known teams, predicted mask: %s', known_teams, is_label_predicted)
                 # sort labels to move eligible teams in front of predicted teams
                 # TODO: should this be optional?
                 labels = [label for i, label in enumerate(labels) if not is_label_predicted[i]] \
                          + [label for i, label in enumerate(labels) if is_label_predicted[i]]
+                PlayoffLogger.get('generator').info('team labels: %s', labels)
                 if len([label for label in labels if label is not None]):
                     # we have at least one known/predicted team
                     for l in range(0, len(labels)):
@@ -126,6 +135,7 @@ class PlayoffGenerator(object):
                         labels[l] = coalesce(labels[l], label_placeholder)
                     # shorten concatenated label to specified combined length
                     labels = self.__shorten_labels(labels, self.team_box_settings.get('label_length_limit', 0), label_separator, label_ellipsis)
+                    PlayoffLogger.get('generator').info('shortened team labels: %s', labels)
                     for l in range(0, len(labels)):
                         # concatenate labels, assigning appropriate classes to predicted teams
                         team_label.append(self.__get_team_label(
@@ -151,7 +161,9 @@ class PlayoffGenerator(object):
                     team_name.insert(0, self.p_temp.get('MATCH_TEAM_LIST_HEADER'))
                 # glue it all together
                 team_label = label_separator.join(team_label)
+                PlayoffLogger.get('generator').info('output teams label HTML: %s', team_label)
                 team_name = name_separator.join(team_name)
+                PlayoffLogger.get('generator').info('output teams name HTML: %s', team_name)
             team_html = self.p_temp.get(
                 'MATCH_TEAM_LINK',
                 match.link, team_name, team_label) \
