@@ -12,6 +12,7 @@ class PlayoffGenerator(object):
         self.page = settings.get('page')
         PlayoffLogger.get('generator').info(
             'page settings: %s', self.page)
+        self.team_box_settings = self.page.get('team_boxes', {})
         self.canvas = {}
         if settings.has_section('canvas'):
             self.canvas = settings.get('canvas')
@@ -52,7 +53,7 @@ class PlayoffGenerator(object):
                     datetime.now().strftime('%Y-%m-%d o %H:%M:%S'))))
 
     def __get_team_label(self, team_name, template='MATCH_TEAM_LABEL'):
-        if not self.page.get('predict_teams', None):
+        if not self.team_box_settings.get('predict_teams', None):
             # override template if team predictions are not enabled
             template = 'MATCH_TEAM_LABEL'
         return self.p_temp.get(template, team_name)
@@ -87,13 +88,14 @@ class PlayoffGenerator(object):
             # the easy part: team score cell
             score_html = self.p_temp.get('MATCH_SCORE', team.score)
             # the hard part begins here.
-            # TODO: should separators and ellipsis indicators be configurable?
             team_label = [] # label is what's shown in the table cell
-            label_separator = ' / '
+            label_separator = self.team_box_settings.get('label_separator', ' / ')
+            label_placeholder = self.team_box_settings.get('label_placeholder', '??')
+            label_ellipsis = self.team_box_settings.get('label_ellipsis', '(...)')
             team_name = []  # name is what's shown in the tooltip
-            name_separator = '<br />'
-            name_prefix = '&nbsp;&nbsp;' # prefix (indent) for team names in the tooltip
-            if (team.known_teams == 0) and not self.page.get('predict_teams', False):
+            name_separator = self.team_box_settings.get('name_separator', '<br />')
+            name_prefix = self.team_box_settings.get('name_prefix', '&nbsp;&nbsp;') # prefix (indent) for team names in the tooltip
+            if (team.known_teams == 0) and not self.team_box_settings.get('predict_teams', False):
                 # we've got no teams eligible for the match and the prediction option is disabled
                 team_label = ''
                 team_name = ''
@@ -105,12 +107,12 @@ class PlayoffGenerator(object):
                 predicted_labels = [self.data.get_shortname(name) if name else None for name in team.possible_name]
                 for l in range(0, len(labels)):
                     if labels[l] is None:
-                        if self.page.get('predict_teams', False) and (len(predicted_labels) > l):
+                        if self.team_box_settings.get('predict_teams', False) and (len(predicted_labels) > l):
                             # fill team labels with either predictions...
                             labels[l] = predicted_labels[l]
                         else:
                             # ...or empty placeholders
-                            labels[l] = '??'
+                            labels[l] = label_placeholder
                 # count how many teams are eligible (how many non-predicted teams are there)
                 known_teams = len(is_label_predicted) - sum(is_label_predicted)
                 # sort labels to move eligible teams in front of predicted teams
@@ -121,9 +123,9 @@ class PlayoffGenerator(object):
                     # we have at least one known/predicted team
                     for l in range(0, len(labels)):
                         # fill any remaining empty labels (i.e. these which had empty predictions available) with placeholders
-                        labels[l] = coalesce(labels[l], '??')
+                        labels[l] = coalesce(labels[l], label_placeholder)
                     # shorten concatenated label to specified combined length
-                    labels = self.__shorten_labels(labels, self.page.get('label_length_limit', 0), label_separator, '(...)')
+                    labels = self.__shorten_labels(labels, self.team_box_settings.get('label_length_limit', 0), label_separator, label_ellipsis)
                     for l in range(0, len(labels)):
                         # concatenate labels, assigning appropriate classes to predicted teams
                         team_label.append(self.__get_team_label(
@@ -134,7 +136,7 @@ class PlayoffGenerator(object):
                     if name:
                         # every non-empty name gets some indentation
                         team_name.append(name_prefix + name)
-                if self.page.get('predict_teams', False):
+                if self.team_box_settings.get('predict_teams', False):
                     # remember where the list of eligible teams ends
                     known_teams = len(team_name)
                     for name in team.possible_name:
