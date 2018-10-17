@@ -4,13 +4,14 @@ from jfr_playoff.db import PlayoffDB
 from jfr_playoff.dto import Phase
 from jfr_playoff.matchinfo import MatchInfo
 from jfr_playoff.tournamentinfo import TournamentInfo
+from jfr_playoff.logger import PlayoffLogger
 
 
 class PlayoffData(object):
     def __init__(self, settings):
         self.database = PlayoffDB(settings.get('database')) if settings.has_section('database') else None
         if self.database is None:
-            print PlayoffDB.DATABASE_NOT_CONFIGURED_WARNING
+            PlayoffLogger.get('db').warning(PlayoffDB.DATABASE_NOT_CONFIGURED_WARNING)
         self.team_settings = settings.get('teams')
         self.phases = settings.get('phases')
         self.swiss = []
@@ -23,27 +24,31 @@ class PlayoffData(object):
     @cached_property
     def teams(self):
         if isinstance(self.team_settings, list):
+            PlayoffLogger.get('data').info(
+                'team list pre-defined: %s', self.team_settings)
             return self.team_settings
         tournament_info = TournamentInfo(self.team_settings, self.database)
-        return tournament_info.get_tournament_results()
+        team_list = tournament_info.get_tournament_results()
+        if len(team_list) == 0:
+            PlayoffLogger.get('data').warning('team list is empty!')
+        return team_list
 
     def generate_phases(self):
         self.grid = []
         for phase in self.phases:
-            phase_count = len(phase['matches'])
-            if 'dummies' in phase:
-                phase_count += len(phase['dummies'])
+            dummies = phase.get('dummies', [])
+            phase_count = len(phase['matches']) + len(dummies)
             phase_object = Phase()
             phase_object.title = phase['title']
-            phase_object.link = phase['link'] if 'link' in phase else None
+            phase_object.link = phase.get('link', None)
             phase_object.matches = [None] * phase_count
             phase_pos = 0
             for match in phase['matches']:
-                if 'dummies' in phase:
-                    while phase_pos in phase['dummies']:
-                        phase_pos += 1
+                while phase_pos in dummies:
+                    phase_pos += 1
                 phase_object.matches[phase_pos] = match['id']
                 phase_pos += 1
+            PlayoffLogger.get('data').info('phase object: %s', phase_object)
             self.grid.append(phase_object)
         return self.grid
 
@@ -59,14 +64,16 @@ class PlayoffData(object):
                     for phase_obj in self.grid:
                         if match['id'] in phase_obj.matches:
                             phase_obj.running = True
+                PlayoffLogger.get('data').info(
+                    'match object: %s', self.match_info[match['id']])
         return self.match_info
 
     def get_swiss_link(self, event):
         event_info = TournamentInfo(event, self.database)
         swiss_link = event_info.get_results_link()
-        if ('relative_path' in event) and (
-                event['relative_path'] is not None):
+        if event.get('relative_path', None):
             swiss_link = '%s/%s' % (event['relative_path'], swiss_link)
+        PlayoffLogger.get('data').info('swiss link: %s', swiss_link)
         return swiss_link
 
     def prefill_leaderboard(self, teams):
@@ -75,6 +82,7 @@ class PlayoffData(object):
             if len(team) > 3:
                 self.leaderboard[team[3]-1] = team[0]
         self.fill_swiss_leaderboard(self.swiss, teams)
+        PlayoffLogger.get('data').info('leaderboard pre-filled: %s', self.leaderboard)
         return self.leaderboard
 
     def fill_swiss_leaderboard(self, swiss, teams):
@@ -83,16 +91,8 @@ class PlayoffData(object):
             event['ties'] = teams
             event_info = TournamentInfo(event, self.database)
             if event_info.is_finished():
-                swiss_position = (
-                    event['swiss_position']
-                    if 'swiss_position' in event
-                    else 1
-                )
-                position_limit = (
-                    event['position_to']
-                    if 'position_to' in event
-                    else 9999
-                )
+                swiss_position = event.get('swiss_position', 1)
+                position_limit = event.get('position_to', 9999)
                 place = 1
                 swiss_results = event_info.get_tournament_results()
                 for team in swiss_results:
@@ -104,6 +104,8 @@ class PlayoffData(object):
                             self.leaderboard[
                                 target_position - 1] = team[0]
                     place += 1
+            PlayoffLogger.get('data').info(
+                'leaderboard after %s swiss: %s', event, self.leaderboard)
 
     def fill_leaderboard(self):
         self.prefill_leaderboard(self.teams)
@@ -124,30 +126,41 @@ class PlayoffData(object):
                         self.match_info[match['id']].loser)
         for positions, position_teams in leaderboard_teams.iteritems():
             positions = list(positions)
+            PlayoffLogger.get('data').info(
+                'filling leaderboard positions %s with teams %s',
+                positions, position_teams)
             if len(positions) == len([
                     team for team in position_teams if team is not None]):
                 for table_team in self.teams:
                     if table_team[0] in position_teams:
                         position = positions.pop(0)
                         self.leaderboard[position-1] = table_team[0]
+                        PlayoffLogger.get('data').info(
+                            'team %s in position %d', table_team[0], position)
+        PlayoffLogger.get('data').info(
+            'leaderboard filled: %s', self.leaderboard)
         return self.leaderboard
 
     def get_swiss_info(self):
-        return [{
+        swiss_info = [{
             'link': self.get_swiss_link(event),
             'position': event['position'],
-            'label': event['label'] if 'label' in event else None,
+            'label': event.get('label', None),
             'finished': TournamentInfo(event, self.database).is_finished()
         } for event in self.swiss]
+        PlayoffLogger.get('data').info('swiss info: %s', swiss_info)
+        return swiss_info
 
     def get_dimensions(self):
-        return (
+        dimensions = (
             len(self.phases),
             max([
-                len(phase['matches']) + len(phase['dummies'])
-                if 'dummies' in phase
-                else len(phase['matches'])
-                for phase in self.phases]))
+                len(phase['matches']) + len(phase.get('dummies', []))
+                for phase in self.phases
+            ])
+        )
+        PlayoffLogger.get('data').info('grid dimensions: %s', dimensions)
+        return dimensions
 
     def get_shortname(self, fullname):
         for team in self.teams:

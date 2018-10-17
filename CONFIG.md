@@ -25,6 +25,7 @@ Konfiguracja składa się, po kolei, z:
    + `"refresh"` - parametr odświeżania strony drabinki: `0` = wyłączone, liczba naturalna = interwał odświeżania, w sekundach
    + `"width"` i `"height"` - wymiary (w pikselach) miejsca rezerwowanego dla każdego meczu w widoku drabinki (`"width"` bezpośrednio wpływa na rozmieszczanie kolumn, wewnątrz każdej z kolumn mecze rozmieszczane są równomiernie, w zależnie od ich liczby)
    + `"margin"` - odstęp między w/w miejscem (minimalny - jak widać, w przypadku mniejszej liczby meczów w fazie, odstępy się dopasują)
+   + `"label_length_limit"` - maksymalna liczba znaków wyświetlanych jako skrócona nazwa drużyn(y) w schemacie (`0` lub brak wartości oznacza brak limitu)
  - sekcji `"canvas"`: ustawień rysowania linii
    + `"winner_h_offset"`, `"winner_v_offset"` - marginesy (poziomy i pionowy) rysowania linii zwycięzców (odpowiednio: pionowych i poziomych, względem środka obszaru)
    + `"loser_h_offset"`, `"loser_v_offset"` - analogiczne marginesy rysowania linii przegranych
@@ -35,6 +36,25 @@ Konfiguracja składa się, po kolei, z:
 Ustawienia bazy danych nie są wymagane, program potrafi sobie poradzić bez nich, jeśli do poszczególnych faz/meczów podano dostępne przez HTTP linki.
 
 Ustawienia Gońca nie są wymagane, domyślnie jest on wyłączony, a przy włączeniu - domyślnie komunikuje się z `localhost` na porcie `8090`.
+
+Tłumaczenia tekstów
+-------------------
+
+Program obsługuje możliwość ustawienia własnych łańcuchów znaków wyświetlanych w różnych miejscach wynikowej strony. Teksty te opcjonalnie określa sekcja `"i18n"` pliku konfiguracyjnego.
+
+Domyślna postać wszystkich obsługiwanych łańcuchów to:
+
+```
+{
+    "SCORE": "wynik",
+    "FINAL_STANDINGS": "klasyfikacja końcowa",
+    "STANDINGS_PLACE": "miejsce",
+    "STANDINGS_TEAM": "drużyna",
+    "STANDINGS_CAPTIONS": "legenda",
+    "FOOTER_GENERATED": "strona wygenerowana",
+    "SWISS_DEFAULT_LABEL": "Turniej o&nbsp;%d.&nbsp;miejsce"
+}
+```
 
 Zdalne pliki konfiguracyjne
 ---------------------------
