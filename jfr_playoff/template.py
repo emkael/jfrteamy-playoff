@@ -24,6 +24,14 @@ class PlayoffTemplateStrings(object):
     &nbsp;%.1f&nbsp;
     '''
 
+    MATCH_TEAM_LABEL = '<span class="team-label">%s</span>'
+
+    MATCH_PREDICTED_TEAM_LABEL = '<span class="team-predicted-label">%s</span>'
+
+    MATCH_TEAM_LIST_HEADER = '{{DETERMINED_TEAMS}}'
+
+    MATCH_POSSIBLE_TEAM_LIST_HEADER = '{{POSSIBLE_TEAMS}}'
+
     MATCH_TEAM_LINK = '''
     <a href="%s" onmouseover="Tip('%s')" onmouseout="UnTip()">%s</a>
     '''
@@ -51,6 +59,8 @@ class PlayoffTemplateStrings(object):
     <div style="position: relative; width: %dpx; height: %dpx; margin: 10px">
     <canvas width="%d" height="%d" id="playoff_canvas" %s></canvas>
     %s
+    %s
+    %s
     <script src="sklady/playoff.js" type="text/javascript"></script>
     </div>
     '''
@@ -77,8 +87,28 @@ class PlayoffTemplateStrings(object):
     <img src="images/A.gif" />
     '''
 
+    STARTING_POSITION_BOX = '''
+    <div style="position: absolute; left: %dpx; top: %dpx" class="playoff_matchbox" data-id="place-%d">
+    %s
+    </div>
+    '''
+
+    FINISHING_POSITION_BOX = '''
+    <div style="position: absolute; right: 0px; top: %dpx" class="playoff_matchbox" data-id="finish-%d" data-finish-winner="%s" data-finish-loser="%s">
+    %s
+    </div>
+    '''
+
+    POSITION_BOX = '''
+    <table border="0" cellspacing="0">
+    <tr>
+    <td class="bdc12" width="20">%d</td>
+    </tr>
+    </table>
+    '''
+
     MATCH_BOX = '''
-    <div style="text-align: center; position: absolute; left: %dpx; top: %dpx" data-id="%d" data-winner="%s" data-loser="%s" class="playoff_matchbox">
+    <div style="text-align: center; position: absolute; left: %dpx; top: %dpx" data-id="%d" data-winner="%s" data-loser="%s" data-place-winner="%s" data-place-loser="%s" class="playoff_matchbox">
     %s
     </div>
     '''

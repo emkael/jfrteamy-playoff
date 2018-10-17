@@ -11,7 +11,9 @@ PLAYOFF_I18N_DEFAULTS = {
     'STANDINGS_TEAM': 'drużyna',
     'STANDINGS_CAPTIONS': 'legenda',
     'FOOTER_GENERATED': 'strona wygenerowana',
-    'SWISS_DEFAULT_LABEL': 'Turniej o&nbsp;%d.&nbsp;miejsce'
+    'SWISS_DEFAULT_LABEL': 'Turniej o&nbsp;%d.&nbsp;miejsce',
+    'DETERMINED_TEAMS': 'Drużyny z pewnym miejscem w tej fazie:',
+    'POSSIBLE_TEAMS': 'Drużyny z trwających meczów poprzedniej fazy:'
 }
 
 class PlayoffI18N(object):
