@@ -10,6 +10,10 @@ def coalesce(*arg):
 class Team(object):
     name = ''
     score = 0.0
+    place = None
+
+    def __init__(self):
+        self.place = []
 
     def __unicode__(self):
         return u'%s (%.1f)' % (coalesce(self.name, '<None>'), self.score)
@@ -27,6 +31,8 @@ class Match(object):
     loser = None
     winner_matches = None
     loser_matches = None
+    winner_place = None
+    loser_place = None
 
     def __repr__(self):
         return (u'#%d (%s) %s [%s]' % (
