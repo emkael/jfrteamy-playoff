@@ -25,8 +25,16 @@ Konfiguracja składa się, po kolei, z:
    + `"refresh"` - parametr odświeżania strony drabinki: `0` = wyłączone, liczba naturalna = interwał odświeżania, w sekundach
    + `"width"` i `"height"` - wymiary (w pikselach) miejsca rezerwowanego dla każdego meczu w widoku drabinki (`"width"` bezpośrednio wpływa na rozmieszczanie kolumn, wewnątrz każdej z kolumn mecze rozmieszczane są równomiernie, w zależnie od ich liczby)
    + `"margin"` - odstęp między w/w miejscem (minimalny - jak widać, w przypadku mniejszej liczby meczów w fazie, odstępy się dopasują)
-   + `"label_length_limit"` - maksymalna liczba znaków wyświetlanych jako skrócona nazwa drużyn(y) w schemacie (`0` lub brak wartości oznacza brak limitu)
    + `"starting_position_indicators"`, `"finishing_position_indicators"` - włączają znaczniki miejsc początkowych/końcowych, wynikających ze zdefiniowanego schematu
+   + słownik `"team_boxes"` przechowuje opcjonalne ustawienia wyświetlania nazw teamów:
+     * `"label_length_limit"` - maksymalna liczba znaków wyświetlanych jako skrócona nazwa drużyn(y) w schemacie (domyślnie `0` = brak limitu)
+     * `"predict_teams"` - flaga, jeśli włączona (`1`), w kolejnej fazie wypełniane są nazwy drużyn prowadzących/przegrywających w trwających meczach tak, jakby mecz miał się skończyć aktualnym wynikiem (etykiety takich drużyn mają nadaną osobną klasę CSS)
+     * `"label_separator"` - ciąg rozdzielający skrócone nazwy drużyn wyświetlane na schemacie (domyślnie ` / `)
+     * `"label_placeholder"` - ciąg wyświetlany w miejsce nieznanej drużyny (domyślnie `??`)
+     * `"label_ellipsis"` - ciąg wyświetlany na końcu skróconej etykiety teamów, gdy ustawienie `label_length_limit` ją skróciło (domyślnie `(...)`)
+     * `"name_separator"` - ciąg rozdzielający pełne nazwy teamów w etykiecie po najechaniu na skrócone nazwy w schemacie (domyślnie `<br />`)
+     * `"name_prefix"` - ciąg poprzedzający każdą pełną nazwę teamów w etykiecie po najechaniu (domyślnie wcięcie `&nbsp;&nbsp;`)
+     * `"sort_eligible_first"` - flaga włączająca wyświetlanie teamów zakwalifikowanych do danej fazy (tj. z zakończonym meczem bieżącej fazy) przed teamami z trwających meczów (domyślnie włączona)
  - sekcji `"canvas"`: ustawień rysowania linii
    + `"winner_colour"`, `"loser_colour"` - kolory linii zwycięzców i przegranych
    + `"place_winner_colour"`, `"place_loser_colour"` - kolory linii łączących początkowe miejsca drużyn z pierwszymi meczami (`loser` - drużyny mogące zagrać w więcej niż jednym meczu, czyli wybierane)

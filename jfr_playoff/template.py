@@ -24,6 +24,14 @@ class PlayoffTemplateStrings(object):
     &nbsp;%.1f&nbsp;
     '''
 
+    MATCH_TEAM_LABEL = '<span class="team-label">%s</span>'
+
+    MATCH_PREDICTED_TEAM_LABEL = '<span class="team-predicted-label">%s</span>'
+
+    MATCH_TEAM_LIST_HEADER = '{{DETERMINED_TEAMS}}'
+
+    MATCH_POSSIBLE_TEAM_LIST_HEADER = '{{POSSIBLE_TEAMS}}'
+
     MATCH_TEAM_LINK = '''
     <a href="%s" onmouseover="Tip('%s')" onmouseout="UnTip()">%s</a>
     '''

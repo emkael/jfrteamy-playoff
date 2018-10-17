@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from jfr_playoff.dto import coalesce
 from jfr_playoff.template import PlayoffTemplate
 from jfr_playoff.data import PlayoffData
 from jfr_playoff.logger import PlayoffLogger
@@ -11,6 +12,7 @@ class PlayoffGenerator(object):
         self.page = settings.get('page')
         PlayoffLogger.get('generator').info(
             'page settings: %s', self.page)
+        self.team_box_settings = self.page.get('team_boxes', {})
         self.canvas = {}
         if settings.has_section('canvas'):
             self.canvas = settings.get('canvas')
@@ -50,28 +52,136 @@ class PlayoffGenerator(object):
                     'PAGE_BODY_FOOTER',
                     datetime.now().strftime('%Y-%m-%d o %H:%M:%S'))))
 
+    def __get_team_label(self, team_name, template='MATCH_TEAM_LABEL'):
+        if not self.team_box_settings.get('predict_teams', None):
+            # override template if team predictions are not enabled
+            template = 'MATCH_TEAM_LABEL'
+        return self.p_temp.get(template, team_name)
+
+    def __shorten_labels(self, labels, limit, separator, ellipsis):
+        if limit > 0:
+            current_length = 0
+            shortened = []
+            for l in range(0, len(labels)):
+                if current_length + len(labels[l]) > limit:
+                    # current label won't fit within limit, shorten it and stop
+                    shortened.append(labels[l][0:limit-current_length] + ellipsis)
+                    break
+                else:
+                    # current label fits, add it to output
+                    shortened.append(labels[l])
+                    current_length += len(labels[l])
+                    if l < len(labels) - 1:
+                        # if it's not the last label, separator will be added
+                        # if it was the last label, next condition won't run and ellipsis won't be added
+                        current_length += len(separator)
+                    if current_length > limit:
+                        # if separator puts us over the limit, add ellipsis and stop
+                        shortened.append(ellipsis)
+                        break
+            labels = shortened
+        return labels
+
     def get_match_table(self, match):
         rows = ''
         for team in match.teams:
+            PlayoffLogger.get('generator').info(
+                'generating HTML for team object: %s', team)
+            # the easy part: team score cell
             score_html = self.p_temp.get('MATCH_SCORE', team.score)
-            team_label = ' / '.join([
-                self.data.get_shortname(name) for name in
-                team.name.split('<br />')])
-            label_max_length = self.page.get('label_length_limit', 0)
-            if label_max_length:
-                team_label = team_label[:label_max_length] + (team_label[label_max_length:] and '(...)')
+            PlayoffLogger.get('generator').info(
+                'score HTML for team object: %s', score_html.strip())
+            # the hard part begins here.
+            team_label = [] # label is what's shown in the table cell
+            label_separator = self.team_box_settings.get('label_separator', ' / ')
+            label_placeholder = self.team_box_settings.get('label_placeholder', '??')
+            label_length_limit = self.team_box_settings.get('label_length_limit', self.page.get('label_length_limit', 0))
+            label_ellipsis = self.team_box_settings.get('label_ellipsis', '(...)')
+            team_name = []  # name is what's shown in the tooltip
+            name_separator = self.team_box_settings.get('name_separator', '<br />')
+            name_prefix = self.team_box_settings.get('name_prefix', '&nbsp;&nbsp;') # prefix (indent) for team names in the tooltip
+            if (team.known_teams == 0) and not self.team_box_settings.get('predict_teams', False):
+                PlayoffLogger.get('generator').info('no eligible teams and predictions are disabled')
+                # we've got no teams eligible for the match and the prediction option is disabled
+                team_label = ''
+                team_name = ''
+            else:
+                # predicted teams are not in team.name, they're in tem.possible_name so corresponding spots in team.name are empty
+                is_label_predicted = [name is None for name in team.name]
+                # fetch labels (shortnames) for teams in both lists
+                labels = [self.data.get_shortname(name) if name else None for name in team.name]
+                PlayoffLogger.get('generator').info('eligible team labels: %s', labels)
+                predicted_labels = [self.data.get_shortname(name) if name else None for name in team.possible_name]
+                PlayoffLogger.get('generator').info('predicted team labels: %s', predicted_labels)
+                for l in range(0, len(labels)):
+                    if labels[l] is None:
+                        if self.team_box_settings.get('predict_teams', False) and (len(predicted_labels) > l):
+                            # fill team labels with either predictions...
+                            labels[l] = predicted_labels[l]
+                        else:
+                            # ...or empty placeholders
+                            labels[l] = label_placeholder
+                # count how many teams are eligible (how many non-predicted teams are there)
+                known_teams = len(is_label_predicted) - sum(is_label_predicted)
+                PlayoffLogger.get('generator').info('detected %d known team(s), predicted mask: %s', known_teams, is_label_predicted)
+                if self.team_box_settings.get('sort_eligible_first', True):
+                    # sort labels to move eligible teams in front of predicted teams
+                    labels = [label for i, label in enumerate(labels) if not is_label_predicted[i]] \
+                             + [label for i, label in enumerate(labels) if is_label_predicted[i]]
+                PlayoffLogger.get('generator').info('team labels: %s', labels)
+                if len([label for label in labels if label is not None]):
+                    # we have at least one known/predicted team
+                    for l in range(0, len(labels)):
+                        # fill any remaining empty labels (i.e. these which had empty predictions available) with placeholders
+                        labels[l] = coalesce(labels[l], label_placeholder)
+                    # shorten concatenated label to specified combined length
+                    labels = self.__shorten_labels(labels, label_length_limit, label_separator, label_ellipsis)
+                    PlayoffLogger.get('generator').info('shortened team labels: %s', labels)
+                    for l in range(0, len(labels)):
+                        # concatenate labels, assigning appropriate classes to predicted teams
+                        if self.team_box_settings.get('sort_eligible_first', True):
+                            team_label.append(self.__get_team_label(
+                                labels[l],
+                                'MATCH_PREDICTED_TEAM_LABEL' if l >= known_teams else 'MATCH_TEAM_LABEL'))
+                        else:
+                            team_label.append(self.__get_team_label(
+                                labels[l],
+                                'MATCH_PREDICTED_TEAM_LABEL' if is_label_predicted[l] else 'MATCH_TEAM_LABEL'))
+                # team names for tooltip
+                for name in team.name:
+                    if name:
+                        # every non-empty name gets some indentation
+                        team_name.append(name_prefix + name)
+                if self.team_box_settings.get('predict_teams', False):
+                    # remember where the list of eligible teams ends
+                    known_teams = len(team_name)
+                    for name in team.possible_name:
+                        # append predicted team names, with indentation as well
+                        if name:
+                            team_name.append(name_prefix + name)
+                    if len(team_name) != known_teams:
+                        # we've added some predicted team names, so we add a header
+                        team_name.insert(known_teams, self.p_temp.get('MATCH_POSSIBLE_TEAM_LIST_HEADER'))
+                if (len(team_label) > 1) and (match.running == 0):
+                    # and we add a header for matches that haven't started yet and have multiple options for teams
+                    team_name.insert(0, self.p_temp.get('MATCH_TEAM_LIST_HEADER'))
+                # glue it all together
+                team_label = label_separator.join(team_label)
+                PlayoffLogger.get('generator').info('output teams label HTML: %s', team_label)
+                team_name = name_separator.join(team_name)
+                PlayoffLogger.get('generator').info('output teams name HTML: %s', team_name)
             team_html = self.p_temp.get(
                 'MATCH_TEAM_LINK',
-                match.link, team.name, team_label) \
+                match.link, team_name, team_label) \
                 if match.link is not None \
                    else self.p_temp.get(
                            'MATCH_TEAM_NON_LINK',
-                           team.name, team_label)
+                           team_name, team_label)
             rows += self.p_temp.get(
                 'MATCH_TEAM_ROW',
                 ' '.join([
-                    'winner' if team.name == match.winner else '',
-                    'loser' if team.name == match.loser else ''
+                    'winner' if (match.winner is not None) and (match.winner in team.name) else '',
+                    'loser' if (match.loser is not None) and (match.loser in team.name) else ''
                 ]).strip(),
                 team_html,
                 self.p_temp.get(
