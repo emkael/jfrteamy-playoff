@@ -272,6 +272,7 @@ class PlayoffGenerator(object):
             boxes += self.p_temp.get(
                 'FINISHING_POSITION_BOX',
                 self.page['margin'] / 2 + int(float(order) / float(len(positions)) * dimensions[1]),
+                self.get_leaderboard_row_class(place),
                 place,
                 ' '.join([str(p) for p in position_info[place]['winner']]),
                 ' '.join([str(p) for p in position_info[place]['loser']]),
