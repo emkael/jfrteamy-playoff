@@ -176,7 +176,8 @@ class TournamentInfo:
                 final_positions)
             for position in final_positions:
                 if len(teams) >= position:
-                    teams[position-1].append(position)
+                    teams[position-1] = (teams[position-1] + [None] * 4)[0:4]
+                    teams[position-1][3] = position
         return teams
 
     def is_finished(self):
