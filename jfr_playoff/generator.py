@@ -162,7 +162,7 @@ class PlayoffGenerator(object):
                     if len(team_name) != known_teams:
                         # we've added some predicted team names, so we add a header
                         team_name.insert(known_teams, self.p_temp.get('MATCH_POSSIBLE_TEAM_LIST_HEADER'))
-                if (len(team_label) > 1) and (match.running == 0):
+                if (len(team_label) > 1) and (match.running == 0) and (known_teams > 0):
                     # and we add a header for matches that haven't started yet and have multiple options for teams
                     team_name.insert(0, self.p_temp.get('MATCH_TEAM_LIST_HEADER'))
                 # glue it all together
