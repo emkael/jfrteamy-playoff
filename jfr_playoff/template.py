@@ -111,7 +111,7 @@ class PlayoffTemplateStrings(object):
     <table border="0" cellspacing="0">
     <tr>
     <td class="bdc12" width="20">
-    <a onmouseover="Tip('%s')" onmouseout="UnTip()">%d</a>
+    <a onmouseover="Tip('%s')" onmouseout="UnTip()" style="width: 100%%; display: inline-block; cursor: pointer">%d</a>
     </td>
     </tr>
     </table>
