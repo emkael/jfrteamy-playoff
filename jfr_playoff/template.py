@@ -107,6 +107,16 @@ class PlayoffTemplateStrings(object):
     </table>
     '''
 
+    CAPTIONED_POSITION_BOX = '''
+    <table border="0" cellspacing="0">
+    <tr>
+    <td class="bdc12" width="20">
+    <a onmouseover="Tip('%s')" onmouseout="UnTip()">%d</a>
+    </td>
+    </tr>
+    </table>
+    '''
+
     MATCH_BOX = '''
     <div style="text-align: center; position: absolute; left: %dpx; top: %dpx" data-id="%d" data-winner="%s" data-loser="%s" data-place-winner="%s" data-place-loser="%s" class="playoff_matchbox">
     %s

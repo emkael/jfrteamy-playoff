@@ -269,6 +269,7 @@ class PlayoffGenerator(object):
         boxes = ''
         order = 0
         for place in sorted(positions):
+            caption = self.get_caption_for_finishing_position(place)
             boxes += self.p_temp.get(
                 'FINISHING_POSITION_BOX',
                 self.page['margin'] / 2 + int(float(order) / float(len(positions)) * dimensions[1]),
@@ -276,7 +277,7 @@ class PlayoffGenerator(object):
                 place,
                 ' '.join([str(p) for p in position_info[place]['winner']]),
                 ' '.join([str(p) for p in position_info[place]['loser']]),
-                self.p_temp.get('POSITION_BOX', place))
+                self.p_temp.get('CAPTIONED_POSITION_BOX', caption, place) if caption else self.p_temp.get('POSITION_BOX', place))
             order += 1
         return boxes
 
@@ -355,6 +356,12 @@ class PlayoffGenerator(object):
                 finishing_places, finishing_positions, canvas_size, self.page['margin']
             )
         )
+
+    def get_caption_for_finishing_position(self, position):
+        for style in self.leaderboard_classes:
+            if position in style['positions']:
+                return style['caption']
+        return None
 
     def get_leaderboard_row_class(self, position):
         classes = []
