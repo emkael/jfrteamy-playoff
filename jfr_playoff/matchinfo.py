@@ -47,7 +47,8 @@ class MatchInfo:
                 'runda%d.html' % (self.config['round']))
             PlayoffLogger.get('matchinfo').info(
                 'match #%d link fetched: %s', self.info.id, self.info.link)
-        PlayoffLogger.get('matchinfo').info('match #%d link empty', self.info.id)
+        else:
+            PlayoffLogger.get('matchinfo').info('match #%d link empty', self.info.id)
 
     def __get_predefined_scores(self):
         teams = [Team(), Team()]
