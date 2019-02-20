@@ -189,6 +189,7 @@ class MatchInfo:
             teams[i].name = match_teams
             teams[i].possible_name = possible_teams
             teams[i].known_teams = len([team for team in match_teams if team is not None])
+            teams[i].selected_team = self.config['selected_teams'][i] if 'selected_teams' in self.config else -1
         PlayoffLogger.get('matchinfo').info(
             'config scores for match #%d: %s',
             self.info.id, teams)

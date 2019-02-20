@@ -124,6 +124,11 @@ class PlayoffGenerator(object):
                 # count how many teams are eligible (how many non-predicted teams are there)
                 known_teams = len(is_label_predicted) - sum(is_label_predicted)
                 PlayoffLogger.get('generator').info('detected %d known team(s), predicted mask: %s', known_teams, is_label_predicted)
+                # the team's already selected, cut the label list to single entry
+                if team.selected_team > -1:
+                    PlayoffLogger.get('generator').info('pre-selected team #%d, label: %s', team.selected_team, labels[team.selected_team])
+                    labels = [labels[team.selected_team]]
+                    is_label_predicted = [False]
                 if self.team_box_settings.get('sort_eligible_first', True):
                     # sort labels to move eligible teams in front of predicted teams
                     labels = [label for i, label in enumerate(labels) if not is_label_predicted[i]] \
@@ -147,24 +152,29 @@ class PlayoffGenerator(object):
                             team_label.append(self.__get_team_label(
                                 labels[l],
                                 'MATCH_PREDICTED_TEAM_LABEL' if is_label_predicted[l] else 'MATCH_TEAM_LABEL'))
-                # team names for tooltip
-                for name in team.name:
-                    if name:
-                        # every non-empty name gets some indentation
-                        team_name.append(name_prefix + name)
-                if self.team_box_settings.get('predict_teams', False):
-                    # remember where the list of eligible teams ends
-                    known_teams = len(team_name)
-                    for name in team.possible_name:
-                        # append predicted team names, with indentation as well
+                # the team's already selected, cut the tooltip list to single entry
+                if team.selected_team > -1:
+                    PlayoffLogger.get('generator').info('pre-selected team #%d, name: %s', team.selected_team, team.name[team.selected_team])
+                    team_name = [team.name[team.selected_team]]
+                else:
+                    # team names for tooltip
+                    for name in team.name:
                         if name:
+                            # every non-empty name gets some indentation
                             team_name.append(name_prefix + name)
-                    if len(team_name) != known_teams:
-                        # we've added some predicted team names, so we add a header
-                        team_name.insert(known_teams, self.p_temp.get('MATCH_POSSIBLE_TEAM_LIST_HEADER'))
-                if (len(team_label) > 1) and (match.running == 0) and (known_teams > 0):
-                    # and we add a header for matches that haven't started yet and have multiple options for teams
-                    team_name.insert(0, self.p_temp.get('MATCH_TEAM_LIST_HEADER'))
+                    if self.team_box_settings.get('predict_teams', False):
+                        # remember where the list of eligible teams ends
+                        known_teams = len(team_name)
+                        for name in team.possible_name:
+                            # append predicted team names, with indentation as well
+                            if name:
+                                team_name.append(name_prefix + name)
+                        if len(team_name) > known_teams:
+                            # we've added some predicted team names, so we add a header
+                            team_name.insert(known_teams, self.p_temp.get('MATCH_POSSIBLE_TEAM_LIST_HEADER'))
+                    if (len(team_label) > 1) and (match.running == 0) and (known_teams > 0):
+                        # and we add a header for matches that haven't started yet and have multiple options for teams
+                        team_name.insert(0, self.p_temp.get('MATCH_TEAM_LIST_HEADER'))
                 # glue it all together
                 team_label = label_separator.join(team_label)
                 PlayoffLogger.get('generator').info('output teams label HTML: %s', team_label)

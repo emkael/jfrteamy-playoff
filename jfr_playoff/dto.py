@@ -13,6 +13,7 @@ class Team(object):
     score = 0.0
     place = None
     known_teams = 0
+    selected_team = -1
 
     def __init__(self):
         self.place = []
