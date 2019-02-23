@@ -47,7 +47,7 @@ class PlayoffGenerator(object):
                 match_grid,
                 self.get_swiss_links(),
                 leaderboard_table,
-                self.get_leaderboard_caption_table() if leaderboard_table or self.page['finishing_position_indicators'] else '',
+                self.get_leaderboard_caption_table() if leaderboard_table or ('finishing_position_indicators' in self.page and self.page['finishing_position_indicators']) else '',
                 self.p_temp.get(
                     'PAGE_BODY_FOOTER',
                     datetime.now().strftime('%Y-%m-%d o %H:%M:%S'))))
