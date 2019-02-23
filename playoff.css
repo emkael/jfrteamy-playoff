@@ -1,0 +1,16 @@
+tr.winner > td {
+	background: #dfd;
+}
+tr.loser > td {
+	background: #fee;
+}
+
+.team-predicted-label {
+    opacity: 0.3
+}
+
+@media print {
+    span#logo, p.swiss_links, table.leaderboard, table.caption_table, body>p.f {
+        display: none;
+    }
+}

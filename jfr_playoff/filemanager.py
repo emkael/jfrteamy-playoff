@@ -50,23 +50,29 @@ class PlayoffFileManager(object):
         self.register_file(self.output_file)
         return self.output_file
 
-    def copy_scripts(self, script_path='sklady/playoff.js'):
-        script_output_path = os.path.join(self.output_path, script_path)
-        script_output_dir = os.path.dirname(script_output_path)
-        if len(script_output_dir) > 0:
-            if not os.path.exists(script_output_dir):
+    def copy_file(self, filename, path):
+        output_path = os.path.join(self.output_path, path)
+        output_dir = os.path.dirname(output_path)
+        if len(output_dir) > 0:
+            if not os.path.exists(output_dir):
                 PlayoffLogger.get('filemanager').info(
                     'output directory %s does not exist, creating',
-                    script_output_dir)
-                os.makedirs(script_output_dir)
+                    output_dir)
+                os.makedirs(output_dir)
         PlayoffLogger.get('filemanager').info(
-            'copying JS to %s', script_output_path)
+            'copying file to %s', output_path)
         shutil.copy(
             unicode(os.path.join(
-                os.path.dirname(__main__.__file__), 'playoff.js')),
-            unicode(script_output_path))
-        self.register_file(script_output_path)
-        return script_output_path
+                os.path.dirname(__main__.__file__), filename)),
+            unicode(output_path))
+        self.register_file(output_path)
+        return output_path
+
+    def copy_scripts(self, script_path='sklady/playoff.js'):
+        return self.copy_file('playoff.js', script_path)
+
+    def copy_styles(self, sheet_path='css/playoff.css'):
+        return self.copy_file('playoff.css', sheet_path)
 
     def send_files(self):
         if (self.goniec is not None) and self.goniec['enabled']:

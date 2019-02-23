@@ -41,6 +41,7 @@ def main():
         file_manager = PlayoffFileManager(settings)
         file_manager.write_content(content)
         file_manager.copy_scripts()
+        file_manager.copy_styles()
         file_manager.send_files()
     except SystemExit:
         interactive = False

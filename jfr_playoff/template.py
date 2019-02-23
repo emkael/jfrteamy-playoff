@@ -124,7 +124,7 @@ class PlayoffTemplateStrings(object):
     '''
 
     LEADERBOARD = '''
-    <table border="0" cellspacing="0">
+    <table class="leaderboard" border="0" cellspacing="0">
     <tr>
     <td class="bdnl12" colspan="2" align="center" style="text-transform: uppercase"><b>&nbsp;{{FINAL_STANDINGS}}&nbsp;</b></td>
     </tr>
@@ -178,6 +178,7 @@ class PlayoffTemplateStrings(object):
     %s
     <title>%s</title>
     <link rel="stylesheet" type="text/css" href="css/kolorki.css" />
+    <link rel="stylesheet" type="text/css" href="css/playoff.css" />
     <script type="text/javascript" src="sklady/myAjax.js"></script>
     '''
 
@@ -189,7 +190,7 @@ class PlayoffTemplateStrings(object):
     <script type="text/javascript" src="sklady/wz_tooltip.js"></script>
     %s
     %s
-    <p>
+    <p class="swiss_links">
     %s
     </p>
     %s
