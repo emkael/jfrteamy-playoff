@@ -104,6 +104,24 @@ Miejsca w tabeli końcowej dla drużyn zdefiniowanych jako kończące rozgrywki 
 
 Program nie potrafi ich rozstrzygać samodzielnie remisów podczas pobierania wyników z bazy danych. Dla listy teamów pobranej ze strony wyników, zachowana jest kolejność na stronie (więc remisy rozstrzygnięte przez Teamy przed wygenerowaniem wyników).
 
+Ustawienia teamów - aliasy
+--------------------------
+
+Jeśli zdarzy się, że w jakichś meczach, pobieranych ze stron WWW lub bazy danych, pełna nazwa teamu nie zgadza się z nazwą zefiniowaną na liście teamów, nazwy takie można zmapować na właściwe nazwy teamów.
+
+Służy do tego sekcja `"team_aliases"`, będąca słownikiem, w którym:
+ - kluczami są docelowe (tj. obecne w liście teamów) pełne nazwy teamów
+ - wartościami są tablice nazw, które mają być mapowane na daną właściwą nazwę
+
+Na przykład:
+
+```
+"team_aliases": {
+    "SYNERGIA Lublin": ["Synergia Lublin", "Synergia", "SYNERGIA", "SYNERGIA  Lublin", "SYNERGIA Lublin "]
+}
+```
+
+Wszystkie zdefiniowane w takim słowniku nazwy teamów będą rozpoznawane jako właściwe nazwy, obecne w liście teamów.
 
 Ustawienia stylów klasyfikacji końcowej
 ---------------------------------------
