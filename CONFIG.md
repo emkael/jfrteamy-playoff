@@ -98,6 +98,7 @@ Składa się z następujących pól:
  - `"database"` - nazwa bazy danych turnieju, z której pobierana jest lista teamów ALBO
  - `"link"` - URL do strony wyników (`PREFIXleaderb.html`) turnieju, dostępnej zdalnie
  - opcjonalne pole `"final_positions"` - tablica numerów miejsc, dla drużyn, które zakończyły rozgrywki (odpowiednik czwartego pola tablicy w tekstowej wersji listy teamów)
+ - opcjonalne pole `"max_teams"` - wymusza pobranie tylko określonej liczby pierwszych teamów z tabeli
  - przy użyciu `"database"`: opcjonalne pole `"ties"` - tablica pełnych nazw drużyn w kolejności, w jakiej rozstrzygane powinny być remisy w VP w turnieju źródłowym
 
 Miejsca w tabeli końcowej dla drużyn zdefiniowanych jako kończące rozgrywki będą zgodne z miejscami zajętymi w zdefiniowanym turnieju. Jeśli potrzeba zmapować te miejsca na inne miejsca klasyfikacji końcowej, należy użyć sekcji `"swiss"`, opisanej poniżej.

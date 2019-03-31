@@ -34,7 +34,7 @@ class PlayoffData(object):
         team_list = tournament_info.get_tournament_results()
         if len(team_list) == 0:
             PlayoffLogger.get('data').warning('team list is empty!')
-        return team_list
+        return team_list if 'max_teams' not in self.team_settings else team_list[0:self.team_settings['max_teams']]
 
     def generate_phases(self):
         self.grid = []
