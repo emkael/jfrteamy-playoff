@@ -28,7 +28,7 @@ class WidgetRepeater(tk.Frame):
         removeButton = ttk.Button(
             self, text='[-]', width=5,
             command=lambda i=len(self.widgets): self._removeWidget(i))
-        removeButton.grid(row=len(self.widgets), column=0)
+        removeButton.grid(row=len(self.widgets), column=0, sticky=tk.N)
         widget = self.widgetClass(self)
         self.widgets.append(widget)
         self._updateGrid()
@@ -40,9 +40,9 @@ class WidgetRepeater(tk.Frame):
 
     def _updateGrid(self):
         for idx, widget in enumerate(self.widgets):
-            widget.grid(row=idx, column=1, sticky=tk.W+tk.E)
+            widget.grid(row=idx, column=1, sticky=tk.W+tk.E+tk.N+tk.S)
         self.addButton.grid(
-            row=len(self.widgets), column=0, columnspan=1, sticky=tk.W)
+            row=len(self.widgets), column=0, columnspan=1, sticky=tk.W+tk.N)
 
     def _renderHeader(self):
         if self.headers:
@@ -50,9 +50,10 @@ class WidgetRepeater(tk.Frame):
             for idx, header in enumerate(self.headers):
                 headerFrame.columnconfigure(idx, weight=1)
                 widget = header[0](headerFrame, **header[1])
-                widget.grid(row=0, column=idx, sticky=tk.W+tk.E)
+                widget.grid(row=0, column=idx, sticky=tk.W+tk.E+tk.N)
             self.widgets.append(headerFrame)
-            (tk.Label(self, text=' ')).grid(row=0, column=0, sticky=tk.W+tk.E)
+            (tk.Label(self, text=' ')).grid(
+                row=0, column=0, sticky=tk.W+tk.E+tk.N)
 
     def renderContent(self):
         self.columnconfigure(1, weight=1)
@@ -60,17 +61,32 @@ class WidgetRepeater(tk.Frame):
         self._updateGrid()
 
 class RepeatableFrame(tk.Frame):
+    def __init__(self, *args, **kwargs):
+        tk.Frame.__init__(self, *args, **kwargs)
+        self.renderContent()
+
+    def renderContent(self):
+        pass
+
     def getValue(self):
         pass
 
     def setValue(self, value):
         pass
 
-class ManualTeamRow(RepeatableFrame):
-    def __init__(self, *args, **kwargs):
-        RepeatableFrame.__init__(self, *args, **kwargs)
-        self.renderContent()
+class RepeatableEntry(RepeatableFrame):
+    def renderContent(self):
+        self.value = tk.StringVar()
+        self.field = ttk.Entry(self, textvariable=self.value)
+        self.field.pack(expand=True, fill=tk.BOTH)
 
+    def getValue(self):
+        return self.value.get()
+
+    def setValue(self, value):
+        return self.value.set(value)
+
+class ManualTeamRow(RepeatableFrame):
     def renderContent(self):
         self.fullname = ttk.Entry(self, width=20)
         self.fullname.grid(row=0, column=0)
@@ -246,3 +262,25 @@ class TeamSettingsFrame(tk.Frame):
 
         self.teamFormat.set(self.FORMAT_MANUAL)
         self.setTeams([])
+
+class TeamAliasRow(RepeatableFrame):
+    def renderContent(self):
+        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+        self.teamName = tk.StringVar()
+        (ttk.OptionMenu(self, self.teamName, '')).grid(
+            row=0, column=0, sticky=tk.W+tk.E+tk.N)
+        self.names = WidgetRepeater(self, RepeatableEntry)
+        self.names.grid(row=0, column=1, sticky=tk.W+tk.E)
+
+class TeamAliasFrame(tk.Frame):
+    def __init__(self, *args, **kwags):
+        tk.Frame.__init__(self, *args, **kwags)
+        self.renderContent()
+
+    def renderContent(self):
+        self.columnconfigure(0, weight=1)
+        (ttk.Label(self, text='Aliasy teamów')).grid(
+            row=0, column=0, sticky=tk.W+tk.E)
+        self.repeater = WidgetRepeater(self, TeamAliasRow)
+        self.repeater.grid(row=1, column=0, sticky=tk.W+tk.E)
