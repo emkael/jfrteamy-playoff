@@ -6,6 +6,8 @@ import tkinter as tk
 from tkinter import ttk
 import tkFileDialog as tkfd
 
+from .frames import TeamSettingsFrame
+
 class PlayoffTab(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
@@ -46,9 +48,9 @@ class MainSettingsTab(PlayoffTab):
         outputPath = tk.Frame(container)
         outputPath.grid(row=0, column=1, sticky=tk.E+tk.W, pady=2)
         self.outputPath = tk.StringVar()
-        (tk.Entry(outputPath, width=60, textvariable=self.outputPath)).grid(
+        (ttk.Entry(outputPath, width=60, textvariable=self.outputPath)).grid(
             row=0, column=0, sticky=tk.W+tk.E)
-        (tk.Button(
+        (ttk.Button(
             outputPath,
             text='[]', command=self._chooseOutputPath)).grid(row=0, column=1)
         outputPath.columnconfigure(0, weight=1)
@@ -75,13 +77,13 @@ class MainSettingsTab(PlayoffTab):
         refreshPanel = tk.Frame(container)
         refreshPanel.grid(row=5, column=1, sticky=tk.W+tk.E, pady=2)
         self.refresh = tk.IntVar()
-        (tk.Checkbutton(
+        (ttk.Checkbutton(
             refreshPanel,
             command=self._updateRefreshFields, variable=self.refresh)).grid(
                 row=0, column=0)
         (ttk.Label(refreshPanel, text='co:')).grid(row=0, column=1)
         self.refreshInterval = tk.Spinbox(
-            refreshPanel, from_=30, to=3600, width=5)
+            refreshPanel, from_=30, to=3600, width=5, justify=tk.RIGHT)
         self.refreshInterval.grid(row=0, column=2)
         (ttk.Label(refreshPanel, text='sekund')).grid(row=0, column=3)
         self._updateRefreshFields()
@@ -93,6 +95,20 @@ class TeamsTab(PlayoffTab):
     @property
     def title(self):
         return 'Uczestnicy'
+
+    def renderContent(self, container):
+        settingsFrame = TeamSettingsFrame(container, padx=5, pady=5)
+        settingsFrame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.S+tk.W)
+        settingsFrame.columnconfigure(2, weight=1)
+        previewFrame = tk.Frame(container, bg='red')
+        previewFrame.grid(row=0, column=1, sticky=tk.N+tk.E+tk.S+tk.W)
+        aliasFrame = tk.Frame(container, bg='green')
+        aliasFrame.grid(row=1, column=0, columnspan=2,
+                        sticky=tk.N+tk.E+tk.S+tk.W)
+        container.columnconfigure(0, weight=2)
+        container.columnconfigure(1, weight=3)
+        container.rowconfigure(0, weight=2)
+        container.rowconfigure(1, weight=1)
 
 class MatchesTab(PlayoffTab):
     @property
