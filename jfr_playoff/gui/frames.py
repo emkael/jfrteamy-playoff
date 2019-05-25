@@ -4,6 +4,98 @@ import tkinter as tk
 from tkinter import ttk
 import tkMessageBox
 
+class WidgetRepeater(tk.Frame):
+    def __init__(self, master, widgetClass, headers=None, *args, **kwargs):
+        if not issubclass(widgetClass, RepeatableFrame):
+            raise AttributeError(
+                'WidgetRepeater widget must be a RepeatableFrame')
+        tk.Frame.__init__(self, master, **kwargs)
+        self.widgetClass = widgetClass
+        self.widgets = []
+        self.headers = headers
+        self.addButton = ttk.Button(
+            self, text='[+]', width=5, command=self._addWidget)
+        self.renderContent()
+
+    def _findWidget(self, row, column):
+        for children in self.children.values():
+            info = children.grid_info()
+            if info['row'] == str(row) and info['column'] == str(column):
+                return children
+        return None
+
+    def _addWidget(self):
+        removeButton = ttk.Button(
+            self, text='[-]', width=5,
+            command=lambda i=len(self.widgets): self._removeWidget(i))
+        removeButton.grid(row=len(self.widgets), column=0)
+        widget = self.widgetClass(self)
+        self.widgets.append(widget)
+        self._updateGrid()
+
+    def _removeWidget(self, idx):
+        self.widgets.pop(idx).destroy()
+        self._findWidget(row=len(self.widgets), column=0).destroy()
+        self._updateGrid()
+
+    def _updateGrid(self):
+        for idx, widget in enumerate(self.widgets):
+            widget.grid(row=idx, column=1, sticky=tk.W+tk.E)
+        self.addButton.grid(
+            row=len(self.widgets), column=0, columnspan=1, sticky=tk.W)
+
+    def _renderHeader(self):
+        if self.headers:
+            headerFrame = tk.Frame(self)
+            for idx, header in enumerate(self.headers):
+                headerFrame.columnconfigure(idx, weight=1)
+                widget = header[0](headerFrame, **header[1])
+                widget.grid(row=0, column=idx, sticky=tk.W+tk.E)
+            self.widgets.append(headerFrame)
+            (tk.Label(self, text=' ')).grid(row=0, column=0, sticky=tk.W+tk.E)
+
+    def renderContent(self):
+        self.columnconfigure(1, weight=1)
+        self._renderHeader()
+        self._updateGrid()
+
+class RepeatableFrame(tk.Frame):
+    def getValue(self):
+        pass
+
+    def setValue(self, value):
+        pass
+
+class ManualTeamRow(RepeatableFrame):
+    def __init__(self, *args, **kwargs):
+        RepeatableFrame.__init__(self, *args, **kwargs)
+        self.renderContent()
+
+    def renderContent(self):
+        self.fullname = ttk.Entry(self, width=20)
+        self.fullname.grid(row=0, column=0)
+        self.shortname = ttk.Entry(self, width=20)
+        self.shortname.grid(row=0, column=1)
+        self.flag = ttk.Entry(self, width=10)
+        self.flag.grid(row=0, column=2)
+        self.position = ttk.Entry(self, width=10)
+        self.position.grid(row=0, column=3)
+
+class TeamManualSettingsFrame(tk.Frame):
+    def __init__(self, *args, **kwargs):
+        tk.Frame.__init__(self, *args, **kwargs)
+        self.renderContent()
+
+    def renderContent(self):
+        headers = [
+            (ttk.Label, {'text': 'Pełna nazwa', 'width': 20}),
+            (ttk.Label, {'text': 'Skrócona nazwa', 'width': 20}),
+            (ttk.Label, {'text': 'Ikona', 'width': 10}),
+            (ttk.Label, {'text': 'Poz. końc.', 'width': 10}),
+        ]
+        (WidgetRepeater(self, ManualTeamRow, headers=headers)).grid(
+            row=1, column=0, columnspan=5)
+
 class TeamSelectionFrame(tk.Frame):
     def __init__(self, master, title='', teams=[],
                  selected=None, callback=None):
@@ -110,10 +202,14 @@ class TeamSettingsFrame(tk.Frame):
 
     def _setPanelState(self, frame, state):
         for child in frame.winfo_children():
-            child.configure(state=state)
+            if isinstance(child, tk.Frame):
+                self._setPanelState(child, state)
+            else:
+                child.configure(state=state)
 
     def _enablePanels(self, *args):
-        panels = {self.FORMAT_FETCH: self.fetchSettingsFrame}
+        panels = {self.FORMAT_FETCH: self.fetchSettingsFrame,
+                  self.FORMAT_MANUAL: self.manualSettingsFrame}
         for value, panel in panels.iteritems():
             self._setPanelState(
                 frame=panel,
@@ -145,9 +241,8 @@ class TeamSettingsFrame(tk.Frame):
             variable=self.teamFormat, value=self.FORMAT_MANUAL)).grid(
                 row=3, column=0, sticky=tk.W+tk.E)
 
-        self.teamFormat.set(self.FORMAT_FETCH)
-        self.setTeams([
-            ['Drużyna nr 1', 'TEAM1', None, None],
-            ['Drużyna nr 2', 'TEAM2', None, None],
-            ['Drużyna nr 3', 'TEAM3', None, None]
-        ])
+        self.manualSettingsFrame = TeamManualSettingsFrame(self)
+        self.manualSettingsFrame.grid(row=4, column=0, sticky=tk.W+tk.E)
+
+        self.teamFormat.set(self.FORMAT_MANUAL)
+        self.setTeams([])
