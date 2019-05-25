@@ -102,11 +102,11 @@ class TeamsTab(PlayoffTab):
         settingsFrame.columnconfigure(2, weight=1)
         previewFrame = TeamPreviewFrame(container)
         previewFrame.grid(row=0, column=1, rowspan=2,
-                          sticky=tk.N+tk.E+tk.S+tk.W)
+                          sticky=tk.N+tk.E+tk.W)
         aliasFrame = TeamAliasFrame(container)
         aliasFrame.grid(row=1, column=0,
                         sticky=tk.N+tk.E+tk.S+tk.W)
-        container.columnconfigure(0, weight=2)
+        container.columnconfigure(0, weight=1)
         container.columnconfigure(1, weight=3)
         container.rowconfigure(0, weight=2)
         container.rowconfigure(1, weight=1)
