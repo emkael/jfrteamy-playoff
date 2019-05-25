@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import ttk
 import tkFileDialog as tkfd
 
-from .frames import TeamSettingsFrame, TeamAliasFrame
+from .frames.team import *
 
 class PlayoffTab(ttk.Frame):
     def __init__(self, master):
@@ -100,7 +100,7 @@ class TeamsTab(PlayoffTab):
         settingsFrame = TeamSettingsFrame(container, padx=5, pady=5)
         settingsFrame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.S+tk.W)
         settingsFrame.columnconfigure(2, weight=1)
-        previewFrame = tk.Frame(container, bg='red')
+        previewFrame = TeamPreviewFrame(container)
         previewFrame.grid(row=0, column=1, rowspan=2,
                           sticky=tk.N+tk.E+tk.S+tk.W)
         aliasFrame = TeamAliasFrame(container)
