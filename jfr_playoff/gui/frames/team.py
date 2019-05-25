@@ -1,6 +1,7 @@
 #coding=utf-8
 
 import tkinter as tk
+from tkinter.font import Font
 from tkinter import ttk
 import tkMessageBox
 
@@ -115,9 +116,12 @@ class TeamFetchSettingsFrame(tk.Frame):
 
         (ttk.Label(self, text='Pobierz do ')).grid(
             row=2, column=0, columnspan=2, sticky=tk.W)
-        self.fetchLimit = tk.Spinbox(self, from_=0, value=0,
-                                     width=5, justify=tk.RIGHT)
-        self.fetchLimit.grid(row=2, column=2, sticky=tk.W)
+        self.fetchLimit = tk.StringVar()
+        self.fetchLimit.set(0)
+        (tk.Spinbox(
+            self, from_=0, to=9999, width=5, justify=tk.RIGHT,
+            textvariable=self.fetchLimit)).grid(
+                row=2, column=2, sticky=tk.W)
         (ttk.Label(self, text=' miejsca (0 = wszystkie)')).grid(
             row=2, column=3, sticky=tk.W+tk.E)
 
@@ -206,6 +210,56 @@ class TeamAliasFrame(tk.Frame):
         self.repeater.grid(row=1, column=0, sticky=tk.W+tk.E)
 
 class TeamPreviewFrame(tk.Frame):
-    pass
+    def __init__(self, *args, **kwags):
+        tk.Frame.__init__(self, *args, **kwags)
+        self.tieValues = []
+        self.tieFields = []
+        self.renderContent()
+
+    def setTeams(self, teams):
+        self.teamList.grid(
+            row=1, column=0, rowspan=len(teams)+2, sticky=tk.W+tk.E+tk.N)
+        self.tieValues = self.tieValues[0:len(teams)]
+        for idx in range(len(teams), len(self.tieFields)):
+            self.tieFields[idx].remove()
+        for idx, team in enumerate(teams):
+            self.teamList.insert('', tk.END, values=team, tag=idx)
+            if idx >= len(self.tieFields):
+                self.tieValues.append(tk.StringVar())
+                self.tieFields.append(
+                    tk.Spinbox(
+                        self, from_=0, to=9999, width=5, font=Font(size=10),
+                        textvariable=self.tieValues[idx]))
+                self.tieFields[idx].grid(
+                    row=idx+2, column=1, sticky=tk.W+tk.E+tk.N)
+        (ttk.Label(self, text=' ')).grid(row=1, column=1, pady=3)
+        (ttk.Label(self, text=' ')).grid(row=len(teams)+2, column=1)
+        self.rowconfigure(1, weight=0)
+        self.rowconfigure(len(teams)+2, weight=1)
+        (ttk.Label(
+            self,
+            text='Kolejność rozstrzygania remisów w klasyfikacji ' + \
+            'pobranej z bazy JFR Teamy',
+            anchor=tk.E)).grid(row=len(teams)+3, column=0, sticky=tk.E)
+        (ttk.Label(self, text='⬏', font=Font(size=20))).grid(
+            row=len(teams)+3, column=1, sticky=tk.W+tk.N)
+        self.rowconfigure(len(teams)+3, weight=1)
+
+    def renderContent(self):
+        self.columnconfigure(0, weight=1)
+        (ttk.Label(self, text='Podgląd listy teamów')).grid(
+            row=0, column=0, columnspan=2, sticky=tk.W+tk.E)
+        self.teamList = ttk.Treeview(
+            self, show='headings',
+            columns=['fullname','shortname','icon','position'],
+            selectmode='browse')
+        for col, heading in enumerate(
+                [('Nazwa', 100), ('Skrócona nazwa', 100),
+                 ('Ikona', 20), ('Poz. końc.', 20)]):
+            self.teamList.heading(col, text=heading[0])
+            if heading[1]:
+                self.teamList.column(col, width=heading[1], stretch=True)
+
+        self.setTeams([])
 
 __all__ = ['TeamSettingsFrame', 'TeamAliasFrame', 'TeamPreviewFrame']
