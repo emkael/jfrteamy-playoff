@@ -3,6 +3,12 @@
 import tkinter as tk
 from tkinter import ttk
 
+def getIntVal(widget, default=0):
+    try:
+        return int(widget.get().strip())
+    except ValueError:
+        return default
+
 class WidgetRepeater(tk.Frame):
     def __init__(self, master, widgetClass, headers=None, *args, **kwargs):
         if not issubclass(widgetClass, RepeatableFrame):
