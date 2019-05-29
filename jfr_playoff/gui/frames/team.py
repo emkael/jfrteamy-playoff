@@ -253,14 +253,19 @@ class TeamPreviewFrame(tk.Frame):
         tk.Frame.__init__(self, *args, **kwags)
         self.tieValues = []
         self.tieFields = []
+        self.labels = []
         self.renderContent()
 
     def setTeams(self, teams):
         self.teamList.grid(
-            row=1, column=0, rowspan=len(teams)+2, sticky=tk.W+tk.E+tk.N)
+            row=1, column=0, rowspan=len(teams)+2, sticky=tk.W+tk.E+tk.N+tk.S)
         self.tieValues = self.tieValues[0:len(teams)]
         for idx in range(len(teams), len(self.tieFields)):
-            self.tieFields[idx].remove()
+            self.tieFields[idx].destroy()
+        self.tieFields = self.tieFields[0:len(teams)]
+        for label in self.labels:
+            label.destroy()
+        self.teamList.delete(*self.teamList.get_children())
         for idx, team in enumerate(teams):
             self.teamList.insert('', tk.END, values=team, tag=idx)
             if idx >= len(self.tieFields):
@@ -271,16 +276,22 @@ class TeamPreviewFrame(tk.Frame):
                         textvariable=self.tieValues[idx]))
                 self.tieFields[idx].grid(
                     row=idx+2, column=1, sticky=tk.W+tk.E+tk.N)
-        (ttk.Label(self, text=' ')).grid(row=1, column=1, pady=3)
-        (ttk.Label(self, text=' ')).grid(row=len(teams)+2, column=1)
+                self.rowconfigure(idx+2, weight=0)
+        self.labels.append(ttk.Label(self, text=' '))
+        self.labels[-1].grid(row=1, column=1, pady=3)
+        self.labels.append(ttk.Label(self, text=' '))
+        self.labels[-1].grid(row=len(teams)+2, column=1)
         self.rowconfigure(1, weight=0)
         self.rowconfigure(len(teams)+2, weight=1)
-        (ttk.Label(
+        self.labels.append(ttk.Label(
             self,
             text='Kolejność rozstrzygania remisów w klasyfikacji ' + \
             'pobranej z bazy JFR Teamy',
-            anchor=tk.E)).grid(row=len(teams)+3, column=0, sticky=tk.E)
-        (ttk.Label(self, text='⬏', font=Font(size=20))).grid(
+            anchor=tk.E))
+        self.labels[-1].grid(row=len(teams)+3, column=0, sticky=tk.E)
+        self.labels.append(ttk.Label(self, text='⬏', font=Font(size=20)))
+        self.labels[-1].bind('<Button-1>', self.refreshTeams)
+        self.labels[-1].grid(
             row=len(teams)+3, column=1, sticky=tk.W+tk.N)
         self.rowconfigure(len(teams)+3, weight=1)
 
@@ -306,5 +317,8 @@ class TeamPreviewFrame(tk.Frame):
         if len(ties) and max(ties) == 0:
             return None
         return ties
+
+    def refreshTeams(self, event):
+        self.setTeams(self.winfo_toplevel().getTeams())
 
 __all__ = ['TeamSettingsFrame', 'TeamAliasFrame', 'TeamPreviewFrame']
