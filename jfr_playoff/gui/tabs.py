@@ -8,6 +8,8 @@ import tkFileDialog as tkfd
 
 from .frames.team import *
 
+from ..data import PlayoffData
+
 class PlayoffTab(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
@@ -97,19 +99,37 @@ class TeamsTab(PlayoffTab):
         return 'Uczestnicy'
 
     def renderContent(self, container):
-        settingsFrame = TeamSettingsFrame(container, padx=5, pady=5)
-        settingsFrame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.S+tk.W)
-        settingsFrame.columnconfigure(2, weight=1)
-        previewFrame = TeamPreviewFrame(container)
-        previewFrame.grid(row=0, column=1, rowspan=2,
-                          sticky=tk.N+tk.E+tk.W)
-        aliasFrame = TeamAliasFrame(container)
-        aliasFrame.grid(row=1, column=0,
-                        sticky=tk.N+tk.E+tk.S+tk.W)
+        self.settingsFrame = TeamSettingsFrame(container, padx=5, pady=5)
+        self.settingsFrame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.S+tk.W)
+        self.settingsFrame.columnconfigure(2, weight=1)
+        self.previewFrame = TeamPreviewFrame(container)
+        self.previewFrame.grid(row=0, column=1, rowspan=2,
+                               sticky=tk.N+tk.E+tk.W)
+        self.aliasFrame = TeamAliasFrame(container)
+        self.aliasFrame.grid(row=1, column=0,
+                             sticky=tk.N+tk.E+tk.S+tk.W)
         container.columnconfigure(0, weight=1)
         container.columnconfigure(1, weight=3)
         container.rowconfigure(0, weight=2)
         container.rowconfigure(1, weight=1)
+
+    def getTeams(self):
+        config = self.collectConfig()
+        dbConfig = self.winfo_toplevel().getDbConfig()
+        if dbConfig is not None:
+            config['database'] = dbConfig
+        data = PlayoffData()
+        return data.fetch_team_list(config['teams'], dbConfig)
+
+    def collectConfig(self):
+        config = {
+            'teams': self.settingsFrame.getConfig(),
+            'team_aliases': self.aliasFrame.getConfig()
+        }
+        tieConfig = self.previewFrame.getTieConfig()
+        if tieConfig is not None and isinstance(config['teams'], dict):
+            config['teams']['ties'] = tieConfig
+        return config
 
 class MatchesTab(PlayoffTab):
     @property
@@ -125,6 +145,9 @@ class NetworkTab(PlayoffTab):
     @property
     def title(self):
         return 'Sieć'
+
+    def getDB(self):
+        return None
 
 class VisualTab(PlayoffTab):
     @property

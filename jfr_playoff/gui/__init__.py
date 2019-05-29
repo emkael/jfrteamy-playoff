@@ -15,3 +15,9 @@ class PlayoffGUI(tk.Tk):
             self.tabs[tab] = globals()[tab](self.notebook)
             self.notebook.add(self.tabs[tab], text=self.tabs[tab].title)
         self.mainloop()
+
+    def getDbConfig(self):
+        return self.tabs['NetworkTab'].getDB()
+
+    def getTeams(self):
+        return self.tabs['TeamsTab'].getTeams()
