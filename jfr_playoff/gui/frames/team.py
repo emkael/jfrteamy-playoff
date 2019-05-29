@@ -5,7 +5,7 @@ from tkinter.font import Font
 from tkinter import ttk
 import tkMessageBox
 
-from ..frames import RepeatableFrame, WidgetRepeater, RepeatableEntry
+from ..frames import RepeatableFrame, WidgetRepeater, RepeatableEntry, getIntVal
 
 class ManualTeamRow(RepeatableFrame):
     def renderContent(self):
@@ -17,6 +17,14 @@ class ManualTeamRow(RepeatableFrame):
         self.flag.grid(row=0, column=2)
         self.position = ttk.Entry(self, width=10)
         self.position.grid(row=0, column=3)
+
+    def getValue(self):
+        flag = self.flag.get().strip()
+        position = getIntVal(self.position, None)
+        return [
+            self.fullname.get().strip(), self.shortname.get().strip(),
+            flag if len(flag) else None, position
+        ]
 
 class TeamManualSettingsFrame(tk.Frame):
     def __init__(self, *args, **kwargs):
@@ -30,8 +38,11 @@ class TeamManualSettingsFrame(tk.Frame):
             (ttk.Label, {'text': 'Ikona', 'width': 10}),
             (ttk.Label, {'text': 'Poz. końc.', 'width': 10}),
         ]
-        (WidgetRepeater(self, ManualTeamRow, headers=headers)).grid(
-            row=1, column=0, columnspan=5)
+        self.repeater = WidgetRepeater(self, ManualTeamRow, headers=headers)
+        self.repeater.grid(row=1, column=0, columnspan=5)
+
+    def getTeams(self):
+        return [val for val in self.repeater.getValue() if len(val[0].strip())]
 
 class TeamSelectionFrame(tk.Frame):
     def __init__(self, master, title='', teams=[],
@@ -65,6 +76,7 @@ class TeamSelectionFrame(tk.Frame):
         (ttk.Button(self, text='Zapisz', command=self._save)).grid(
             row=row, column=0, columnspan=2)
 
+
 class TeamFetchSettingsFrame(tk.Frame):
     SOURCE_LINK = 0
     SOURCE_DB = 1
@@ -93,6 +105,18 @@ class TeamFetchSettingsFrame(tk.Frame):
                 callback=self._setFinishingPositions)
             selectionFrame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
+    def getTeams(self):
+        teams = {}
+        if self.fetchSource.get() == self.SOURCE_LINK:
+            teams['link'] = self.fetchLink.get()
+        elif self.fetchSource.get() == self.SOURCE_DB:
+            teams['database'] = self.fetchDB.get()
+        if len(self.finishingPositions):
+            teams['final_positions'] = self.finishingPositions
+        maxTeams = getIntVal(self.fetchLimit)
+        if maxTeams:
+            teams['max_teams'] = maxTeams
+        return teams
 
     def renderContent(self):
         (ttk.Label(self, text=' ')).grid(row=0, column=0, rowspan=2)
@@ -186,6 +210,13 @@ class TeamSettingsFrame(tk.Frame):
 
         self.teamFormat.set(self.FORMAT_MANUAL)
         self.setTeams([])
+
+    def getConfig(self):
+        if self.teamFormat.get() == self.FORMAT_MANUAL:
+            return self.manualSettingsFrame.getTeams()
+        elif self.teamFormat.get() == self.FORMAT_FETCH:
+            return self.fetchSettingsFrame.getTeams()
+        return []
 
 class TeamAliasRow(RepeatableFrame):
     def renderContent(self):
