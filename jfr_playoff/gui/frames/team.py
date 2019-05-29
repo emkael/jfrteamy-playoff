@@ -228,6 +228,11 @@ class TeamAliasRow(RepeatableFrame):
         self.names = WidgetRepeater(self, RepeatableEntry)
         self.names.grid(row=0, column=1, sticky=tk.W+tk.E)
 
+    def getValue(self):
+        return (
+            self.teamName.get().strip(),
+            [val.strip() for val in self.names.getValue()])
+
 class TeamAliasFrame(tk.Frame):
     def __init__(self, *args, **kwags):
         tk.Frame.__init__(self, *args, **kwags)
@@ -239,6 +244,9 @@ class TeamAliasFrame(tk.Frame):
             row=0, column=0, sticky=tk.W+tk.E)
         self.repeater = WidgetRepeater(self, TeamAliasRow)
         self.repeater.grid(row=1, column=0, sticky=tk.W+tk.E)
+
+    def getConfig(self):
+        return {val[0]: val[1] for val in self.repeater.getValue() if val[0]}
 
 class TeamPreviewFrame(tk.Frame):
     def __init__(self, *args, **kwags):
@@ -292,5 +300,11 @@ class TeamPreviewFrame(tk.Frame):
                 self.teamList.column(col, width=heading[1], stretch=True)
 
         self.setTeams([])
+
+    def getTieConfig(self):
+        ties = [getIntVal(val, 0) for val in self.tieValues]
+        if len(ties) and max(ties) == 0:
+            return None
+        return ties
 
 __all__ = ['TeamSettingsFrame', 'TeamAliasFrame', 'TeamPreviewFrame']
