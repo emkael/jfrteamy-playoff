@@ -8,33 +8,40 @@ from jfr_playoff.logger import PlayoffLogger
 
 
 class PlayoffData(object):
-    def __init__(self, settings):
-        self.database = PlayoffDB(settings.get('database')) if settings.has_section('database') else None
-        if self.database is None:
-            PlayoffLogger.get('db').warning(PlayoffDB.DATABASE_NOT_CONFIGURED_WARNING)
-        self.team_settings = settings.get('teams')
-        self.phases = settings.get('phases')
-        self.swiss = []
-        if settings.has_section('swiss'):
-            self.swiss = settings.get('swiss')
-        self.aliases = {}
-        if settings.has_section('team_aliases'):
-            self.aliases = settings.get('team_aliases')
+    def __init__(self, settings=None):
+        if settings is not None:
+            self.database = PlayoffDB(settings.get('database')) \
+                if settings.has_section('database') else None
+            if self.database is None:
+                PlayoffLogger.get('db').warning(
+                    PlayoffDB.DATABASE_NOT_CONFIGURED_WARNING)
+            self.team_settings = settings.get('teams')
+            self.phases = settings.get('phases')
+            self.swiss = []
+            if settings.has_section('swiss'):
+                self.swiss = settings.get('swiss')
+            self.aliases = {}
+            if settings.has_section('team_aliases'):
+                self.aliases = settings.get('team_aliases')
         self.grid = []
         self.match_info = {}
         self.leaderboard = []
 
-    @cached_property
-    def teams(self):
-        if isinstance(self.team_settings, list):
+    def fetch_team_list(self, settings, db_settings):
+        if isinstance(settings, list):
             PlayoffLogger.get('data').info(
-                'team list pre-defined: %s', self.team_settings)
-            return self.team_settings
-        tournament_info = TournamentInfo(self.team_settings, self.database)
+                'team list pre-defined: %s', settings)
+            return settings
+        tournament_info = TournamentInfo(settings, db_settings)
         team_list = tournament_info.get_tournament_results()
         if len(team_list) == 0:
             PlayoffLogger.get('data').warning('team list is empty!')
-        return team_list if 'max_teams' not in self.team_settings else team_list[0:self.team_settings['max_teams']]
+        return team_list if 'max_teams' not in settings \
+            else team_list[0:settings['max_teams']]
+
+    @cached_property
+    def teams(self):
+        return self.fetch_team_list(self.team_settings, self.database)
 
     def generate_phases(self):
         self.grid = []
