@@ -13,7 +13,7 @@ def complete_filename(text, state):
 
 class PlayoffSettings(object):
 
-    def __init__(self, config_file):
+    def __init__(self, config_file=None, config_obj=None):
         self.settings = None
         self.interactive = False
         self.settings_file = None
@@ -21,7 +21,10 @@ class PlayoffSettings(object):
             self.settings_file = config_file.decode(
                 sys.getfilesystemencoding())
         else:
-            self.interactive = True
+            if config_obj is not None:
+                self.settings = config_obj
+            else:
+                self.interactive = True
 
     def __merge_config(self, base_config,
                        new_config=None, remote_url=None,
@@ -39,7 +42,7 @@ class PlayoffSettings(object):
         return base_config
 
     def load(self):
-        if self.settings_file is None:
+        if self.interactive:
             readline.set_completer_delims(' \t\n;')
             readline.parse_and_bind("tab: complete")
             readline.set_completer(complete_filename)
