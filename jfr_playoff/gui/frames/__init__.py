@@ -65,6 +65,10 @@ class WidgetRepeater(tk.Frame):
         self._renderHeader()
         self._updateGrid()
 
+    def getValue(self):
+        return [widget.getValue() for widget in self.widgets
+                if isinstance(widget, self.widgetClass)]
+
 class RepeatableFrame(tk.Frame):
     def __init__(self, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
