@@ -9,14 +9,21 @@ from ..frames import RepeatableFrame, WidgetRepeater, RepeatableEntry, getIntVal
 
 class ManualTeamRow(RepeatableFrame):
     def renderContent(self):
-        self.fullname = ttk.Entry(self, width=20)
-        self.fullname.grid(row=0, column=0)
-        self.shortname = ttk.Entry(self, width=20)
-        self.shortname.grid(row=0, column=1)
-        self.flag = ttk.Entry(self, width=10)
-        self.flag.grid(row=0, column=2)
-        self.position = ttk.Entry(self, width=10)
-        self.position.grid(row=0, column=3)
+        self.fullname = tk.StringVar()
+        fullnameField = ttk.Entry(self, width=20, textvariable=self.fullname)
+        fullnameField.grid(row=0, column=0)
+        self.shortname = tk.StringVar()
+        shortnameField = ttk.Entry(self, width=20, textvariable=self.shortname)
+        shortnameField.grid(row=0, column=1)
+        self.flag = tk.StringVar()
+        flagField = ttk.Entry(self, width=10, textvariable=self.flag)
+        flagField.grid(row=0, column=2)
+        self.position = tk.StringVar()
+        positionField = ttk.Entry(self, width=10, textvariable=self.position)
+        positionField.grid(row=0, column=3)
+        for var in [self.fullname, self.shortname, self.flag, self.position]:
+            var.trace('w', self._changeNotify)
+        self._changeNotify(None)
 
     def getValue(self):
         flag = self.flag.get().strip()
@@ -25,6 +32,10 @@ class ManualTeamRow(RepeatableFrame):
             self.fullname.get().strip(), self.shortname.get().strip(),
             flag if len(flag) else None, position
         ]
+
+    def _changeNotify(self, *args):
+        self.winfo_toplevel().event_generate(
+            '<<TeamSettingsChanged>>', when='tail')
 
 class TeamManualSettingsFrame(tk.Frame):
     def __init__(self, *args, **kwargs):
@@ -85,10 +96,15 @@ class TeamFetchSettingsFrame(tk.Frame):
         tk.Frame.__init__(self, *args, **kwargs)
         self.renderContent()
 
+    def _changeNotify(self, *args):
+        self.winfo_toplevel().event_generate(
+            '<<TeamSettingsChanged>>', when='tail')
+
     def _setFinishingPositions(self, positions):
         self.finishingPositions = positions
         self.finishingPositionsBtn.configure(
             text='[wybrano: %d]' % (len(self.finishingPositions)))
+        self._changeNotify(None)
 
     def _chooseFinishingPositions(self):
         if not self.master.teams:
@@ -128,6 +144,7 @@ class TeamFetchSettingsFrame(tk.Frame):
             variable=self.fetchSource, value=self.SOURCE_DB)).grid(
                 row=0, column=1, columnspan=2, sticky=tk.W)
         self.fetchDB = tk.StringVar()
+        self.fetchDB.trace('w', self._changeNotify)
         (ttk.OptionMenu(self, self.fetchDB, '')).grid(
             row=0, column=3, sticky=tk.W+tk.E)
 
@@ -135,13 +152,17 @@ class TeamFetchSettingsFrame(tk.Frame):
             self, text='Strona wyników',
             variable=self.fetchSource, value=self.SOURCE_LINK)).grid(
                 row=1, column=1, columnspan=2, sticky=tk.W)
-        self.fetchLink = ttk.Entry(self, width=20)
+        self.link = tk.StringVar()
+        self.link.set('')
+        self.link.trace('w', self._changeNotify)
+        self.fetchLink = ttk.Entry(self, width=20, textvariable=self.link)
         self.fetchLink.grid(row=1, column=3)
 
         (ttk.Label(self, text='Pobierz do ')).grid(
             row=2, column=0, columnspan=2, sticky=tk.W)
         self.fetchLimit = tk.StringVar()
         self.fetchLimit.set(0)
+        self.fetchLimit.trace('w', self._changeNotify)
         (tk.Spinbox(
             self, from_=0, to=9999, width=5, justify=tk.RIGHT,
             textvariable=self.fetchLimit)).grid(
@@ -180,13 +201,17 @@ class TeamSettingsFrame(tk.Frame):
                 state=tk.NORMAL \
                 if self.teamFormat.get()==value else tk.DISABLED)
 
-    def setTeams(self, teams):
-        self.teams = teams
-        # emit event or sth
+    def _changeNotify(self, *args):
+        self.winfo_toplevel().event_generate(
+            '<<TeamSettingsChanged>>', when='tail')
+
+    def setTeams(self, event):
+        self.teams = self.winfo_toplevel().getTeams()
 
     def renderContent(self):
         self.teamFormat = tk.IntVar()
         self.teamFormat.trace('w', self._enablePanels)
+        self.teamFormat.trace('w', self._changeNotify)
 
         (ttk.Radiobutton(
             self, text='Pobierz z JFR Teamy:',
@@ -209,7 +234,9 @@ class TeamSettingsFrame(tk.Frame):
         self.manualSettingsFrame.grid(row=4, column=0, sticky=tk.W+tk.E)
 
         self.teamFormat.set(self.FORMAT_MANUAL)
-        self.setTeams([])
+        self.teams = []
+        self.winfo_toplevel().bind(
+            '<<TeamListChanged>>', self.setTeams, add='+')
 
     def getConfig(self):
         if self.teamFormat.get() == self.FORMAT_MANUAL:
@@ -223,15 +250,30 @@ class TeamAliasRow(RepeatableFrame):
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
         self.teamName = tk.StringVar()
-        (ttk.OptionMenu(self, self.teamName, '')).grid(
-            row=0, column=0, sticky=tk.W+tk.E+tk.N)
+        self._createList([])
         self.names = WidgetRepeater(self, RepeatableEntry)
         self.names.grid(row=0, column=1, sticky=tk.W+tk.E)
+        self.winfo_toplevel().bind(
+            '<<TeamListChanged>>', self.refreshTeams, add='+')
+        self.refreshTeams(None)
+
+    def _createList(self, options):
+        self.teamName.set('')
+        self.teamList = ttk.OptionMenu(self, self.teamName, '', *options)
+        self.teamList.grid(row=0, column=0, sticky=tk.W+tk.E+tk.N)
 
     def getValue(self):
         return (
             self.teamName.get().strip(),
             [val.strip() for val in self.names.getValue()])
+
+    def refreshTeams(self, event):
+        oldName = self.teamName.get()
+        options = [team[0] for team in self.winfo_toplevel().getTeams()]
+        self.teamList.destroy()
+        self._createList(options)
+        if oldName in options:
+            self.teamName.set(oldName)
 
 class TeamAliasFrame(tk.Frame):
     def __init__(self, *args, **kwags):
@@ -255,6 +297,8 @@ class TeamPreviewFrame(tk.Frame):
         self.tieFields = []
         self.labels = []
         self.renderContent()
+        self.winfo_toplevel().bind(
+            '<<TeamListChanged>>', self.refreshTeams, add='+')
 
     def setTeams(self, teams):
         self.teamList.grid(
@@ -290,7 +334,6 @@ class TeamPreviewFrame(tk.Frame):
             anchor=tk.E))
         self.labels[-1].grid(row=len(teams)+3, column=0, sticky=tk.E)
         self.labels.append(ttk.Label(self, text='⬏', font=Font(size=20)))
-        self.labels[-1].bind('<Button-1>', self.refreshTeams)
         self.labels[-1].grid(
             row=len(teams)+3, column=1, sticky=tk.W+tk.N)
         self.rowconfigure(len(teams)+3, weight=1)

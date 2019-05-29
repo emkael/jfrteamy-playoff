@@ -116,6 +116,13 @@ class TeamsTab(PlayoffTab):
         container.rowconfigure(0, weight=2)
         container.rowconfigure(2, weight=1)
 
+        self.winfo_toplevel().bind(
+            '<<TeamSettingsChanged>>', self.onTeamSettingsChange, add='+')
+
+    def onTeamSettingsChange(self, event):
+        self.winfo_toplevel().event_generate(
+            '<<TeamListChanged>>', when='tail')
+
     def getTeams(self):
         config = self.collectConfig()
         dbConfig = self.winfo_toplevel().getDbConfig()
