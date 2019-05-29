@@ -105,13 +105,16 @@ class TeamsTab(PlayoffTab):
         self.previewFrame = TeamPreviewFrame(container)
         self.previewFrame.grid(row=0, column=1, rowspan=2,
                                sticky=tk.N+tk.E+tk.W)
+        (ttk.Separator(
+            container, orient=tk.HORIZONTAL)).grid(
+                row=1, column=0, sticky=tk.W+tk.E)
         self.aliasFrame = TeamAliasFrame(container)
-        self.aliasFrame.grid(row=1, column=0,
+        self.aliasFrame.grid(row=2, column=0,
                              sticky=tk.N+tk.E+tk.S+tk.W)
         container.columnconfigure(0, weight=1)
         container.columnconfigure(1, weight=3)
         container.rowconfigure(0, weight=2)
-        container.rowconfigure(1, weight=1)
+        container.rowconfigure(2, weight=1)
 
     def getTeams(self):
         config = self.collectConfig()
