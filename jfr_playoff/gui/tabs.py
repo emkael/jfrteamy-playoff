@@ -116,20 +116,29 @@ class TeamsTab(PlayoffTab):
         container.rowconfigure(0, weight=2)
         container.rowconfigure(2, weight=1)
 
+        self._teamList = []
+        self._teamListFetcher = None
+
         self.winfo_toplevel().bind(
             '<<TeamSettingsChanged>>', self.onTeamSettingsChange, add='+')
 
     def onTeamSettingsChange(self, event):
-        self.winfo_toplevel().event_generate(
-            '<<TeamListChanged>>', when='tail')
+        if self._teamListFetcher is not None:
+            self.after_cancel(self._teamListFetcher)
+        self._teamListFetcher = self.after(500, self._fetchTeamList)
 
-    def getTeams(self):
+    def _fetchTeamList(self):
         config = self.collectConfig()
         dbConfig = self.winfo_toplevel().getDbConfig()
         if dbConfig is not None:
             config['database'] = dbConfig
         data = PlayoffData()
-        return data.fetch_team_list(config['teams'], dbConfig)
+        self._teamList = data.fetch_team_list(config['teams'], dbConfig)
+        self.winfo_toplevel().event_generate(
+            '<<TeamListChanged>>', when='tail')
+
+    def getTeams(self):
+        return self._teamList
 
     def collectConfig(self):
         config = {
