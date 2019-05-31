@@ -94,3 +94,36 @@ class RepeatableEntry(RepeatableFrame):
 
     def setValue(self, value):
         return self.value.set(value)
+
+class ScrollableFrame(tk.Frame):
+    def __init__(self, *args, **kwargs):
+        vertical = False
+        if 'vertical' in kwargs:
+            vertical = kwargs['vertical']
+            del kwargs['vertical']
+        horizontal = False
+        if 'horizontal' in kwargs:
+            horizontal = kwargs['horizontal']
+            del kwargs['horizontal']
+        tk.Frame.__init__(self, *args, **kwargs)
+        canvas = tk.Canvas(self, borderwidth=0, highlightthickness=0)
+        if horizontal:
+            hscroll = tk.Scrollbar(
+                self, orient=tk.HORIZONTAL, command=canvas.xview)
+            hscroll.pack(side=tk.BOTTOM, fill=tk.X)
+            canvas.configure(xscrollcommand=hscroll.set)
+        if vertical:
+            vscroll = tk.Scrollbar(
+                self, orient=tk.VERTICAL, command=canvas.yview)
+            vscroll.pack(side=tk.RIGHT, fill=tk.Y)
+            canvas.configure(yscrollcommand=vscroll.set)
+        frame = tk.Frame(canvas, borderwidth=0, highlightthickness=0)
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        canvas.create_window((0,0), window=frame, anchor=tk.N+tk.W)
+        frame.bind(
+            '<Configure>',
+            lambda ev: canvas.configure(scrollregion=canvas.bbox('all')))
+        self.renderContent(frame)
+
+    def renderContent(self, container):
+        pass

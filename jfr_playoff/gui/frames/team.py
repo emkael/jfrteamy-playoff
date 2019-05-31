@@ -5,7 +5,8 @@ from tkinter.font import Font
 from tkinter import ttk
 import tkMessageBox
 
-from ..frames import RepeatableFrame, WidgetRepeater, RepeatableEntry, getIntVal
+from ..frames import RepeatableFrame, WidgetRepeater, RepeatableEntry
+from ..frames import getIntVal, ScrollableFrame
 
 class ManualTeamRow(RepeatableFrame):
     def renderContent(self):
@@ -177,13 +178,9 @@ class TeamFetchSettingsFrame(tk.Frame):
         self.finishingPositionsBtn.grid(row=3, column=3, sticky=tk.W)
         self._setFinishingPositions([])
 
-class TeamSettingsFrame(tk.Frame):
+class TeamSettingsFrame(ScrollableFrame):
     FORMAT_FETCH = 0
     FORMAT_MANUAL = 1
-
-    def __init__(self, *args, **kwargs):
-        tk.Frame.__init__(self, *args, **kwargs)
-        self.renderContent()
 
     def _setPanelState(self, frame, state):
         for child in frame.winfo_children():
@@ -208,29 +205,29 @@ class TeamSettingsFrame(tk.Frame):
     def setTeams(self, event):
         self.teams = self.winfo_toplevel().getTeams()
 
-    def renderContent(self):
+    def renderContent(self, container):
         self.teamFormat = tk.IntVar()
         self.teamFormat.trace('w', self._enablePanels)
         self.teamFormat.trace('w', self._changeNotify)
 
         (ttk.Radiobutton(
-            self, text='Pobierz z JFR Teamy:',
+            container, text='Pobierz z JFR Teamy:',
             variable=self.teamFormat, value=self.FORMAT_FETCH)).grid(
                 row=0, column=0, sticky=tk.W)
 
-        self.fetchSettingsFrame = TeamFetchSettingsFrame(self)
+        self.fetchSettingsFrame = TeamFetchSettingsFrame(container)
         self.fetchSettingsFrame.grid(row=1, column=0, sticky=tk.W+tk.E)
 
         (ttk.Separator(
-            self, orient=tk.HORIZONTAL)).grid(
+            container, orient=tk.HORIZONTAL)).grid(
                 row=2, column=0, sticky=tk.W+tk.E)
 
         (ttk.Radiobutton(
-            self, text='Ustaw ręcznie:',
+            container, text='Ustaw ręcznie:',
             variable=self.teamFormat, value=self.FORMAT_MANUAL)).grid(
                 row=3, column=0, sticky=tk.W+tk.E)
 
-        self.manualSettingsFrame = TeamManualSettingsFrame(self)
+        self.manualSettingsFrame = TeamManualSettingsFrame(container)
         self.manualSettingsFrame.grid(row=4, column=0, sticky=tk.W+tk.E)
 
         self.teamFormat.set(self.FORMAT_MANUAL)
@@ -275,32 +272,27 @@ class TeamAliasRow(RepeatableFrame):
         if oldName in options:
             self.teamName.set(oldName)
 
-class TeamAliasFrame(tk.Frame):
-    def __init__(self, *args, **kwags):
-        tk.Frame.__init__(self, *args, **kwags)
-        self.renderContent()
-
-    def renderContent(self):
-        self.columnconfigure(0, weight=1)
-        (ttk.Label(self, text='Aliasy teamów')).grid(
+class TeamAliasFrame(ScrollableFrame):
+    def renderContent(self, container):
+        container.columnconfigure(0, weight=1)
+        (ttk.Label(container, text='Aliasy teamów')).grid(
             row=0, column=0, sticky=tk.W+tk.E)
-        self.repeater = WidgetRepeater(self, TeamAliasRow)
+        self.repeater = WidgetRepeater(container, TeamAliasRow)
         self.repeater.grid(row=1, column=0, sticky=tk.W+tk.E)
 
     def getConfig(self):
         return {val[0]: val[1] for val in self.repeater.getValue() if val[0]}
 
-class TeamPreviewFrame(tk.Frame):
+class TeamPreviewFrame(ScrollableFrame):
     def __init__(self, *args, **kwags):
-        tk.Frame.__init__(self, *args, **kwags)
         self.tieValues = []
         self.tieFields = []
         self.labels = []
-        self.renderContent()
+        ScrollableFrame.__init__(self, *args, **kwags)
         self.winfo_toplevel().bind(
             '<<TeamListChanged>>', self.refreshTeams, add='+')
 
-    def setTeams(self, teams):
+    def setTeams(self, container, teams):
         self.teamList.grid(
             row=1, column=0, rowspan=len(teams)+2, sticky=tk.W+tk.E+tk.N+tk.S)
         self.tieValues = self.tieValues[0:len(teams)]
@@ -316,34 +308,35 @@ class TeamPreviewFrame(tk.Frame):
                 self.tieValues.append(tk.StringVar())
                 self.tieFields.append(
                     tk.Spinbox(
-                        self, from_=0, to=9999, width=5, font=Font(size=10),
+                        container, from_=0, to=9999,
+                        width=5, font=Font(size=10),
                         textvariable=self.tieValues[idx]))
                 self.tieFields[idx].grid(
                     row=idx+2, column=1, sticky=tk.W+tk.E+tk.N)
-                self.rowconfigure(idx+2, weight=0)
-        self.labels.append(ttk.Label(self, text=' '))
+                container.rowconfigure(idx+2, weight=0)
+        self.labels.append(ttk.Label(container, text=' '))
         self.labels[-1].grid(row=1, column=1, pady=3)
-        self.labels.append(ttk.Label(self, text=' '))
+        self.labels.append(ttk.Label(container, text=' '))
         self.labels[-1].grid(row=len(teams)+2, column=1)
-        self.rowconfigure(1, weight=0)
-        self.rowconfigure(len(teams)+2, weight=1)
+        container.rowconfigure(1, weight=0)
+        container.rowconfigure(len(teams)+2, weight=1)
         self.labels.append(ttk.Label(
-            self,
+            container,
             text='Kolejność rozstrzygania remisów w klasyfikacji ' + \
             'pobranej z bazy JFR Teamy',
             anchor=tk.E))
-        self.labels[-1].grid(row=len(teams)+3, column=0, sticky=tk.E)
-        self.labels.append(ttk.Label(self, text='⬏', font=Font(size=20)))
+        self.labels[-1].grid(row=len(teams)+3, column=0, sticky=tk.N+tk.E)
+        self.labels.append(ttk.Label(container, text='⬏', font=Font(size=20)))
         self.labels[-1].grid(
             row=len(teams)+3, column=1, sticky=tk.W+tk.N)
-        self.rowconfigure(len(teams)+3, weight=1)
+        container.rowconfigure(len(teams)+3, weight=1)
 
-    def renderContent(self):
-        self.columnconfigure(0, weight=1)
-        (ttk.Label(self, text='Podgląd listy teamów')).grid(
+    def renderContent(self, container):
+        container.columnconfigure(0, weight=1)
+        (ttk.Label(container, text='Podgląd listy teamów')).grid(
             row=0, column=0, columnspan=2, sticky=tk.W+tk.E)
         self.teamList = ttk.Treeview(
-            self, show='headings',
+            container, show='headings',
             columns=['fullname','shortname','icon','position'],
             selectmode='browse')
         for col, heading in enumerate(
@@ -353,7 +346,9 @@ class TeamPreviewFrame(tk.Frame):
             if heading[1]:
                 self.teamList.column(col, width=heading[1], stretch=True)
 
-        self.setTeams([])
+        self.container = container
+
+        self.setTeams(self.container, [])
 
     def getTieConfig(self):
         ties = [getIntVal(val, 0) for val in self.tieValues]
@@ -362,6 +357,6 @@ class TeamPreviewFrame(tk.Frame):
         return ties
 
     def refreshTeams(self, event):
-        self.setTeams(self.winfo_toplevel().getTeams())
+        self.setTeams(self.container, self.winfo_toplevel().getTeams())
 
 __all__ = ['TeamSettingsFrame', 'TeamAliasFrame', 'TeamPreviewFrame']

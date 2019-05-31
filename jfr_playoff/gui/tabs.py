@@ -99,22 +99,18 @@ class TeamsTab(PlayoffTab):
         return 'Uczestnicy'
 
     def renderContent(self, container):
-        self.settingsFrame = TeamSettingsFrame(container, padx=5, pady=5)
-        self.settingsFrame.grid(row=0, column=0, sticky=tk.N+tk.E+tk.S+tk.W)
-        self.settingsFrame.columnconfigure(2, weight=1)
-        self.previewFrame = TeamPreviewFrame(container)
-        self.previewFrame.grid(row=0, column=1, rowspan=2,
-                               sticky=tk.N+tk.E+tk.W)
+        leftFrame = tk.Frame(container)
+        leftFrame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.settingsFrame = TeamSettingsFrame(
+            leftFrame, vertical=True, padx=5, pady=5)
+        self.settingsFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         (ttk.Separator(
-            container, orient=tk.HORIZONTAL)).grid(
-                row=1, column=0, sticky=tk.W+tk.E)
-        self.aliasFrame = TeamAliasFrame(container)
-        self.aliasFrame.grid(row=2, column=0,
-                             sticky=tk.N+tk.E+tk.S+tk.W)
-        container.columnconfigure(0, weight=1)
-        container.columnconfigure(1, weight=3)
-        container.rowconfigure(0, weight=2)
-        container.rowconfigure(2, weight=1)
+            leftFrame, orient=tk.HORIZONTAL)).pack(
+                side=tk.TOP, fill=tk.X)
+        self.aliasFrame = TeamAliasFrame(leftFrame, vertical=True)
+        self.aliasFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.previewFrame = TeamPreviewFrame(container, vertical=True)
+        self.previewFrame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
         self._teamList = []
         self._teamListFetcher = None
