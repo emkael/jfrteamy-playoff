@@ -140,8 +140,10 @@ class TeamFetchSettingsFrame(tk.Frame):
         return teams
 
     def _createDBList(self, values):
+        if self.fetchDB.get() not in values:
+            self.fetchDB.set('')
         self.fetchDBField = ttk.OptionMenu(
-            self, self.fetchDB, *([''] + values))
+            self, self.fetchDB, self.fetchDB.get(), *values)
         self.fetchDBField.grid(row=0, column=3, sticky=tk.W+tk.E)
 
     def _onDBListChange(self, *args):
@@ -271,8 +273,10 @@ class TeamAliasRow(RepeatableFrame):
         self.refreshTeams(None)
 
     def _createList(self, options):
-        self.teamName.set('')
-        self.teamList = ttk.OptionMenu(self, self.teamName, '', *options)
+        if self.teamName.get() not in options:
+            self.teamName.set('')
+        self.teamList = ttk.OptionMenu(
+            self, self.teamName, self.teamName.get(), *options)
         self.teamList.grid(row=0, column=0, sticky=tk.W+tk.E+tk.N)
 
     def getValue(self):
@@ -281,12 +285,9 @@ class TeamAliasRow(RepeatableFrame):
             [val.strip() for val in self.names.getValue()])
 
     def refreshTeams(self, event):
-        oldName = self.teamName.get()
         options = [team[0] for team in self.winfo_toplevel().getTeams()]
         self.teamList.destroy()
         self._createList(options)
-        if oldName in options:
-            self.teamName.set(oldName)
 
 class TeamAliasFrame(ScrollableFrame):
     def renderContent(self, container):
