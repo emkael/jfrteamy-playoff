@@ -110,7 +110,8 @@ class TeamFetchSettingsFrame(tk.Frame):
         self._changeNotify(None)
 
     def _chooseFinishingPositions(self):
-        if not self.master.teams:
+        teams = self.winfo_toplevel().getTeams()
+        if not len(teams):
             tkMessageBox.showerror(
                 'Wybór teamów', 'W turnieju nie ma teamów do wyboru')
             self._setFinishingPositions([])
@@ -120,7 +121,7 @@ class TeamFetchSettingsFrame(tk.Frame):
             selectionFrame = TeamSelectionFrame(
                 dialog, title='Wybierz teamy, które zakończyły rozgrywki ' + \
                 'na swojej pozycji:',
-                teams=self.master.teams,
+                teams=teams,
                 selected=lambda idx, team: idx+1 in self.finishingPositions,
                 callback=self._setFinishingPositions, vertical=True)
             selectionFrame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
