@@ -10,6 +10,7 @@ import tkMessageBox as tkmb
 from .frames import getIntVal
 from .frames.team import *
 from .frames.network import *
+from .frames.translations import *
 
 from ..data import PlayoffData
 from ..db import PlayoffDB
@@ -198,6 +199,11 @@ class TranslationsTab(PlayoffTab):
     @property
     def title(self):
         return 'Tłumaczenia'
+
+    def renderContent(self, container):
+        self.translationsFrame = TranslationConfigurationFrame(
+            container, vertical=True)
+        self.translationsFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 __all__ = ['MainSettingsTab', 'TeamsTab', 'MatchesTab', 'SwissesTab',
            'NetworkTab', 'VisualTab', 'StyleTab', 'TranslationsTab']
