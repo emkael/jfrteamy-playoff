@@ -134,9 +134,12 @@ class TeamsTab(PlayoffTab):
         if dbConfig is not None:
             config['database'] = dbConfig
         data = PlayoffData()
-        self._teamList = data.fetch_team_list(
-            config['teams'],
-            PlayoffDB(dbConfig) if dbConfig is not None else None)
+        db = None
+        try:
+            db = PlayoffDB(dbConfig)
+        except Exception:
+            pass
+        self._teamList = data.fetch_team_list(config['teams'], db)
         self.winfo_toplevel().event_generate(
             '<<TeamListChanged>>', when='tail')
 
