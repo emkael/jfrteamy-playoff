@@ -27,12 +27,12 @@ class PlayoffData(object):
         self.match_info = {}
         self.leaderboard = []
 
-    def fetch_team_list(self, settings, db_settings):
+    def fetch_team_list(self, settings, db_interface):
         if isinstance(settings, list):
             PlayoffLogger.get('data').info(
                 'team list pre-defined: %s', settings)
             return settings
-        tournament_info = TournamentInfo(settings, db_settings)
+        tournament_info = TournamentInfo(settings, db_interface)
         team_list = tournament_info.get_tournament_results()
         if len(team_list) == 0:
             PlayoffLogger.get('data').warning('team list is empty!')
