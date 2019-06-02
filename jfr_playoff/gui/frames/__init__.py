@@ -142,7 +142,7 @@ class ScrollableFrame(tk.Frame):
             vscroll.pack(side=tk.RIGHT, fill=tk.Y)
             canvas.configure(yscrollcommand=vscroll.set)
         frame = tk.Frame(canvas, borderwidth=0, highlightthickness=0)
-        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        canvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         canvas.create_window((0,0), window=frame, anchor=tk.N+tk.W)
         frame.bind(
             '<Configure>',

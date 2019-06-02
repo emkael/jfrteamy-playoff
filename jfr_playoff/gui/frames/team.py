@@ -56,13 +56,17 @@ class TeamManualSettingsFrame(tk.Frame):
     def getTeams(self):
         return [val for val in self.repeater.getValue() if len(val[0].strip())]
 
-class TeamSelectionFrame(tk.Frame):
+class TeamSelectionFrame(ScrollableFrame):
     def __init__(self, master, title='', teams=[],
-                 selected=None, callback=None):
-        tk.Frame.__init__(self, master=master)
+                 selected=None, callback=None, *args, **kwargs):
         self.values = []
-        self.renderContent(title, teams, selected)
+        self.title = title
+        self.teams = teams
+        self.selected = selected
         self.callback = callback
+        ScrollableFrame.__init__(self, master=master, *args, **kwargs)
+        (ttk.Button(self, text='Zapisz', command=self._save)).pack(
+            side=tk.BOTTOM, fill=tk.Y)
 
     def _save(self):
         if self.callback:
@@ -71,23 +75,21 @@ class TeamSelectionFrame(tk.Frame):
                  in enumerate(self.values) if value.get()])
         self.master.destroy()
 
-    def renderContent(self, title, teams, selected):
-        self.columnconfigure(1, weight=1)
-        (ttk.Label(self, text=title)).grid(row=0, column=0, columnspan=2)
+    def renderContent(self, container):
+        container.columnconfigure(1, weight=1)
+        (ttk.Label(container, text=self.title)).grid(
+            row=0, column=0, columnspan=2)
         row = 1
-        for team in teams:
-            (ttk.Label(self, text='[%d]' % (row))).grid(row=row, column=0)
+        for team in self.teams:
+            (ttk.Label(container, text='[%d]' % (row))).grid(row=row, column=0)
             self.values.append(tk.IntVar())
             (ttk.Checkbutton(
-                self, text=team[0],
+                container, text=team[0],
                 variable=self.values[row-1]
             )).grid(row=row, column=1, sticky=tk.W)
-            if selected and selected(row-1, team):
+            if self.selected and self.selected(row-1, team):
                 self.values[row-1].set(True)
             row += 1
-        (ttk.Button(self, text='Zapisz', command=self._save)).grid(
-            row=row, column=0, columnspan=2)
-
 
 class TeamFetchSettingsFrame(tk.Frame):
     SOURCE_LINK = 0
@@ -114,12 +116,13 @@ class TeamFetchSettingsFrame(tk.Frame):
             self._setFinishingPositions([])
         else:
             dialog = tk.Toplevel(self)
+            dialog.title('Wybór teamów')
             selectionFrame = TeamSelectionFrame(
                 dialog, title='Wybierz teamy, które zakończyły rozgrywki ' + \
                 'na swojej pozycji:',
                 teams=self.master.teams,
                 selected=lambda idx, team: idx+1 in self.finishingPositions,
-                callback=self._setFinishingPositions)
+                callback=self._setFinishingPositions, vertical=True)
             selectionFrame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
     def getTeams(self):
