@@ -10,12 +10,14 @@ def getIntVal(widget, default=0):
         return default
 
 class WidgetRepeater(tk.Frame):
-    def __init__(self, master, widgetClass, headers=None, *args, **kwargs):
+    def __init__(self, master, widgetClass, headers=None, classParams=None,
+                 *args, **kwargs):
         if not issubclass(widgetClass, RepeatableFrame):
             raise AttributeError(
                 'WidgetRepeater widget must be a RepeatableFrame')
         tk.Frame.__init__(self, master, **kwargs)
         self.widgetClass = widgetClass
+        self.widgetClassParams = classParams
         self.widgets = []
         self.headers = headers
         self.addButton = ttk.Button(
@@ -35,6 +37,8 @@ class WidgetRepeater(tk.Frame):
             command=lambda i=len(self.widgets): self._removeWidget(i))
         removeButton.grid(row=len(self.widgets), column=0, sticky=tk.N)
         widget = self.widgetClass(self)
+        if self.widgetClassParams is not None:
+            widget.configureContent(**self.widgetClassParams)
         self.widgets.append(widget)
         self._updateGrid()
 
@@ -77,6 +81,9 @@ class RepeatableFrame(tk.Frame):
     def renderContent(self):
         pass
 
+    def configureContent(self, **kwargs):
+        pass
+
     def getValue(self):
         pass
 
@@ -88,6 +95,10 @@ class RepeatableEntry(RepeatableFrame):
         self.value = tk.StringVar()
         self.field = ttk.Entry(self, textvariable=self.value)
         self.field.pack(expand=True, fill=tk.BOTH)
+
+    def configureContent(self, **kwargs):
+        for param, value in kwargs.iteritems():
+            self.field[param] = value
 
     def getValue(self):
         return self.value.get()

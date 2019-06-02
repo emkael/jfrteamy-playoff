@@ -172,6 +172,12 @@ class NetworkTab(PlayoffTab):
         self.mysqlFrame = MySQLConfigurationFrame(container)
         self.mysqlFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+        (ttk.Separator(container, orient=tk.HORIZONTAL)).pack(
+            side=tk.TOP, fill=tk.X)
+
+        self.remoteFrame = RemoteConfigurationFrame(container, vertical=True)
+        self.remoteFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
 class VisualTab(PlayoffTab):
     @property
     def title(self):

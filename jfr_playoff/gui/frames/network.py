@@ -5,7 +5,8 @@ from tkinter import ttk
 import tkMessageBox as tkmb
 
 from ...db import PlayoffDB
-from ..frames import getIntVal
+from ..frames import RepeatableEntry, WidgetRepeater
+from ..frames import ScrollableFrame, getIntVal
 
 class MySQLConfigurationFrame(tk.Frame):
     def __init__(self, *args, **kwargs):
@@ -73,4 +74,12 @@ class MySQLConfigurationFrame(tk.Frame):
         (ttk.Entry(container, textvariable=self.pass_, show='*')).grid(
             row=3, column=1, sticky=tk.E+tk.W)
 
-__all__ = ['MySQLConfigurationFrame']
+class RemoteConfigurationFrame(ScrollableFrame):
+    def renderContent(self, container):
+        (ttk.Label(container, text='Zdalne pliki konfiguracyjne:')).pack(
+            side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.repeater = WidgetRepeater(
+            container, RepeatableEntry, classParams={'width':100})
+        self.repeater.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+__all__ = ['MySQLConfigurationFrame', 'RemoteConfigurationFrame']
