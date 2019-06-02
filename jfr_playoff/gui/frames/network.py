@@ -1,5 +1,7 @@
 #coding=utf-8
 
+import socket
+
 import tkinter as tk
 from tkinter import ttk
 import tkMessageBox as tkmb
@@ -74,6 +76,62 @@ class MySQLConfigurationFrame(tk.Frame):
         (ttk.Entry(container, textvariable=self.pass_, show='*')).grid(
             row=3, column=1, sticky=tk.E+tk.W)
 
+class GoniecConfigurationFrame(tk.Frame):
+    def __init__(self, *args, **kwargs):
+        tk.Frame.__init__(self, *args, **kwargs)
+        self.renderContent(self)
+
+    def _enableWidgets(self):
+        for field in [self.portField, self.hostField, self.testButton]:
+            field.configure(
+                state=tk.NORMAL if self.enable.get() else tk.DISABLED)
+
+    def _test(self):
+        try:
+            goniec = socket.socket()
+            goniec.connect(
+                (self.host.get().strip(), getIntVal(self.port, 8080)))
+            goniec.close()
+            self.testError = None
+            self.testLabel.configure(text='✓')
+            self.testLabel.configure(foreground='green')
+        except socket.error as e:
+            self.testError = unicode(str(e).decode('utf-8', errors='replace'))
+            self.testLabel.configure(text='✗')
+            self.testLabel.configure(foreground='red')
+
+    def _testError(self, event):
+        if self.testError is not None:
+            tkmb.showerror('Błąd połączenia z Gońcem', self.testError)
+
+    def renderContent(self, container):
+        (ttk.Label(container, text='Konfiguracja Gońca:')).grid(
+            row=0, column=0, columnspan=4, sticky=tk.W)
+        self.enable = tk.IntVar()
+        (ttk.Checkbutton(
+            container, text='Włącz obsługę Gońca', variable=self.enable,
+            command=self._enableWidgets)).grid(
+                row=1, column=0, columnspan=2, sticky=tk.W)
+        (ttk.Label(container, text='Host:')).grid(row=2, column=0)
+        self.host = tk.StringVar()
+        self.hostField = ttk.Entry(container, textvariable=self.host)
+        self.hostField.grid(row=2, column=1)
+        (ttk.Label(container, text='Port:')).grid(row=2, column=2)
+        self.port = tk.StringVar()
+        self.port.set(8080)
+        self.portField = tk.Spinbox(
+            container, textvariable=self.port, width=5)
+        self.portField.grid(row=2, column=3)
+        self.testButton = ttk.Button(
+            container, text='Testuj ustawienia', command=self._test)
+        self.testButton.grid(row=3, column=1, sticky=tk.E)
+        self.testError = None
+        self.testLabel = ttk.Label(container)
+        self.testLabel.grid(row=3, column=2, sticky=tk.W)
+        self.testLabel.bind('<Button-1>', self._testError)
+        self._enableWidgets()
+
+
 class RemoteConfigurationFrame(ScrollableFrame):
     def renderContent(self, container):
         (ttk.Label(container, text='Zdalne pliki konfiguracyjne:')).pack(
@@ -82,4 +140,4 @@ class RemoteConfigurationFrame(ScrollableFrame):
             container, RepeatableEntry, classParams={'width':100})
         self.repeater.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-__all__ = ['MySQLConfigurationFrame', 'RemoteConfigurationFrame']
+__all__ = ['MySQLConfigurationFrame', 'GoniecConfigurationFrame', 'RemoteConfigurationFrame']

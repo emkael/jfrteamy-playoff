@@ -175,6 +175,12 @@ class NetworkTab(PlayoffTab):
         (ttk.Separator(container, orient=tk.HORIZONTAL)).pack(
             side=tk.TOP, fill=tk.X)
 
+        self.goniecFrame = GoniecConfigurationFrame(container)
+        self.goniecFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+        (ttk.Separator(container, orient=tk.HORIZONTAL)).pack(
+            side=tk.TOP, fill=tk.X)
+
         self.remoteFrame = RemoteConfigurationFrame(container, vertical=True)
         self.remoteFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
