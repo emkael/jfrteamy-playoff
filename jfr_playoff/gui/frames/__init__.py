@@ -80,6 +80,12 @@ class WidgetRepeater(tk.Frame):
         return [widget.getValue() for widget in self.widgets
                 if isinstance(widget, self.widgetClass)]
 
+    def setValue(self, value):
+        for i in range(0, len(value)):
+            if i >= len(self.widgets):
+                self._addWidget()
+            self.widgets[i].setValue(value[i])
+
 class RepeatableFrame(tk.Frame):
     def __init__(self, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
