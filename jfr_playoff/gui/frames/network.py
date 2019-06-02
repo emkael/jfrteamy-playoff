@@ -43,24 +43,31 @@ class MySQLConfigurationFrame(tk.Frame):
         if self.dbError is not None:
             tkmb.showerror('Błąd połączenia z bazą danych', self.dbError)
 
+    def _changeNotify(self, *args):
+        self.winfo_toplevel().event_generate(
+            '<<DBSettingsChanged>>', when='tail')
+
     def renderContent(self, container):
         (ttk.Label(container, text='Ustawienia MySQL')).grid(
             row=0, column=0, columnspan=4, sticky=tk.E+tk.W)
         (ttk.Label(container, text='Host:')).grid(
             row=1, column=0, sticky=tk.E)
         self.host = tk.StringVar()
+        self.host.trace('w', self._changeNotify)
         (ttk.Entry(container, textvariable=self.host)).grid(
             row=1, column=1, sticky=tk.E+tk.W)
         (ttk.Label(container, text='Port:')).grid(
             row=1, column=2, sticky=tk.E)
         self.port = tk.StringVar()
         self.port.set(3306)
+        self.port.trace('w', self._changeNotify)
         (tk.Spinbox(
             container, textvariable=self.port, width=5,
             from_=0, to=65535)).grid(row=1, column=3, sticky=tk.W)
         (ttk.Label(container, text='Użytkownik:')).grid(
             row=2, column=0, sticky=tk.E)
         self.user = tk.StringVar()
+        self.user.trace('w', self._changeNotify)
         (ttk.Entry(container, textvariable=self.user)).grid(
             row=2, column=1, sticky=tk.E+tk.W)
         (ttk.Button(
@@ -73,6 +80,7 @@ class MySQLConfigurationFrame(tk.Frame):
         (ttk.Label(container, text='Hasło:')).grid(
             row=3, column=0, sticky=tk.E)
         self.pass_ = tk.StringVar()
+        self.pass_.trace('w', self._changeNotify)
         (ttk.Entry(container, textvariable=self.pass_, show='*')).grid(
             row=3, column=1, sticky=tk.E+tk.W)
 

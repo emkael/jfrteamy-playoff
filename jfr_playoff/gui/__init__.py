@@ -22,3 +22,6 @@ class PlayoffGUI(tk.Tk):
 
     def getTeams(self):
         return self.tabs['TeamsTab'].getTeams()
+
+    def getDBs(self):
+        return self.tabs['NetworkTab'].getDBList()

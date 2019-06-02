@@ -139,19 +139,38 @@ class TeamFetchSettingsFrame(tk.Frame):
             teams['max_teams'] = maxTeams
         return teams
 
+    def _createDBList(self, values):
+        self.fetchDBField = ttk.OptionMenu(
+            self, self.fetchDB, *([''] + values))
+        self.fetchDBField.grid(row=0, column=3, sticky=tk.W+tk.E)
+
+    def _onDBListChange(self, *args):
+        self.fetchDBField.destroy()
+        self._createDBList(self.winfo_toplevel().getDBs())
+
+    def _sourceChange(self, *args):
+        self.fetchDBField.configure(state=tk.DISABLED)
+        self.fetchLink.configure(state=tk.DISABLED)
+        if self.fetchSource.get() == self.SOURCE_LINK:
+            self.fetchLink.configure(state=tk.NORMAL)
+        elif self.fetchSource.get() == self.SOURCE_DB:
+            self.fetchDBField.configure(state=tk.NORMAL)
+
     def renderContent(self):
         (ttk.Label(self, text=' ')).grid(row=0, column=0, rowspan=2)
 
         self.fetchSource = tk.IntVar()
         self.fetchSource.set(self.SOURCE_LINK)
+        self.fetchSource.trace('w', self._sourceChange)
         (ttk.Radiobutton(
             self, text='Baza danych',
             variable=self.fetchSource, value=self.SOURCE_DB)).grid(
                 row=0, column=1, columnspan=2, sticky=tk.W)
         self.fetchDB = tk.StringVar()
         self.fetchDB.trace('w', self._changeNotify)
-        (ttk.OptionMenu(self, self.fetchDB, '')).grid(
-            row=0, column=3, sticky=tk.W+tk.E)
+        self._createDBList([])
+        self.winfo_toplevel().bind(
+            '<<DBListChanged>>', self._onDBListChange, add='+')
 
         (ttk.Radiobutton(
             self, text='Strona wyników',

@@ -134,7 +134,9 @@ class TeamsTab(PlayoffTab):
         if dbConfig is not None:
             config['database'] = dbConfig
         data = PlayoffData()
-        self._teamList = data.fetch_team_list(config['teams'], dbConfig)
+        self._teamList = data.fetch_team_list(
+            config['teams'],
+            PlayoffDB(dbConfig) if dbConfig is not None else None)
         self.winfo_toplevel().event_generate(
             '<<TeamListChanged>>', when='tail')
 
@@ -166,6 +168,26 @@ class NetworkTab(PlayoffTab):
     def title(self):
         return 'Sieć'
 
+    def _onDBSettingsChange(self, event):
+        if self.dbFetchTimer is not None:
+            self.after_cancel(self.dbFetchTimer)
+        self.dbFetchTimer = self.after(1500, self._fetchDBList)
+
+    def _fetchDBList(self):
+        self._dbList = []
+        try:
+            db = PlayoffDB(self.getDB())
+            for row in db.fetch_all(
+                    'information_schema',
+                    'SELECT TABLE_SCHEMA FROM information_schema.COLUMNS WHERE TABLE_NAME = "admin" AND COLUMN_NAME = "teamcnt" ORDER BY TABLE_SCHEMA;', {}):
+                self._dbList.append(row[0])
+        except Exception as e:
+            pass
+        self.winfo_toplevel().event_generate('<<DBListChanged>>', when='tail')
+
+    def getDBList(self):
+        return self._dbList
+
     def getDB(self):
         return self.mysqlFrame.getConfig()
 
@@ -184,6 +206,11 @@ class NetworkTab(PlayoffTab):
 
         self.remoteFrame = RemoteConfigurationFrame(container, vertical=True)
         self.remoteFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+        self._dbList = []
+        self.dbFetchTimer = None
+        self.winfo_toplevel().bind(
+            '<<DBSettingsChanged>>', self._onDBSettingsChange, add='+')
 
 class VisualTab(PlayoffTab):
     @property
