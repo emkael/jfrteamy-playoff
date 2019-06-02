@@ -6,7 +6,7 @@ from tkinter import ttk
 import tkMessageBox
 
 from ..frames import RepeatableFrame, WidgetRepeater, RepeatableEntry
-from ..frames import getIntVal, ScrollableFrame
+from ..frames import getIntVal, setPanelState, ScrollableFrame
 
 class ManualTeamRow(RepeatableFrame):
     def renderContent(self):
@@ -182,18 +182,11 @@ class TeamSettingsFrame(ScrollableFrame):
     FORMAT_FETCH = 0
     FORMAT_MANUAL = 1
 
-    def _setPanelState(self, frame, state):
-        for child in frame.winfo_children():
-            if isinstance(child, tk.Frame):
-                self._setPanelState(child, state)
-            else:
-                child.configure(state=state)
-
     def _enablePanels(self, *args):
         panels = {self.FORMAT_FETCH: self.fetchSettingsFrame,
                   self.FORMAT_MANUAL: self.manualSettingsFrame}
         for value, panel in panels.iteritems():
-            self._setPanelState(
+            setPanelState(
                 frame=panel,
                 state=tk.NORMAL \
                 if self.teamFormat.get()==value else tk.DISABLED)

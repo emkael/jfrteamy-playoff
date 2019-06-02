@@ -9,6 +9,13 @@ def getIntVal(widget, default=0):
     except ValueError:
         return default
 
+def setPanelState(frame, state):
+    for child in frame.winfo_children():
+        if isinstance(child, tk.Frame):
+            setPanelState(child, state)
+        else:
+            child.configure(state=state)
+
 class WidgetRepeater(tk.Frame):
     def __init__(self, master, widgetClass, headers=None, classParams=None,
                  *args, **kwargs):
