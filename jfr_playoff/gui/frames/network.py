@@ -90,6 +90,9 @@ class MySQLConfigurationFrame(tk.Frame):
             row=3, column=1, sticky=tk.E+tk.W)
 
 class GoniecConfigurationFrame(tk.Frame):
+    DEFAULT_HOST = 'localhost'
+    DEFAULT_PORT = 8090
+
     def __init__(self, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
         self.renderContent(self)
@@ -103,7 +106,8 @@ class GoniecConfigurationFrame(tk.Frame):
         def test():
             goniec = socket.socket()
             goniec.connect(
-                (self.host.get().strip(), getIntVal(self.port, 8080)))
+                (self.host.get().strip(), getIntVal(
+                    self.port, self.DEFAULT_PORT)))
             goniec.close()
         self.testError = network_test(test, self.testLabel)
 
@@ -121,11 +125,12 @@ class GoniecConfigurationFrame(tk.Frame):
                 row=1, column=0, columnspan=2, sticky=tk.W)
         (ttk.Label(container, text='Host:')).grid(row=2, column=0)
         self.host = tk.StringVar()
+        self.host.set(self.DEFAULT_HOST)
         self.hostField = ttk.Entry(container, textvariable=self.host)
         self.hostField.grid(row=2, column=1)
         (ttk.Label(container, text='Port:')).grid(row=2, column=2)
         self.port = tk.StringVar()
-        self.port.set(8080)
+        self.port.set(self.DEFAULT_PORT)
         self.portField = tk.Spinbox(
             container, textvariable=self.port, width=5)
         self.portField.grid(row=2, column=3)
