@@ -10,6 +10,17 @@ from ...db import PlayoffDB
 from ..frames import RepeatableEntry, WidgetRepeater
 from ..frames import ScrollableFrame, getIntVal
 
+def network_test(connFunction, testLabel):
+    try:
+        connFunction()
+        testLabel.configure(text='✓')
+        testLabel.configure(foreground='green')
+        return None
+    except Exception as e:
+        testLabel.configure(text='✗')
+        testLabel.configure(foreground='red')
+        return unicode(str(e).decode('utf-8', errors='replace'))
+
 class MySQLConfigurationFrame(tk.Frame):
     def __init__(self, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
@@ -26,18 +37,12 @@ class MySQLConfigurationFrame(tk.Frame):
         return None
 
     def _testDB(self):
-        try:
+        def test():
             dbConfig = self.getConfig()
             if dbConfig is None:
                 raise AttributeError('Database not configured')
             db = PlayoffDB(dbConfig)
-            self.dbError = None
-            self.dbTestLabel.configure(text='✓')
-            self.dbTestLabel.configure(foreground='green')
-        except Exception as e:
-            self.dbError = unicode(e)
-            self.dbTestLabel.configure(text='✗')
-            self.dbTestLabel.configure(foreground='red')
+        self.dbError = network_test(test, self.dbTestLabel)
 
     def _dbError(self, event):
         if self.dbError is not None:
@@ -95,18 +100,12 @@ class GoniecConfigurationFrame(tk.Frame):
                 state=tk.NORMAL if self.enable.get() else tk.DISABLED)
 
     def _test(self):
-        try:
+        def test():
             goniec = socket.socket()
             goniec.connect(
                 (self.host.get().strip(), getIntVal(self.port, 8080)))
             goniec.close()
-            self.testError = None
-            self.testLabel.configure(text='✓')
-            self.testLabel.configure(foreground='green')
-        except socket.error as e:
-            self.testError = unicode(str(e).decode('utf-8', errors='replace'))
-            self.testLabel.configure(text='✗')
-            self.testLabel.configure(foreground='red')
+        self.testError = network_test(test, self.testLabel)
 
     def _testError(self, event):
         if self.testError is not None:
