@@ -241,7 +241,8 @@ class StyleTab(PlayoffTab):
         (ttk.Separator(container, orient=tk.HORIZONTAL)).pack(
             side=tk.TOP, fill=tk.X)
 
-        self.positionStylesFrame = PositionStylesFrame(container)
+        self.positionStylesFrame = PositionStylesFrame(
+            container, vertical=True)
         self.positionStylesFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 class TranslationsTab(PlayoffTab):
