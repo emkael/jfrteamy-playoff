@@ -198,6 +198,18 @@ var playoff = {
                         (lines.vTo[1] + lines.vTo[3]) / 2
                     ]
                 ]
+                for (var h in lines.hTo) {
+                    lines.hTo[h][2] = Math.max(
+                        lines.hTo[h][2],
+                        lines.midpoints[2][0]
+                    );
+                }
+                for (var h in lines.hFrom) {
+                    lines.hFrom[h][2] = Math.min(
+                        lines.hFrom[h][2],
+                        lines.midpoints[0][0]
+                    );
+                }
                 return lines;
             }
         };
@@ -220,10 +232,12 @@ var playoff = {
                 }
                 this.drawLine(ctx, linesToDraw.vTo);
                 for (var m = 0; m < linesToDraw.midpoints.length-1; m++) {
-                    this.drawLine(ctx, [
-                        linesToDraw.midpoints[m][0], linesToDraw.midpoints[m][1],
-                        linesToDraw.midpoints[m+1][0], linesToDraw.midpoints[m+1][1]
-                    ]);
+                    if (linesToDraw.midpoints[m][0] <= linesToDraw.midpoints[m+1][0]) {
+                        this.drawLine(ctx, [
+                            linesToDraw.midpoints[m][0], linesToDraw.midpoints[m][1],
+                            linesToDraw.midpoints[m+1][0], linesToDraw.midpoints[m+1][1]
+                        ]);
+                    }
                 }
             }
         }
