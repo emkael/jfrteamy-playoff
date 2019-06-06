@@ -146,7 +146,30 @@ class VisualSettingsFrame(GuiFrame):
                 field.configure(state=tk.NORMAL if var.get() else tk.DISABLED)
 
 
+class BoxPositionFrame(RepeatableFrame):
+    def renderContent(self):
+        self.match = tk.StringVar()
+        self.vertical = tk.IntVar()
+        self.horizontal = tk.IntVar()
+        self.horizontal.set(-1)
+        (ttk.OptionMenu(self, self.match)).grid(row=0, column=0)
+        (ttk.Label(self, text=' w pionie:')).grid(row=0, column=1)
+        (tk.Spinbox(
+            self, textvariable=self.vertical, from_=0, to=9999,
+            width=5, justify=tk.RIGHT)).grid(
+                row=0, column=2)
+        (ttk.Label(self, text=' w poziomie (-1 = automatyczna):')).grid(
+                row=0, column=3)
+        (tk.Spinbox(
+            self, textvariable=self.horizontal, from_=-1, to=9999,
+            width=5, justify=tk.RIGHT)).grid(
+                row=0, column=4)
+
 class BoxPositionsFrame(ScrollableFrame):
-    pass
+    def renderContent(self, container):
+        (ttk.Label(container, text='Pozycje tabelek meczów:')).pack(
+            side=tk.TOP, anchor=tk.W)
+        (WidgetRepeater(container, BoxPositionFrame)).pack(
+            side=tk.TOP, fill=tk.BOTH, expand=True)
 
 __all__ = ['VisualSettingsFrame', 'BoxPositionsFrame']
