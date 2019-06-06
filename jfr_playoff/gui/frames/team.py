@@ -5,8 +5,9 @@ from tkinter.font import Font
 from tkinter import ttk
 import tkMessageBox
 
-from ..frames import RepeatableFrame, WidgetRepeater, RepeatableEntry
-from ..frames import getIntVal, setPanelState, ScrollableFrame
+from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
+from ..frames import WidgetRepeater, RepeatableEntry
+from ..frames import getIntVal, setPanelState
 
 class ManualTeamRow(RepeatableFrame):
     def renderContent(self):
@@ -38,11 +39,7 @@ class ManualTeamRow(RepeatableFrame):
         self.winfo_toplevel().event_generate(
             '<<TeamSettingsChanged>>', when='tail')
 
-class TeamManualSettingsFrame(tk.Frame):
-    def __init__(self, *args, **kwargs):
-        tk.Frame.__init__(self, *args, **kwargs)
-        self.renderContent()
-
+class TeamManualSettingsFrame(GuiFrame):
     def renderContent(self):
         headers = [
             (ttk.Label, {'text': 'Pełna nazwa', 'width': 20}),
@@ -91,13 +88,9 @@ class TeamSelectionFrame(ScrollableFrame):
                 self.values[row-1].set(True)
             row += 1
 
-class TeamFetchSettingsFrame(tk.Frame):
+class TeamFetchSettingsFrame(GuiFrame):
     SOURCE_LINK = 0
     SOURCE_DB = 1
-
-    def __init__(self, *args, **kwargs):
-        tk.Frame.__init__(self, *args, **kwargs)
-        self.renderContent()
 
     def _changeNotify(self, *args):
         self.winfo_toplevel().event_generate(

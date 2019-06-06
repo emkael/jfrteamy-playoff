@@ -8,7 +8,7 @@ import tkMessageBox as tkmb
 
 from ...db import PlayoffDB
 from ..frames import RepeatableEntry, WidgetRepeater
-from ..frames import ScrollableFrame, getIntVal
+from ..frames import GuiFrame, ScrollableFrame, getIntVal
 
 def network_test(connFunction, testLabel):
     try:
@@ -21,11 +21,7 @@ def network_test(connFunction, testLabel):
         testLabel.configure(foreground='red')
         return unicode(str(e).decode('utf-8', errors='replace'))
 
-class MySQLConfigurationFrame(tk.Frame):
-    def __init__(self, *args, **kwargs):
-        tk.Frame.__init__(self, *args, **kwargs)
-        self.renderContent(self)
-
+class MySQLConfigurationFrame(GuiFrame):
     def getConfig(self):
         if len(self.host.get().strip()):
             return {
@@ -52,50 +48,46 @@ class MySQLConfigurationFrame(tk.Frame):
         self.winfo_toplevel().event_generate(
             '<<DBSettingsChanged>>', when='tail')
 
-    def renderContent(self, container):
-        (ttk.Label(container, text='Ustawienia MySQL')).grid(
+    def renderContent(self):
+        (ttk.Label(self, text='Ustawienia MySQL')).grid(
             row=0, column=0, columnspan=4, sticky=tk.E+tk.W)
-        (ttk.Label(container, text='Host:')).grid(
+        (ttk.Label(self, text='Host:')).grid(
             row=1, column=0, sticky=tk.E)
         self.host = tk.StringVar()
         self.host.trace('w', self._changeNotify)
-        (ttk.Entry(container, textvariable=self.host)).grid(
+        (ttk.Entry(self, textvariable=self.host)).grid(
             row=1, column=1, sticky=tk.E+tk.W)
-        (ttk.Label(container, text='Port:')).grid(
+        (ttk.Label(self, text='Port:')).grid(
             row=1, column=2, sticky=tk.E)
         self.port = tk.StringVar()
         self.port.set(3306)
         self.port.trace('w', self._changeNotify)
         (tk.Spinbox(
-            container, textvariable=self.port, width=5,
+            self, textvariable=self.port, width=5,
             from_=0, to=65535)).grid(row=1, column=3, sticky=tk.W)
-        (ttk.Label(container, text='Użytkownik:')).grid(
+        (ttk.Label(self, text='Użytkownik:')).grid(
             row=2, column=0, sticky=tk.E)
         self.user = tk.StringVar()
         self.user.trace('w', self._changeNotify)
-        (ttk.Entry(container, textvariable=self.user)).grid(
+        (ttk.Entry(self, textvariable=self.user)).grid(
             row=2, column=1, sticky=tk.E+tk.W)
         (ttk.Button(
-            container, text='Testuj ustawienia', command=self._testDB)).grid(
+            self, text='Testuj ustawienia', command=self._testDB)).grid(
                 row=2, column=3)
         self.dbError = None
-        self.dbTestLabel = ttk.Label(container)
+        self.dbTestLabel = ttk.Label(self)
         self.dbTestLabel.grid(row=2, column=4)
         self.dbTestLabel.bind('<Button-1>', self._dbError)
-        (ttk.Label(container, text='Hasło:')).grid(
+        (ttk.Label(self, text='Hasło:')).grid(
             row=3, column=0, sticky=tk.E)
         self.pass_ = tk.StringVar()
         self.pass_.trace('w', self._changeNotify)
-        (ttk.Entry(container, textvariable=self.pass_, show='*')).grid(
+        (ttk.Entry(self, textvariable=self.pass_, show='*')).grid(
             row=3, column=1, sticky=tk.E+tk.W)
 
-class GoniecConfigurationFrame(tk.Frame):
+class GoniecConfigurationFrame(GuiFrame):
     DEFAULT_HOST = 'localhost'
     DEFAULT_PORT = 8090
-
-    def __init__(self, *args, **kwargs):
-        tk.Frame.__init__(self, *args, **kwargs)
-        self.renderContent(self)
 
     def _enableWidgets(self):
         for field in [self.portField, self.hostField, self.testButton]:
@@ -115,30 +107,30 @@ class GoniecConfigurationFrame(tk.Frame):
         if self.testError is not None:
             tkmb.showerror('Błąd połączenia z Gońcem', self.testError)
 
-    def renderContent(self, container):
-        (ttk.Label(container, text='Konfiguracja Gońca:')).grid(
+    def renderContent(self):
+        (ttk.Label(self, text='Konfiguracja Gońca:')).grid(
             row=0, column=0, columnspan=4, sticky=tk.W)
         self.enable = tk.IntVar()
         (ttk.Checkbutton(
-            container, text='Włącz obsługę Gońca', variable=self.enable,
+            self, text='Włącz obsługę Gońca', variable=self.enable,
             command=self._enableWidgets)).grid(
                 row=1, column=0, columnspan=2, sticky=tk.W)
-        (ttk.Label(container, text='Host:')).grid(row=2, column=0)
+        (ttk.Label(self, text='Host:')).grid(row=2, column=0)
         self.host = tk.StringVar()
         self.host.set(self.DEFAULT_HOST)
-        self.hostField = ttk.Entry(container, textvariable=self.host)
+        self.hostField = ttk.Entry(self, textvariable=self.host)
         self.hostField.grid(row=2, column=1)
-        (ttk.Label(container, text='Port:')).grid(row=2, column=2)
+        (ttk.Label(self, text='Port:')).grid(row=2, column=2)
         self.port = tk.StringVar()
         self.port.set(self.DEFAULT_PORT)
         self.portField = tk.Spinbox(
-            container, textvariable=self.port, width=5)
+            self, textvariable=self.port, width=5)
         self.portField.grid(row=2, column=3)
         self.testButton = ttk.Button(
-            container, text='Testuj ustawienia', command=self._test)
+            self, text='Testuj ustawienia', command=self._test)
         self.testButton.grid(row=3, column=1, sticky=tk.E)
         self.testError = None
-        self.testLabel = ttk.Label(container)
+        self.testLabel = ttk.Label(self)
         self.testLabel.grid(row=3, column=2, sticky=tk.W)
         self.testLabel.bind('<Button-1>', self._testError)
         self._enableWidgets()

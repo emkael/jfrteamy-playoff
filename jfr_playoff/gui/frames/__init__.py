@@ -86,6 +86,14 @@ class WidgetRepeater(tk.Frame):
                 self._addWidget()
             self.widgets[i].setValue(value[i])
 
+class GuiFrame(tk.Frame):
+    def __init__(self, *args, **kwargs):
+        tk.Frame.__init__(self, *args, **kwargs)
+        self.renderContent()
+
+    def renderContent(self):
+        pass
+
 class RepeatableFrame(tk.Frame):
     def __init__(self, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
