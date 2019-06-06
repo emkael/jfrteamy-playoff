@@ -8,6 +8,7 @@ import tkFileDialog as tkfd
 import tkMessageBox as tkmb
 
 from .frames import getIntVal
+from .frames.match import *
 from .frames.network import *
 from .frames.team import *
 from .frames.translations import *
@@ -167,6 +168,10 @@ class SwissesTab(PlayoffTab):
     @property
     def title(self):
         return 'Swissy'
+
+    def renderContent(self, container):
+        self.swisses = SwissesFrame(container, vertical=True)
+        self.swisses.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 class NetworkTab(PlayoffTab):
     @property
