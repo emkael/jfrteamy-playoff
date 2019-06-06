@@ -62,7 +62,7 @@ class TeamSelectionFrame(ScrollableFrame):
         self.selected = selected
         self.callback = callback
         ScrollableFrame.__init__(self, master=master, *args, **kwargs)
-        (ttk.Button(self, text='Zapisz', command=self._save)).pack(
+        (ttk.Button(master, text='Zapisz', command=self._save)).pack(
             side=tk.BOTTOM, fill=tk.Y)
 
     def _save(self):
