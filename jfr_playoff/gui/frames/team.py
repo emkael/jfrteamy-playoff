@@ -72,37 +72,49 @@ class TeamSelectionFrame(ScrollableFrame):
                  in enumerate(self.values) if value.get()])
         self.master.destroy()
 
-    def renderContent(self, container):
+    def renderHeader(self, container):
         container.columnconfigure(1, weight=1)
         (ttk.Label(container, text=self.title)).grid(
             row=0, column=0, columnspan=2)
-        row = 1
-        for team in self.teams:
-            (ttk.Label(container, text='[%d]' % (row))).grid(row=row, column=0)
+
+    def renderTeam(self, container, team, idx):
+        (ttk.Label(container, text='[%d]' % (idx+1))).grid(
+            row=idx+1, column=0)
+        (ttk.Checkbutton(
+            container, text=team[0],
+            variable=self.values[idx]
+        )).grid(row=idx+1, column=1, sticky=tk.W)
+
+    def renderContent(self, container):
+        self.renderHeader(container)
+        for idx, team in enumerate(self.teams):
             self.values.append(tk.IntVar())
-            (ttk.Checkbutton(
-                container, text=team[0],
-                variable=self.values[row-1]
-            )).grid(row=row, column=1, sticky=tk.W)
-            if self.selected and self.selected(row-1, team):
-                self.values[row-1].set(True)
-            row += 1
+            self.renderTeam(container, team, idx)
+            if self.selected and self.selected(idx, team):
+                self.values[idx].set(True)
 
-class TeamFetchSettingsFrame(GuiFrame):
-    SOURCE_LINK = 0
-    SOURCE_DB = 1
+class TeamSelectionButton(ttk.Button):
+    def __init__(self, *args, **kwargs):
+        for arg in ['callback', 'prompt', 'dialogclass']:
+            setattr(self, arg, kwargs[arg] if arg in kwargs else None)
+            if arg in kwargs:
+                del kwargs[arg]
+        kwargs['command'] = self._choosePositions
+        if self.dialogclass is None:
+            self.dialogclass = TeamSelectionFrame
+        if self.prompt is None:
+            self.prompt = 'Wybierz teamy:'
+        ttk.Button.__init__(self, *args, **kwargs)
+        self.setPositions([])
 
-    def _changeNotify(self, *args):
-        self.winfo_toplevel().event_generate(
-            '<<TeamSettingsChanged>>', when='tail')
+    def setPositions(self, values):
+        self.selected = values
+        self.configure(
+            text='[wybrano: %d]' % (len(values)))
+        if self.callback is not None:
+            self.callback(values)
 
-    def _setFinishingPositions(self, positions):
-        self.finishingPositions = positions
-        self.finishingPositionsBtn.configure(
-            text='[wybrano: %d]' % (len(self.finishingPositions)))
-        self._changeNotify(None)
-
-    def _chooseFinishingPositions(self):
+    def _choosePositions(self):
         teams = self.winfo_toplevel().getTeams()
         if not len(teams):
             tkMessageBox.showerror(
@@ -111,13 +123,25 @@ class TeamFetchSettingsFrame(GuiFrame):
         else:
             dialog = tk.Toplevel(self)
             dialog.title('Wybór teamów')
-            selectionFrame = TeamSelectionFrame(
-                dialog, title='Wybierz teamy, które zakończyły rozgrywki ' + \
-                'na swojej pozycji:',
+            selectionFrame = self.dialogclass(
+                dialog, title=self.prompt,
                 teams=teams,
-                selected=lambda idx, team: idx+1 in self.finishingPositions,
-                callback=self._setFinishingPositions, vertical=True)
+                selected=lambda idx, team: idx+1 in self.selected,
+                callback=self.setPositions, vertical=True)
             selectionFrame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+
+class TeamFetchSettingsFrame(GuiFrame):
+    SOURCE_LINK = 0
+    SOURCE_DB = 1
+
+    def _setFinishingPositions(self, positions):
+        self.finishingPositions = positions
+        self._changeNotify(None)
+
+    def _changeNotify(self, *args):
+        self.winfo_toplevel().event_generate(
+            '<<TeamSettingsChanged>>', when='tail')
 
     def getTeams(self):
         teams = {}
@@ -191,10 +215,12 @@ class TeamFetchSettingsFrame(GuiFrame):
 
         (ttk.Label(self, text='Pozycje końcowe: ')).grid(
             row=3, column=0, columnspan=3, sticky=tk.W+tk.E)
-        self.finishingPositionsBtn = ttk.Button(
-            self, command=self._chooseFinishingPositions)
-        self.finishingPositionsBtn.grid(row=3, column=3, sticky=tk.W)
-        self._setFinishingPositions([])
+        finishingPositionsBtn = TeamSelectionButton(
+            self, callback=self._setFinishingPositions,
+            prompt='Wybierz teamy, które zakończyły rozgrywki ' + \
+            'na swojej pozycji:')
+        finishingPositionsBtn.grid(row=3, column=3, sticky=tk.W)
+        finishingPositionsBtn.setPositions([])
 
 class TeamSettingsFrame(ScrollableFrame):
     FORMAT_FETCH = 0
