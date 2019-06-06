@@ -5,7 +5,7 @@ from tkinter import ttk
 import tkColorChooser as tkcc
 
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
-from ..frames import WidgetRepeater, getIntVal
+from ..frames import WidgetRepeater
 from ..frames.team import TeamSelectionButton, TeamSelectionFrame
 
 class VisualSettingsFrame(GuiFrame):
