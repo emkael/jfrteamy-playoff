@@ -8,9 +8,10 @@ import tkFileDialog as tkfd
 import tkMessageBox as tkmb
 
 from .frames import getIntVal
-from .frames.team import *
 from .frames.network import *
+from .frames.team import *
 from .frames.translations import *
+from .frames.visual import *
 
 from ..data import PlayoffData
 from ..db import PlayoffDB
@@ -219,6 +220,13 @@ class VisualTab(PlayoffTab):
     @property
     def title(self):
         return 'Wygląd'
+
+    def renderContent(self, container):
+        self.settingsFrame = VisualSettingsFrame(container)
+        self.settingsFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+        self.positionFrame = BoxPositionsFrame(container, vertical=True)
+        self.positionFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 class StyleTab(PlayoffTab):
     @property
