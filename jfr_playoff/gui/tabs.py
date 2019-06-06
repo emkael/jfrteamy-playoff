@@ -60,7 +60,8 @@ class MainSettingsTab(PlayoffTab):
             row=0, column=0, sticky=tk.W+tk.E)
         (ttk.Button(
             outputPath,
-            text='[]', command=self._chooseOutputPath)).grid(row=0, column=1)
+            text='wybierz...', command=self._chooseOutputPath)).grid(
+                row=0, column=1)
         outputPath.columnconfigure(0, weight=1)
 
         (ttk.Separator(container, orient=tk.HORIZONTAL)).grid(
