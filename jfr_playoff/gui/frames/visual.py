@@ -2,9 +2,11 @@
 
 import tkinter as tk
 from tkinter import ttk
+import tkColorChooser as tkcc
 
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
 from ..frames import WidgetRepeater, getIntVal
+from ..frames.team import TeamSelectionButton, TeamSelectionFrame
 
 class VisualSettingsFrame(GuiFrame):
     def renderContent(self):
@@ -172,4 +174,110 @@ class BoxPositionsFrame(ScrollableFrame):
         (WidgetRepeater(container, BoxPositionFrame)).pack(
             side=tk.TOP, fill=tk.BOTH, expand=True)
 
-__all__ = ['VisualSettingsFrame', 'BoxPositionsFrame']
+class LineStyle(GuiFrame):
+    def _selectColour(self):
+        colour = tkcc.askcolor(self._getColour())
+        if colour is not None:
+            self._setColour(colour[1])
+
+    def _getColour(self):
+        return self.colourBtn.cget('bg')
+
+    def _setColour(self, colour):
+        self.colourBtn.configure(bg=colour)
+
+    def renderContent(self):
+        (ttk.Label(self, text='kolor:')).grid(row=0, column=0)
+        self.colourBtn = tk.Button(self, width=2, command=self._selectColour)
+        self.colourBtn.grid(row=0, column=1)
+        (ttk.Label(self, text='margines w poziomie:')).grid(row=0, column=2)
+        self.hOffset = tk.StringVar()
+        (tk.Spinbox(
+            self, textvariable=self.hOffset, from_=-50, to=50,
+            width=5, justify=tk.RIGHT)).grid(row=0, column=3)
+        (ttk.Label(self, text='margines w pionie:')).grid(row=0, column=4)
+        self.vOffset = tk.StringVar()
+        (tk.Spinbox(
+            self, textvariable=self.vOffset, from_=-50, to=50,
+            width=5, justify=tk.RIGHT)).grid(row=0, column=5)
+
+    def setValue(self, value):
+        self._setColour(value[0])
+        self.hOffset.set(value[1])
+        self.vOffset.set(value[2])
+
+class LineStylesFrame(GuiFrame):
+    def renderContent(self):
+        lines = [
+            ('winner', ('#00ff00', 5, -10),
+             'Zwycięzcy meczów: '),
+            ('loser', ('#ff0000', 20, 10),
+             'Przegrani meczów: '),
+            ('place_winner', ('#00dddd', 10, 2),
+             'Pozycje startowe (wybierający): '),
+            ('place_loser', ('#dddd00', 15, 9),
+             'Pozycje startowe (wybierani): '),
+            ('finish_winner', ('#00ff00', 5, -10),
+             'Zwycięzcy meczów kończący rozgrywki: '),
+            ('finish_loser', ('#ff0000', 20, 10),
+             'Przegrani meczów kończący rozgrywki: ')
+        ]
+        self.lines = {}
+        for idx, line in enumerate(lines):
+            self.lines[line[0]] = LineStyle(self)
+            self.lines[line[0]].grid(row=idx+1, column=1, sticky=tk.W)
+            self.lines[line[0]].setValue(line[1])
+            (ttk.Label(self, text=line[2])).grid(
+                row=idx+1, column=0, sticky=tk.E)
+        (ttk.Label(self, text='Kolory linii')).grid(
+            row=0, column=0, columnspan=2, sticky=tk.W)
+
+class FinalPositionsSelectionFrame(TeamSelectionFrame):
+    COLUMN_COUNT=10
+
+    def __init__(self, *args, **kwargs):
+        TeamSelectionFrame.__init__(self, *args, **kwargs)
+        self.winfo_toplevel().geometry(
+            '%dx%d' % (
+                self.COLUMN_COUNT * 40,
+                (len(self.teams) / self.COLUMN_COUNT + 2) * 25 + 30
+            ))
+
+    def renderHeader(self, container):
+        (ttk.Label(container, text=self.title)).grid(
+            row=0, column=0, columnspan=self.COLUMN_COUNT, sticky=tk.W)
+
+    def renderTeam(self, container, team, idx):
+        (ttk.Checkbutton(
+            container, text=str(idx+1),
+            variable=self.values[idx]
+        )).grid(
+            row=(idx/self.COLUMN_COUNT)+1, column=idx%self.COLUMN_COUNT,
+            sticky=tk.W)
+
+class PositionStyleFrame(RepeatableFrame):
+    def _setPositions(self, values):
+        self.positions = values
+
+    def renderContent(self):
+        (ttk.Label(self, text='Styl:')).grid(row=0, column=0)
+        self.name = tk.StringVar()
+        (ttk.Entry(self, textvariable=self.name)).grid(row=0, column=1)
+        (ttk.Label(self, text='Pozycje końcowe:')).grid(row=0, column=2)
+        self.positionBtn = TeamSelectionButton(
+            self, prompt='Wybierz pozycje końcowe:',
+            dialogclass=FinalPositionsSelectionFrame,
+            callback=self._setPositions)
+        self.positionBtn.grid(row=0, column=3)
+        (ttk.Label(self, text='Opis w legendzie:')).grid(row=0, column=4)
+        self.description = tk.StringVar()
+        (ttk.Entry(self, textvariable=self.description)).grid(row=0, column=5)
+
+class PositionStylesFrame(ScrollableFrame):
+    def renderContent(self, container):
+        (ttk.Label(container, text='Klasyfikacja końcowa')).pack(
+            side=tk.TOP, anchor=tk.W)
+        self.styles = WidgetRepeater(container, PositionStyleFrame)
+        self.styles.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+__all__ = ['VisualSettingsFrame', 'BoxPositionsFrame', 'LineStylesFrame', 'PositionStylesFrame']

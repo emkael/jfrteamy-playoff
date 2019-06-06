@@ -233,6 +233,16 @@ class StyleTab(PlayoffTab):
     def title(self):
         return 'Style'
 
+    def renderContent(self, container):
+        self.linesFrame = LineStylesFrame(container)
+        self.linesFrame.pack(side=tk.TOP, anchor=tk.W)
+
+        (ttk.Separator(container, orient=tk.HORIZONTAL)).pack(
+            side=tk.TOP, fill=tk.X)
+
+        self.positionStylesFrame = PositionStylesFrame(container)
+        self.positionStylesFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
 class TranslationsTab(PlayoffTab):
     @property
     def title(self):
