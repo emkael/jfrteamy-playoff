@@ -123,6 +123,8 @@ class TeamSelectionButton(ttk.Button):
         else:
             dialog = tk.Toplevel(self)
             dialog.title('Wybór teamów')
+            dialog.grab_set()
+            dialog.focus_force()
             selectionFrame = self.dialogclass(
                 dialog, title=self.prompt,
                 teams=teams,

@@ -67,6 +67,8 @@ class WidgetRepeater(tk.Frame):
         dialog = tk.Toplevel(self)
         dialog.title('Wybór elementu do dodania')
         dialog.geometry('%dx%d' % (300, len(self.widgetClass) * 20 + 30))
+        dialog.grab_set()
+        dialog.focus_force()
         frame = WidgetSelectionFrame(
             dialog, vertical=True,
             widgets=self.widgetClass, callback=self._handleWidgetSelection)
