@@ -163,8 +163,8 @@ class DBSelectionField(ttk.Entry):
                     self.insert(0, new_suggestion)
                     self.selection_range(len(prefix), tk.END)
                     return 'break'
-            except tk.TclError:
-                # no text selection
+            except (tk.TclError, ValueError):
+                # no text selection or selection was altered, ignore
                 pass
 
     def _onChange(self, event):

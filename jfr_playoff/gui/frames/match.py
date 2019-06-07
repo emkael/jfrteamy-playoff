@@ -123,7 +123,7 @@ class SwissSettingsFrame(RepeatableFrame):
         (ttk.Separator(self, orient=tk.HORIZONTAL)).grid(
             row=9, column=0, columnspan=6, sticky=tk.E+tk.W)
 
-        self.fetchDBField.setOptions([])
+        self._onDBListChange()
         self._setFields()
         self._setPositionInfo()
 
