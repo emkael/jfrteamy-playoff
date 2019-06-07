@@ -1,5 +1,7 @@
 #coding=utf-8
 
+from functools import partial
+
 import tkinter as tk
 from tkinter import ttk
 
@@ -19,9 +21,13 @@ def setPanelState(frame, state):
 class WidgetRepeater(tk.Frame):
     def __init__(self, master, widgetClass, headers=None, classParams=None,
                  *args, **kwargs):
-        if not issubclass(widgetClass, RepeatableFrame):
-            raise AttributeError(
-                'WidgetRepeater widget must be a RepeatableFrame')
+        widgetList = widgetClass
+        if not isinstance(widgetClass, list):
+            widgetList = [widgetClass]
+        for widget in widgetList:
+            if not issubclass(widget, RepeatableFrame):
+                raise AttributeError(
+                    'WidgetRepeater widget must be a RepeatableFrame')
         tk.Frame.__init__(self, master, **kwargs)
         self.widgetClass = widgetClass
         self.widgetClassParams = classParams
@@ -38,16 +44,39 @@ class WidgetRepeater(tk.Frame):
                 return children
         return None
 
-    def _addWidget(self):
+    def _createWidget(self, widgetClass, widgetClassParams=None):
         removeButton = ttk.Button(
             self, text='[-]', width=5,
             command=lambda i=len(self.widgets): self._removeWidget(i))
         removeButton.grid(row=len(self.widgets), column=0, sticky=tk.N)
-        widget = self.widgetClass(self)
-        if self.widgetClassParams is not None:
-            widget.configureContent(**self.widgetClassParams)
+        widget = widgetClass(self)
+        if widgetClassParams is not None:
+            widget.configureContent(**widgetClassParams)
         self.widgets.append(widget)
         self._updateGrid()
+
+    def _handleWidgetSelection(self, selected):
+        if selected < len(self.widgetClass):
+            params = None
+            if isinstance(self.widgetClassParams, list) and \
+               selected < len(self.widgetClassParams):
+                params = self.widgetClassParams[selected]
+            self._createWidget(self.widgetClass[selected], params)
+
+    def _widgetSelectionDialog(self):
+        dialog = tk.Toplevel(self)
+        dialog.title('Wybór elementu do dodania')
+        dialog.geometry('%dx%d' % (300, len(self.widgetClass) * 20 + 30))
+        frame = WidgetSelectionFrame(
+            dialog, vertical=True,
+            widgets=self.widgetClass, callback=self._handleWidgetSelection)
+        frame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+    def _addWidget(self):
+        if isinstance(self.widgetClass, list):
+            self._widgetSelectionDialog()
+        else:
+            self._createWidget(self.widgetClass, self.widgetClassParams)
 
     def _removeWidget(self, idx):
         self.widgets.pop(idx).destroy()
@@ -111,6 +140,10 @@ class RepeatableFrame(tk.Frame):
     def setValue(self, value):
         pass
 
+    @classmethod
+    def info(cls):
+        return cls.__name__
+
 class RepeatableEntry(RepeatableFrame):
     def renderContent(self):
         self.value = tk.StringVar()
@@ -159,3 +192,28 @@ class ScrollableFrame(tk.Frame):
 
     def renderContent(self, container):
         pass
+
+class WidgetSelectionFrame(ScrollableFrame):
+    def __init__(self, *args, **kwargs):
+        self.widgets = []
+        self.callback = None
+        for var in ['widgets', 'callback']:
+            if var in kwargs:
+                setattr(self, var, kwargs[var])
+                del kwargs[var]
+        ScrollableFrame.__init__(self, *args, **kwargs)
+        addBtn = ttk.Button(
+            self.master, text='Dodaj', command=self._onConfirm)
+        addBtn.pack(side=tk.BOTTOM)
+
+    def renderContent(self, container):
+        self.value = tk.IntVar()
+        for idx, widget in enumerate(self.widgets):
+            (ttk.Radiobutton(
+                container, variable=self.value, value=idx,
+                text=widget.info())).pack(side=tk.TOP, fill=tk.X, expand=True)
+
+    def _onConfirm(self):
+        if self.callback is not None:
+            self.callback(self.value.get())
+        self.winfo_toplevel().destroy()
