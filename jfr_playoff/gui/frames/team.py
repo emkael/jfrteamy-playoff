@@ -131,15 +131,56 @@ class TeamSelectionButton(ttk.Button):
             selectionFrame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
 
-class DBSelectionField(ttk.OptionMenu):
+class DBSelectionField(ttk.Entry):
+    def __init__(self, master, variable, value, *options, **kwargs):
+        kwargs['textvariable'] = variable
+        ttk.Entry.__init__(self, master, **kwargs)
+        self._variable = variable
+        self._variable.set(value)
+        self._optionDict = options if options is not None else []
+        self.bind('<KeyPress>', self._onPress)
+        self.bind('<KeyRelease>', self._onChange)
+        self._matches = []
+        self._prevValue = None
+
     def setOptions(self, values):
-        if self._variable.get() not in values:
-            self._variable.set('')
-        menu = self['menu']
-        menu.delete(0, tk.END)
-        for item in values:
-            menu.add_command(
-                label=item, command=tk._setit(self._variable, item))
+        self._optionDict = values
+
+    def _onPress(self, event):
+        if event.keysym == 'Tab':
+            try:
+                suggestion = self.selection_get()
+                if len(suggestion) > 0:
+                    prefix = self._variable.get()[0:-len(suggestion)]
+                    phrase = prefix + suggestion
+                    next_suggestion = self._matches[
+                        (self._matches.index(phrase)+1) % len(self._matches)]
+                    prev_suggestion = self._matches[
+                        (self._matches.index(phrase)-1) % len(self._matches)]
+                    new_suggestion = prev_suggestion if event.state & 1 \
+                        else next_suggestion
+                    self.delete(0, tk.END)
+                    self.insert(0, new_suggestion)
+                    self.selection_range(len(prefix), tk.END)
+                    return 'break'
+            except tk.TclError:
+                # no text selection
+                pass
+
+    def _onChange(self, event):
+        if self._prevValue == self._variable.get() or event.keysym == 'Tab':
+            return
+        self._prevValue = self._variable.get()
+        prefix = self._variable.get()
+        if len(prefix) > 0:
+            matches = [d for d in self._optionDict if d.startswith(prefix)]
+            if len(matches) > 0:
+                self._matches = matches
+                text_to_add = matches[0][len(prefix):]
+                self.insert(tk.END, text_to_add)
+                self.selection_range(len(prefix), tk.END)
+                return
+        self._matches = []
 
 class TeamFetchSettingsFrame(GuiFrame):
     SOURCE_LINK = 0
