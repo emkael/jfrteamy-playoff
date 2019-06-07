@@ -12,9 +12,6 @@ class SwissSettingsFrame(RepeatableFrame):
     SOURCE_LINK = 0
     SOURCE_DB = 1
 
-    def _onDBListChange(self, *args):
-        self.fetchDBField.setOptions(self.winfo_toplevel().getDBs())
-
     def _setPositionInfo(self, *args):
         tournamentFrom = getIntVal(self.setFrom, default=1)
         tournamentTo = min(
@@ -55,8 +52,6 @@ class SwissSettingsFrame(RepeatableFrame):
         self.fetchDBField = DBSelectionField(
             self, self.fetchDB, self.fetchDB.get())
         self.fetchDBField.grid(row=1, column=1, sticky=tk.W+tk.E)
-        self.winfo_toplevel().bind(
-            '<<DBListChanged>>', self._onDBListChange, add='+')
         (ttk.Radiobutton(
             self, text='Strona turnieju',
             variable=self.source, value=self.SOURCE_LINK)).grid(
@@ -123,7 +118,6 @@ class SwissSettingsFrame(RepeatableFrame):
         (ttk.Separator(self, orient=tk.HORIZONTAL)).grid(
             row=9, column=0, columnspan=6, sticky=tk.E+tk.W)
 
-        self._onDBListChange()
         self._setFields()
         self._setPositionInfo()
 

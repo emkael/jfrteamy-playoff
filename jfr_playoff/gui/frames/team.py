@@ -138,13 +138,21 @@ class DBSelectionField(ttk.Entry):
         self._variable = variable
         self._variable.set(value)
         self._optionDict = options if options is not None else []
-        self.bind('<KeyPress>', self._onPress)
-        self.bind('<KeyRelease>', self._onChange)
         self._matches = []
         self._prevValue = None
+        self._setOptions()
+        self.bind('<KeyPress>', self._onPress)
+        self.bind('<KeyRelease>', self._onChange)
+        self.winfo_toplevel().bind(
+            '<<DBListChanged>>', self._setOptions, add='+')
 
-    def setOptions(self, values):
-        self._optionDict = values
+    def _setOptions(self, *args):
+        try:
+            self._optionDict = self.winfo_toplevel().getDBs()
+        except:
+            # some stuff may not be available yet
+            # don't worry, the event will fire when it is
+            self._optionDict = []
 
     def _onPress(self, event):
         if event.keysym == 'Tab':
@@ -207,9 +215,6 @@ class TeamFetchSettingsFrame(GuiFrame):
             teams['max_teams'] = maxTeams
         return teams
 
-    def _onDBListChange(self, *args):
-        self.fetchDBField.setOptions(self.winfo_toplevel().getDBs())
-
     def _sourceChange(self, *args):
         self.fetchDBField.configure(state=tk.DISABLED)
         self.fetchLink.configure(state=tk.DISABLED)
@@ -233,9 +238,6 @@ class TeamFetchSettingsFrame(GuiFrame):
         self.fetchDBField = DBSelectionField(
             self, self.fetchDB, self.fetchDB.get())
         self.fetchDBField.grid(row=0, column=3, sticky=tk.W+tk.E)
-        self.winfo_toplevel().bind(
-            '<<DBListChanged>>', self._onDBListChange, add='+')
-        self.fetchDBField.setOptions([])
 
         (ttk.Radiobutton(
             self, text='Strona wyników',
