@@ -389,7 +389,7 @@ class TeamPreviewFrame(ScrollableFrame):
             label.destroy()
         self.teamList.delete(*self.teamList.get_children())
         for idx, team in enumerate(teams):
-            if team[2] is None:
+            if len(team) > 2 and team[2] is None:
                 team[2] = ''
             self.teamList.insert('', tk.END, values=team, tag=idx)
             if idx >= len(self.tieFields):
