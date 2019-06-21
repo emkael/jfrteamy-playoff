@@ -11,22 +11,14 @@ from ..frames.team import TeamSelectionButton
 
 class VisualSettingsFrame(GuiFrame):
     def renderContent(self):
-        (ttk.Label(self, text='Znaczniki pozycji:')).grid(
-            row=0, column=0, sticky=tk.W, pady=5)
-        (ttk.Label(self, text='Wymiary tabelki meczu:')).grid(
-            row=0, column=1, sticky=tk.W, pady=5)
-        indicatorsFrame = tk.Frame(self)
-        indicatorsFrame.grid(row=1, column=0, sticky=tk.W+tk.N, padx=10)
-        dimensionsFrame = tk.Frame(self)
-        dimensionsFrame.grid(row=1, column=1, sticky=tk.W+tk.N, padx=10)
-        (ttk.Label(self, text='Nazwy teamów:')).grid(
-            row=2, column=0, sticky=tk.W, pady=5)
-        (ttk.Label(self, text='Separatory nazw teamów:')).grid(
-            row=2, column=1, sticky=tk.W, pady=5)
-        teamNamesFrame = tk.Frame(self)
-        teamNamesFrame.grid(row=3, column=0, sticky=tk.W+tk.N, padx=10)
-        separatorsFrame = tk.Frame(self)
-        separatorsFrame.grid(row=3, column=1, sticky=tk.W+tk.N, padx=10)
+        indicatorsFrame = ttk.LabelFrame(self, text='Znaczniki pozycji:')
+        indicatorsFrame.grid(row=0, column=0, sticky=tk.W+tk.E+tk.N+tk.S)
+        dimensionsFrame = ttk.LabelFrame(self, text='Wymiary tabelki meczu:')
+        dimensionsFrame.grid(row=0, column=1, sticky=tk.W+tk.E+tk.N+tk.S)
+        teamNamesFrame = ttk.LabelFrame(self, text='Nazwy teamów:')
+        teamNamesFrame.grid(row=1, column=0, sticky=tk.W+tk.E+tk.N+tk.S)
+        separatorsFrame = ttk.LabelFrame(self, text='Separatory nazw teamów:')
+        separatorsFrame.grid(row=1, column=1, sticky=tk.W+tk.E+tk.N+tk.S)
 
         self._fieldsToEnable = []
 
