@@ -68,7 +68,7 @@ class SwissSettingsFrame(RepeatableFrame):
         (ttk.Label(
             self, text='Ustaw od miejsca: ')).grid(
                 row=4, column=0, sticky=tk.E)
-        self.setFrom = tk.StringVar()
+        self.setFrom = tk.IntVar()
         (tk.Spinbox(
             self, textvariable=self.setFrom,
             from_=1, to=999, width=5)).grid(
@@ -78,7 +78,7 @@ class SwissSettingsFrame(RepeatableFrame):
             self, variable=self.setToEnabled,
             text='Ustaw do miejsca: ')).grid(
                 row=5, column=0, sticky=tk.E)
-        self.setTo = tk.StringVar()
+        self.setTo = tk.IntVar()
         (tk.Spinbox(
             self, textvariable=self.setTo,
             from_=1, to=999, width=5)).grid(
@@ -88,7 +88,7 @@ class SwissSettingsFrame(RepeatableFrame):
             self, variable=self.fetchFromEnabled,
             text='Pobierz od miejsca: ')).grid(
                 row=6, column=0, sticky=tk.E)
-        self.fetchFrom = tk.StringVar()
+        self.fetchFrom = tk.IntVar()
         (tk.Spinbox(
             self, textvariable=self.fetchFrom,
             from_=1, to=999, width=5)).grid(
