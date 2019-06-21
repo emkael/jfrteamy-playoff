@@ -185,6 +185,12 @@ class MatchesTab(PlayoffTab):
             if key_to_delete:
                 self.phases.pop(key_to_delete)
 
+    def _renameTabs(self, *args):
+        for idx, tab in self.phases.iteritems():
+            title = tab.name.get().strip()
+            self.phaseFrame.tab(
+                tab, text=title if len(title) else 'Faza #%d' % (idx))
+
     def renderContent(self, container):
         container.columnconfigure(1, weight=1)
         container.rowconfigure(2, weight=1)
@@ -200,6 +206,9 @@ class MatchesTab(PlayoffTab):
         self.phaseFrame = ttk.Notebook(container)
         self.phaseFrame.grid(
             row=2, column=0, columnspan=2, sticky=tk.W+tk.E+tk.N+tk.S)
+
+        self.winfo_toplevel().bind(
+            '<<PhaseRenamed>>', self._renameTabs, add='+')
 
     def getMatches(self):
         matches = []

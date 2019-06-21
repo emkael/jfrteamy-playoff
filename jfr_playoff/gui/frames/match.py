@@ -387,6 +387,9 @@ class MatchPhaseFrame(ScrollableFrame):
                     match.link.set(self.link.get())
         self.previousLink = self.link.get()
 
+    def _signalPhaseRename(self, *args):
+        self.winfo_toplevel().event_generate('<<PhaseRenamed>>', when='tail')
+
     def renderContent(self, container):
         self.previousLink = ''
         headerFrame = tk.Frame(container)
@@ -403,6 +406,7 @@ class MatchPhaseFrame(ScrollableFrame):
         self.matches.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
         self.link.trace('w', self._updateLinks)
+        self.name.trace('w', self._signalPhaseRename)
 
 
 __all__ = ['SwissesFrame', 'MatchPhaseFrame', 'MatchSettingsFrame']
