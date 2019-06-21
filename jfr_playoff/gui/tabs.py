@@ -166,13 +166,47 @@ class MatchesTab(PlayoffTab):
     def title(self):
         return 'Mecze'
 
+    def addPhase(self):
+        phase = MatchPhaseFrame(
+            self.phaseFrame, vertical=True, padx=10, pady=10)
+        newPhase = max(self.phases.keys()) + 1 if len(self.phases) else 1
+        self.phaseFrame.add(phase, text='Faza #%d' % (newPhase))
+        self.phases[newPhase] = phase
+
+    def removePhase(self):
+        selected = self.phaseFrame.select()
+        if selected:
+            self.phaseFrame.forget(selected)
+            key_to_delete = None
+            for key, tab in self.phases.iteritems():
+                if str(selected) == str(tab):
+                    key_to_delete = key
+                    break
+            if key_to_delete:
+                self.phases.pop(key_to_delete)
+
     def renderContent(self, container):
-        self.phase = MatchPhaseFrame(container, vertical=True)
-        self.phase.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        container.columnconfigure(1, weight=1)
+        container.rowconfigure(2, weight=1)
+        (ttk.Label(container, text='Fazy rozgrywek:')).grid(
+            row=0, column=0, columnspan=2, sticky=tk.W)
+        (ttk.Button(
+            container, text='+', command=self.addPhase, width=5)).grid(
+                row=1, column=0, sticky=tk.W)
+        (ttk.Button(
+            container, text='-', command=self.removePhase, width=5)).grid(
+                row=1, column=1, sticky=tk.W)
+        self.phases = {}
+        self.phaseFrame = ttk.Notebook(container)
+        self.phaseFrame.grid(
+            row=2, column=0, columnspan=2, sticky=tk.W+tk.E+tk.N+tk.S)
 
     def getMatches(self):
-        return [w for w in self.phase.matches.widgets
-                if isinstance(w, MatchSettingsFrame)]
+        matches = []
+        for phase in self.phases.values():
+            matches +=  [w for w in phase.matches.widgets
+                         if isinstance(w, MatchSettingsFrame)]
+        return matches
 
 class SwissesTab(PlayoffTab):
     @property
