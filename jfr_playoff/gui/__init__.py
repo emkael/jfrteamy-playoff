@@ -7,6 +7,7 @@ class PlayoffGUI(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
         ttk.Style().configure('TLabelframe.Label', foreground='black')
+        ttk.Style().configure('TLabelframe', padding=5)
         self.geometry('920x640')
         self.tabs = {}
 

@@ -68,24 +68,27 @@ class MainSettingsTab(PlayoffTab):
         (ttk.Separator(container, orient=tk.HORIZONTAL)).grid(
             row=1, column=0, columnspan=2, sticky=tk.E+tk.W, pady=2)
 
-        (ttk.Label(container, text='Ustawienia strony')).grid(
-            row=2, column=0, columnspan=2, sticky=tk.W, pady=5)
-        (ttk.Label(container, text='Tytuł:')).grid(
-            row=3, column=0, sticky=tk.E, pady=2)
+        pageSettings = ttk.LabelFrame(
+            container, text='Ustawienia strony')
+        pageSettings.grid(
+            row=2, column=0, columnspan=2, sticky=tk.W+tk.E+tk.N+tk.S, pady=5)
+
+        (ttk.Label(pageSettings, text='Tytuł:')).grid(
+            row=0, column=0, sticky=tk.E, pady=2)
         self.pageTitle = tk.StringVar()
-        (tk.Entry(container, textvariable=self.pageTitle)).grid(
-            row=3, column=1, sticky=tk.W+tk.E, pady=2)
-        (ttk.Label(container, text='Logoh:')).grid(
-            row=4, column=0, sticky=tk.E+tk.N, pady=2)
-        self.pageLogoh = tk.Text(container, width=45, height=10)
+        (tk.Entry(pageSettings, textvariable=self.pageTitle)).grid(
+            row=0, column=1, sticky=tk.W+tk.E, pady=2)
+        (ttk.Label(pageSettings, text='Logoh:')).grid(
+            row=1, column=0, sticky=tk.E+tk.N, pady=2)
+        self.pageLogoh = tk.Text(pageSettings, width=45, height=10)
         self.pageLogoh.grid(
-            row=4, column=1,
+            row=1, column=1,
             sticky=tk.W+tk.N+tk.E+tk.S, pady=2)
 
-        (ttk.Label(container, text='Odświeżaj:')).grid(
-            row=5, column=0, sticky=tk.E, pady=2)
-        refreshPanel = tk.Frame(container)
-        refreshPanel.grid(row=5, column=1, sticky=tk.W+tk.E, pady=2)
+        (ttk.Label(pageSettings, text='Odświeżaj:')).grid(
+            row=2, column=0, sticky=tk.E, pady=2)
+        refreshPanel = tk.Frame(pageSettings)
+        refreshPanel.grid(row=2, column=1, sticky=tk.W+tk.E, pady=2)
         self.refresh = tk.IntVar()
         (ttk.Checkbutton(
             refreshPanel,
