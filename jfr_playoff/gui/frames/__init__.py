@@ -4,6 +4,7 @@ from functools import partial
 
 import tkinter as tk
 from tkinter import ttk
+import tkMessageBox
 
 def getIntVal(widget, default=0):
     try:
@@ -219,3 +220,91 @@ class WidgetSelectionFrame(ScrollableFrame):
         if self.callback is not None:
             self.callback(self.value.get())
         self.winfo_toplevel().destroy()
+
+class SelectionButton(ttk.Button):
+    @property
+    def defaultPrompt(self):
+        pass
+
+    @property
+    def title(self):
+        pass
+
+    @property
+    def errorMessage(self):
+        pass
+
+    def getOptions(self):
+        pass
+
+    def __init__(self, *args, **kwargs):
+        for arg in ['callback', 'prompt', 'dialogclass']:
+            setattr(self, arg, kwargs[arg] if arg in kwargs else None)
+            if arg in kwargs:
+                del kwargs[arg]
+        kwargs['command'] = self._choosePositions
+        if self.prompt is None:
+            self.prompt = self.defaultPrompt
+        ttk.Button.__init__(self, *args, **kwargs)
+        self.setPositions([])
+
+    def setPositions(self, values):
+        self.selected = values
+        self.configure(
+            text='[wybrano: %d]' % (len(values)))
+        if self.callback is not None:
+            self.callback(values)
+
+    def _choosePositions(self):
+        options = self.getOptions()
+        if not len(options):
+            tkMessageBox.showerror(
+                self.title, self.errorMessage)
+            self.setPositions([])
+        else:
+            dialog = tk.Toplevel(self)
+            dialog.title(self.title)
+            dialog.grab_set()
+            dialog.focus_force()
+            selectionFrame = self.dialogclass(
+                dialog, title=self.prompt,
+                options=options,
+                selected=lambda idx, option: idx+1 in self.selected,
+                callback=self.setPositions, vertical=True)
+            selectionFrame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+class SelectionFrame(ScrollableFrame):
+
+    def renderOption(self, container, option, idx):
+        pass
+
+    def __init__(self, master, title='', options=[],
+                 selected=None, callback=None, *args, **kwargs):
+        self.values = []
+        self.title = title
+        self.options = options
+        self.selected = selected
+        self.callback = callback
+        ScrollableFrame.__init__(self, master=master, *args, **kwargs)
+        (ttk.Button(master, text='Zapisz', command=self._save)).pack(
+            side=tk.BOTTOM, fill=tk.Y)
+
+    def _save(self):
+        if self.callback:
+            self.callback(
+                [idx+1 for idx, value
+                 in enumerate(self.values) if value.get()])
+        self.master.destroy()
+
+    def renderHeader(self, container):
+        container.columnconfigure(1, weight=1)
+        (ttk.Label(container, text=self.title)).grid(
+            row=0, column=0, columnspan=2)
+
+    def renderContent(self, container):
+        self.renderHeader(container)
+        for idx, option in enumerate(self.options):
+            self.values.append(tk.IntVar())
+            self.renderOption(container, option, idx)
+            if self.selected and self.selected(idx, option):
+                self.values[idx].set(True)

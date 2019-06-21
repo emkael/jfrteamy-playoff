@@ -6,7 +6,8 @@ import tkColorChooser as tkcc
 
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
 from ..frames import WidgetRepeater
-from ..frames.team import TeamSelectionButton, TeamSelectionFrame
+from ..frames import SelectionFrame
+from ..frames.team import TeamSelectionButton
 
 class VisualSettingsFrame(GuiFrame):
     def renderContent(self):
@@ -232,22 +233,22 @@ class LineStylesFrame(GuiFrame):
         (ttk.Label(self, text='Kolory linii')).grid(
             row=0, column=0, columnspan=2, sticky=tk.W)
 
-class FinalPositionsSelectionFrame(TeamSelectionFrame):
+class PositionsSelectionFrame(SelectionFrame):
     COLUMN_COUNT=10
 
     def __init__(self, *args, **kwargs):
-        TeamSelectionFrame.__init__(self, *args, **kwargs)
+        SelectionFrame.__init__(self, *args, **kwargs)
         self.winfo_toplevel().geometry(
             '%dx%d' % (
                 self.COLUMN_COUNT * 40,
-                (len(self.teams) / self.COLUMN_COUNT + 2) * 25 + 30
+                (len(self.options) / self.COLUMN_COUNT + 2) * 25 + 30
             ))
 
     def renderHeader(self, container):
         (ttk.Label(container, text=self.title)).grid(
             row=0, column=0, columnspan=self.COLUMN_COUNT, sticky=tk.W)
 
-    def renderTeam(self, container, team, idx):
+    def renderOption(self, container, option, idx):
         (ttk.Checkbutton(
             container, text=str(idx+1),
             variable=self.values[idx]
@@ -266,7 +267,7 @@ class PositionStyleFrame(RepeatableFrame):
         (ttk.Label(self, text='Pozycje końcowe:')).grid(row=0, column=2)
         self.positionBtn = TeamSelectionButton(
             self, prompt='Wybierz pozycje końcowe:',
-            dialogclass=FinalPositionsSelectionFrame,
+            dialogclass=PositionsSelectionFrame,
             callback=self._setPositions)
         self.positionBtn.grid(row=0, column=3)
         (ttk.Label(self, text='Opis w legendzie:')).grid(row=0, column=4)

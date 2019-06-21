@@ -3,10 +3,10 @@
 import tkinter as tk
 from tkinter.font import Font
 from tkinter import ttk
-import tkMessageBox
 
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
 from ..frames import WidgetRepeater, RepeatableEntry
+from ..frames import SelectionButton, SelectionFrame
 from ..frames import getIntVal, setPanelState
 
 class ManualTeamRow(RepeatableFrame):
@@ -53,84 +53,30 @@ class TeamManualSettingsFrame(GuiFrame):
     def getTeams(self):
         return [val for val in self.repeater.getValue() if len(val[0].strip())]
 
-class TeamSelectionFrame(ScrollableFrame):
-    def __init__(self, master, title='', teams=[],
-                 selected=None, callback=None, *args, **kwargs):
-        self.values = []
-        self.title = title
-        self.teams = teams
-        self.selected = selected
-        self.callback = callback
-        ScrollableFrame.__init__(self, master=master, *args, **kwargs)
-        (ttk.Button(master, text='Zapisz', command=self._save)).pack(
-            side=tk.BOTTOM, fill=tk.Y)
-
-    def _save(self):
-        if self.callback:
-            self.callback(
-                [idx+1 for idx, value
-                 in enumerate(self.values) if value.get()])
-        self.master.destroy()
-
-    def renderHeader(self, container):
-        container.columnconfigure(1, weight=1)
-        (ttk.Label(container, text=self.title)).grid(
-            row=0, column=0, columnspan=2)
-
-    def renderTeam(self, container, team, idx):
+class TeamSelectionFrame(SelectionFrame):
+    def renderOption(self, container, option, idx):
         (ttk.Label(container, text='[%d]' % (idx+1))).grid(
             row=idx+1, column=0)
         (ttk.Checkbutton(
-            container, text=team[0],
+            container, text=option[0],
             variable=self.values[idx]
         )).grid(row=idx+1, column=1, sticky=tk.W)
 
-    def renderContent(self, container):
-        self.renderHeader(container)
-        for idx, team in enumerate(self.teams):
-            self.values.append(tk.IntVar())
-            self.renderTeam(container, team, idx)
-            if self.selected and self.selected(idx, team):
-                self.values[idx].set(True)
+class TeamSelectionButton(SelectionButton):
+    @property
+    def prompt(self):
+        return 'Wybierz teamy:'
 
-class TeamSelectionButton(ttk.Button):
-    def __init__(self, *args, **kwargs):
-        for arg in ['callback', 'prompt', 'dialogclass']:
-            setattr(self, arg, kwargs[arg] if arg in kwargs else None)
-            if arg in kwargs:
-                del kwargs[arg]
-        kwargs['command'] = self._choosePositions
-        if self.dialogclass is None:
-            self.dialogclass = TeamSelectionFrame
-        if self.prompt is None:
-            self.prompt = 'Wybierz teamy:'
-        ttk.Button.__init__(self, *args, **kwargs)
-        self.setPositions([])
+    @property
+    def title(self):
+        return 'Wybór teamów'
 
-    def setPositions(self, values):
-        self.selected = values
-        self.configure(
-            text='[wybrano: %d]' % (len(values)))
-        if self.callback is not None:
-            self.callback(values)
+    @property
+    def errorMessage(self):
+        return 'W turnieju nie ma teamów do wyboru'
 
-    def _choosePositions(self):
-        teams = self.winfo_toplevel().getTeams()
-        if not len(teams):
-            tkMessageBox.showerror(
-                'Wybór teamów', 'W turnieju nie ma teamów do wyboru')
-            self._setFinishingPositions([])
-        else:
-            dialog = tk.Toplevel(self)
-            dialog.title('Wybór teamów')
-            dialog.grab_set()
-            dialog.focus_force()
-            selectionFrame = self.dialogclass(
-                dialog, title=self.prompt,
-                teams=teams,
-                selected=lambda idx, team: idx+1 in self.selected,
-                callback=self.setPositions, vertical=True)
-            selectionFrame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+    def getOptions(self):
+        return self.winfo_toplevel().getTeams()
 
 
 class DBSelectionField(ttk.Entry):
@@ -268,7 +214,8 @@ class TeamFetchSettingsFrame(GuiFrame):
         finishingPositionsBtn = TeamSelectionButton(
             self, callback=self._setFinishingPositions,
             prompt='Wybierz teamy, które zakończyły rozgrywki ' + \
-            'na swojej pozycji:')
+            'na swojej pozycji:',
+            dialogclass=TeamSelectionFrame)
         finishingPositionsBtn.grid(row=3, column=3, sticky=tk.W)
         finishingPositionsBtn.setPositions([])
 
@@ -329,34 +276,39 @@ class TeamSettingsFrame(ScrollableFrame):
             return self.fetchSettingsFrame.getTeams()
         return []
 
+class TeamList(ttk.OptionMenu):
+    def __init__(self, *args, **kwargs):
+        ttk.OptionMenu.__init__(self, *args, **kwargs)
+        self.winfo_toplevel().bind(
+            '<<TeamListChanged>>', self._refreshTeams, add='+')
+        self._refreshTeams(None)
+        self.configure(width=10)
+
+    def _refreshTeams(self, event):
+        oldValue = self._variable.get()
+        options = [team[0] for team in self.winfo_toplevel().getTeams()]
+        self['menu'].delete(0, tk.END)
+        for option in options:
+            self['menu'].add_command(
+                label=option, command=tk._setit(self._variable, option))
+        if oldValue not in options:
+            self._variable.set('')
+
 class TeamAliasRow(RepeatableFrame):
     def renderContent(self):
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
         self.teamName = tk.StringVar()
-        self._createList([])
+        (TeamList(self, self.teamName, self.teamName.get())).grid(
+            row=0, column=0, sticky=tk.W+tk.E+tk.N)
         self.names = WidgetRepeater(self, RepeatableEntry)
         self.names.grid(row=0, column=1, sticky=tk.W+tk.E)
-        self.winfo_toplevel().bind(
-            '<<TeamListChanged>>', self.refreshTeams, add='+')
-        self.refreshTeams(None)
-
-    def _createList(self, options):
-        if self.teamName.get() not in options:
-            self.teamName.set('')
-        self.teamList = ttk.OptionMenu(
-            self, self.teamName, self.teamName.get(), *options)
-        self.teamList.grid(row=0, column=0, sticky=tk.W+tk.E+tk.N)
 
     def getValue(self):
         return (
             self.teamName.get().strip(),
             [val.strip() for val in self.names.getValue()])
 
-    def refreshTeams(self, event):
-        options = [team[0] for team in self.winfo_toplevel().getTeams()]
-        self.teamList.destroy()
-        self._createList(options)
 
 class TeamAliasFrame(ScrollableFrame):
     def renderContent(self, container):

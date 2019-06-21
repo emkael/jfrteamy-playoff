@@ -6,7 +6,9 @@ from tkinter import ttk
 
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
 from ..frames import WidgetRepeater, RepeatableEntry, getIntVal
-from ..frames.team import DBSelectionField
+from ..frames import SelectionFrame, SelectionButton
+from ..frames.team import DBSelectionField, TeamList, TeamSelectionButton
+from ..frames.visual import PositionsSelectionFrame
 
 class SwissSettingsFrame(RepeatableFrame):
     SOURCE_LINK = 0
@@ -139,3 +141,31 @@ class SwissesFrame(ScrollableFrame):
         self.swisses.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
 __all__ = ['SwissesFrame']
+
+class MatchSelectionButton(SelectionButton):
+    @property
+    def defaultPrompt(self):
+        return 'Wybierz mecze:'
+
+    @property
+    def title(self):
+        return 'Wybór meczów'
+
+    @property
+    def errorMessage(self):
+        return 'W turnieju nie zdefiniowano żadnych meczów'
+
+    def getOptions(self):
+        return self.winfo_toplevel().getMatches()
+
+
+class MatchSelectionFrame(SelectionFrame):
+    def renderOption(self, container, option, idx):
+        (ttk.Label(container, text='[%d]' % (idx+1))).grid(
+            row=idx+1, column=0)
+        (ttk.Checkbutton(
+            container, text='Mecz nr %d' % (option.getMatchID()),
+            variable=self.values[idx]
+        )).grid(row=idx+1, column=1, sticky=tk.W)
+
+
