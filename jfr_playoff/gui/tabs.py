@@ -7,7 +7,6 @@ from tkinter import ttk
 import tkFileDialog as tkfd
 import tkMessageBox as tkmb
 
-from .frames import getIntVal
 from .frames.match import *
 from .frames.network import *
 from .frames.team import *
