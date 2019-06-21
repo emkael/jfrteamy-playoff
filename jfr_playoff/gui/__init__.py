@@ -6,6 +6,7 @@ from .tabs import *
 class PlayoffGUI(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
+        ttk.Style().configure('TLabelframe.Label', foreground='black')
         self.geometry('920x640')
         self.tabs = {}
 
