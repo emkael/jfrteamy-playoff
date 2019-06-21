@@ -164,6 +164,14 @@ class MatchesTab(PlayoffTab):
     def title(self):
         return 'Mecze'
 
+    def renderContent(self, container):
+        self.phase = MatchPhaseFrame(container, vertical=True)
+        self.phase.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+    def getMatches(self):
+        return [w for w in self.phase.matches.widgets
+                if isinstance(w, MatchSettingsFrame)]
+
 class SwissesTab(PlayoffTab):
     @property
     def title(self):

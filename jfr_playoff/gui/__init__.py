@@ -26,3 +26,12 @@ class PlayoffGUI(tk.Tk):
 
     def getDBs(self):
         return self.tabs['NetworkTab'].getDBList()
+
+    def getMatches(self):
+        return self.tabs['MatchesTab'].getMatches()
+
+    def getNewMatchID(self, match):
+        matches = self.tabs['MatchesTab'].getMatches()
+        if len(matches) > 0:
+            return max([m.getMatchID() for m in matches]) + 1
+        return 1
