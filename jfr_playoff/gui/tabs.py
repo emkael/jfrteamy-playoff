@@ -357,5 +357,11 @@ class TranslationsTab(PlayoffTab):
             container, vertical=True)
         self.translationsFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+    def setValues(self, config):
+        if 'i18n' in config:
+            self.translationsFrame.setTranslations(config['i18n'])
+        else:
+            self.translationsFrame.setTranslations({})
+
 __all__ = ['MainSettingsTab', 'TeamsTab', 'MatchesTab', 'SwissesTab',
            'NetworkTab', 'VisualTab', 'StyleTab', 'TranslationsTab']

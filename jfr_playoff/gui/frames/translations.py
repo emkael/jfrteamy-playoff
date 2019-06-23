@@ -24,17 +24,15 @@ class TranslationRow(RepeatableFrame):
 class TranslationConfigurationFrame(ScrollableFrame):
 
     def setTranslations(self, translations):
-        translations = copy.copy(PLAYOFF_I18N_DEFAULTS)
-        translations.update(translations)
+        default_translations = copy.copy(PLAYOFF_I18N_DEFAULTS)
+        default_translations.update(translations)
         values = []
-        for value in translations.iteritems():
+        for value in default_translations.iteritems():
             values.append(value)
         self.repeater.setValue(values)
 
     def renderContent(self, container):
         self.repeater = WidgetRepeater(container, TranslationRow)
         self.repeater.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-
-        self.setTranslations({})
 
 __all__ = ['TranslationConfigurationFrame']
