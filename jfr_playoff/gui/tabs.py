@@ -7,6 +7,7 @@ from tkinter import ttk
 import tkFileDialog as tkfd
 import tkMessageBox as tkmb
 
+from .frames import TraceableText
 from .frames.match import *
 from .frames.network import *
 from .frames.team import *
@@ -38,9 +39,18 @@ class PlayoffTab(ttk.Frame):
         pass
 
 class MainSettingsTab(PlayoffTab):
+    DEFAULT_INTERVAL = 60
+
     @property
     def title(self):
         return 'Główne ustawienia'
+
+    def initData(self):
+        self.outputPath = tk.StringVar()
+        self.pageTitle = tk.StringVar()
+        self.pageLogoh = tk.StringVar()
+        self.refresh = tk.IntVar()
+        self.refreshInterval = tk.StringVar()
 
     def _chooseOutputPath(self):
         currentPath = self.outputPath.get()
@@ -54,15 +64,44 @@ class MainSettingsTab(PlayoffTab):
             self.outputPath.set(filename)
 
     def _updateRefreshFields(self):
-        self.refreshInterval.configure(
+        self.intervalField.configure(
             state=tk.NORMAL if self.refresh.get() else tk.DISABLED)
+
+    def setValues(self, config):
+        if 'output' in config:
+            self.outputPath.set(config['output'])
+        else:
+            self.outputPath.set('')
+        if 'page' in config:
+            self.pageTitle.set(config['page']['title']
+                               if 'title' in config['page']
+                               else '')
+            self.pageLogoh.set(config['page']['logoh']
+                               if 'logoh' in config['page']
+                               else '')
+            try:
+                interval = int(config['page']['refresh'])
+                if interval > 0:
+                    self.refresh.set(1)
+                    self.refreshInterval.set(interval)
+                else:
+                    self.refresh.set(0)
+                    self.refreshInterval.set(self.DEFAULT_INTERVAL)
+            except:
+                self.refresh.set(0)
+                self.refreshInterval.set(self.DEFAULT_INTERVAL)
+        else:
+            self.pageTitle.set('')
+            self.pageLogoh.set('')
+            self.refresh.set(0)
+            self.refreshInterval.set(self.DEFAULT_INTERVAL)
+        self._updateRefreshFields()
 
     def renderContent(self, container):
         (ttk.Label(container, text='Plik wynikowy:')).grid(
             row=0, column=0, sticky=tk.E, pady=2)
         outputPath = tk.Frame(container)
         outputPath.grid(row=0, column=1, sticky=tk.E+tk.W, pady=2)
-        self.outputPath = tk.StringVar()
         (ttk.Entry(outputPath, width=60, textvariable=self.outputPath)).grid(
             row=0, column=0, sticky=tk.W+tk.E)
         (ttk.Button(
@@ -81,31 +120,29 @@ class MainSettingsTab(PlayoffTab):
 
         (ttk.Label(pageSettings, text='Tytuł:')).grid(
             row=0, column=0, sticky=tk.E, pady=2)
-        self.pageTitle = tk.StringVar()
         (tk.Entry(pageSettings, textvariable=self.pageTitle)).grid(
             row=0, column=1, sticky=tk.W+tk.E, pady=2)
         (ttk.Label(pageSettings, text='Logoh:')).grid(
             row=1, column=0, sticky=tk.E+tk.N, pady=2)
-        self.pageLogoh = tk.Text(pageSettings, width=45, height=10)
-        self.pageLogoh.grid(
-            row=1, column=1,
-            sticky=tk.W+tk.N+tk.E+tk.S, pady=2)
+        (TraceableText(pageSettings, width=45, height=10,
+                       variable=self.pageLogoh)).grid(
+                           row=1, column=1,
+                           sticky=tk.W+tk.N+tk.E+tk.S, pady=2)
 
         (ttk.Label(pageSettings, text='Odświeżaj:')).grid(
             row=2, column=0, sticky=tk.E, pady=2)
         refreshPanel = tk.Frame(pageSettings)
         refreshPanel.grid(row=2, column=1, sticky=tk.W+tk.E, pady=2)
-        self.refresh = tk.IntVar()
         (ttk.Checkbutton(
             refreshPanel,
             command=self._updateRefreshFields, variable=self.refresh)).grid(
                 row=0, column=0)
         (ttk.Label(refreshPanel, text='co:')).grid(row=0, column=1)
-        self.refreshInterval = tk.Spinbox(
-            refreshPanel, from_=30, to=3600, width=5, justify=tk.RIGHT)
-        self.refreshInterval.grid(row=0, column=2)
+        self.intervalField = tk.Spinbox(
+            refreshPanel, from_=30, to=3600, width=5, justify=tk.RIGHT,
+            textvariable=self.refreshInterval)
+        self.intervalField.grid(row=0, column=2)
         (ttk.Label(refreshPanel, text='sekund')).grid(row=0, column=3)
-        self._updateRefreshFields()
 
         container.columnconfigure(1, weight=1)
         container.rowconfigure(4, weight=1)
