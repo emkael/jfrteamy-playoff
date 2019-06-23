@@ -308,3 +308,21 @@ class SelectionFrame(ScrollableFrame):
             self.renderOption(container, option, idx)
             if self.selected and self.selected(idx, option):
                 self.values[idx].set(True)
+
+class RefreshableOptionMenu(ttk.OptionMenu):
+    def __init__(self, *args, **kwargs):
+        ttk.OptionMenu.__init__(self, *args, **kwargs)
+        self.refreshOptions()
+
+    def refreshOptions(self, *args):
+        oldValue = self._variable.get()
+        options = self.getOptions()
+        self['menu'].delete(0, tk.END)
+        for option in options:
+            self['menu'].add_command(
+                label=option, command=tk._setit(self._variable, option))
+        if oldValue not in options:
+            self._variable.set('')
+
+    def getOptions(self):
+        pass

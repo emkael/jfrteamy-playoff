@@ -163,7 +163,7 @@ class MatchSelectionFrame(SelectionFrame):
         (ttk.Label(container, text='[%d]' % (idx+1))).grid(
             row=idx+1, column=0)
         (ttk.Checkbutton(
-            container, text='Mecz nr %d' % (option.getMatchID()),
+            container, text=option.label,
             variable=self.values[idx]
         )).grid(row=idx+1, column=1, sticky=tk.W)
 
@@ -360,6 +360,8 @@ class MatchSettingsFrame(RepeatableFrame):
 
         self.source.set(self.SCORE_SOURCE_CUSTOM)
 
+        self.winfo_toplevel().event_generate(
+            '<<MatchListChanged>>', when='tail')
 
     @classmethod
     def info(cls):
@@ -367,6 +369,10 @@ class MatchSettingsFrame(RepeatableFrame):
 
     def getMatchID(self):
         return self.matchID
+
+    @property
+    def label(self):
+        return 'Mecz nr %d' % (self.getMatchID())
 
 class MatchSeparator(RepeatableFrame):
     def renderContent(self):

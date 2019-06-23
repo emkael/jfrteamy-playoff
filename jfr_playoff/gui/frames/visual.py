@@ -6,7 +6,7 @@ import tkColorChooser as tkcc
 
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
 from ..frames import WidgetRepeater
-from ..frames import SelectionFrame
+from ..frames import SelectionFrame, RefreshableOptionMenu
 from ..frames.team import TeamSelectionButton
 
 class VisualSettingsFrame(GuiFrame):
@@ -141,13 +141,25 @@ class VisualSettingsFrame(GuiFrame):
                 field.configure(state=tk.NORMAL if var.get() else tk.DISABLED)
 
 
+class MatchList(RefreshableOptionMenu):
+    def __init__(self, *args, **kwargs):
+        RefreshableOptionMenu.__init__(self, *args, **kwargs)
+        self.winfo_toplevel().bind(
+            '<<MatchListChanged>>', self.refreshOptions, add='+')
+        self.configure(width=10)
+
+    def getOptions(self):
+        return [match.label for match in self.winfo_toplevel().getMatches()]
+
+
 class BoxPositionFrame(RepeatableFrame):
     def renderContent(self):
         self.match = tk.StringVar()
         self.vertical = tk.IntVar()
         self.horizontal = tk.IntVar()
         self.horizontal.set(-1)
-        (ttk.OptionMenu(self, self.match)).grid(row=0, column=0)
+        self.matchBox = MatchList(self, self.match)
+        self.matchBox.grid(row=0, column=0)
         (ttk.Label(self, text=' w pionie:')).grid(row=0, column=1)
         (tk.Spinbox(
             self, textvariable=self.vertical, from_=0, to=9999,
