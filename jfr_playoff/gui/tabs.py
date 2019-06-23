@@ -21,13 +21,20 @@ class PlayoffTab(ttk.Frame):
         ttk.Frame.__init__(self, master)
         self.frame = ttk.Frame(self)
         self.frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        self.initData()
         self.renderContent(self.frame)
 
     @property
     def title(self):
         pass
 
+    def initData(self):
+        pass
+
     def renderContent(self, container):
+        pass
+
+    def setValues(self, config):
         pass
 
 class MainSettingsTab(PlayoffTab):

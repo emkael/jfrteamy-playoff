@@ -10,6 +10,7 @@ class PlayoffGUI(tk.Tk):
         ttk.Style().configure('TLabelframe', padding=5)
         self.geometry('920x640')
         self.tabs = {}
+        self.newFileIndex = 0
 
     def run(self):
         self.notebook = ttk.Notebook(self)
@@ -17,7 +18,20 @@ class PlayoffGUI(tk.Tk):
         for tab in tabs.__all__:
             self.tabs[tab] = globals()[tab](self.notebook)
             self.notebook.add(self.tabs[tab], text=self.tabs[tab].title)
+        self.newFile()
         self.mainloop()
+
+    def _setValues(self, config):
+        for tab in self.tabs.values():
+            tab.setValues(config)
+
+    def _resetValues(self):
+        self._setValues({})
+
+    def newFile(self):
+        self.newFileIndex += 1
+        self.title('Nowa drabinka %d' % (self.newFileIndex))
+        self._resetValues()
 
     def getDbConfig(self):
         return self.tabs['NetworkTab'].getDB()
