@@ -6,7 +6,7 @@ from tkinter import ttk
 
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
 from ..frames import WidgetRepeater, RepeatableEntry
-from ..frames import SelectionButton, SelectionFrame
+from ..frames import SelectionButton, SelectionFrame, RefreshableOptionMenu
 from ..frames import getIntVal, setPanelState
 
 class ManualTeamRow(RepeatableFrame):
@@ -276,23 +276,15 @@ class TeamSettingsFrame(ScrollableFrame):
             return self.fetchSettingsFrame.getTeams()
         return []
 
-class TeamList(ttk.OptionMenu):
+class TeamList(RefreshableOptionMenu):
     def __init__(self, *args, **kwargs):
-        ttk.OptionMenu.__init__(self, *args, **kwargs)
+        RefreshableOptionMenu.__init__(self, *args, **kwargs)
         self.winfo_toplevel().bind(
-            '<<TeamListChanged>>', self._refreshTeams, add='+')
-        self._refreshTeams(None)
+            '<<TeamListChanged>>', self.refreshOptions, add='+')
         self.configure(width=10)
 
-    def _refreshTeams(self, event):
-        oldValue = self._variable.get()
-        options = [team[0] for team in self.winfo_toplevel().getTeams()]
-        self['menu'].delete(0, tk.END)
-        for option in options:
-            self['menu'].add_command(
-                label=option, command=tk._setit(self._variable, option))
-        if oldValue not in options:
-            self._variable.set('')
+    def getOptions(self):
+        return [team[0] for team in self.winfo_toplevel().getTeams()]
 
 class TeamAliasRow(RepeatableFrame):
     def renderContent(self):
