@@ -326,3 +326,37 @@ class RefreshableOptionMenu(ttk.OptionMenu):
 
     def getOptions(self):
         pass
+
+class TraceableText(tk.Text):
+    def __init__(self, *args, **kwargs):
+        self._variable = None
+        self._variableLock = False
+        if 'variable' in kwargs:
+            self._variable = kwargs['variable']
+            del kwargs['variable']
+        tk.Text.__init__(self, *args, **kwargs)
+        if self._variable is not None:
+            self._orig = self._w + '_orig'
+            self.tk.call('rename', self._w, self._orig)
+            self.tk.createcommand(self._w, self._proxy)
+            self._variable.trace('w', self._fromVariable)
+
+    def _fromVariable(self, *args):
+        if not self._variableLock:
+            self._variableLock = True
+            self.delete('1.0', tk.END)
+            self.insert(tk.END, self._variable.get())
+            self._varaibleLock = False
+
+    def _proxy(self, command, *args):
+        cmd = (self._orig, command) + args
+        result = self.tk.call(cmd)
+        if command in ('insert', 'delete', 'replace') and \
+           not self._variableLock:
+            text = self.get('1.0', tk.END).strip()
+            self._variableLock = True
+            self._variable.set(text)
+            self._variableLock = False
+        return result
+
+# TODO: NumericSpinBox instead of getIntVal
