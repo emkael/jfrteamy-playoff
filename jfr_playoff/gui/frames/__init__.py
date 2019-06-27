@@ -139,8 +139,7 @@ class WidgetRepeater(tk.Frame):
             self.widgets[i].setValue(value[1] if typedWidget else value)
         for idx in range(len(values), len(self.widgets)):
             self._removeWidget(len(self.widgets)-1)
-        self.winfo_toplevel().event_generate(
-            '<<MatchListChanged>>', when='tail')
+
 
 class GuiFrame(tk.Frame):
     def __init__(self, *args, **kwargs):

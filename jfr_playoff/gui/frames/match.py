@@ -386,6 +386,11 @@ class MatchSettingsFrame(RepeatableFrame):
     SCORE_SOURCE_LINK = 1
     SCORE_SOURCE_CUSTOM = 2
 
+    def destroy(self, *args, **kwargs):
+        self.winfo_toplevel().event_generate(
+            '<<MatchListChanged>>', when='tail')
+        RepeatableFrame.destroy(self, *args, **kwargs)
+
     def _enablePanels(self, *args):
         for val, fields in self.scoreWidgets.iteritems():
             for field in fields:
@@ -661,6 +666,8 @@ class MatchPhaseFrame(ScrollableFrame):
         self.matches.setValue(objects)
         self.link.set(values['link'] if 'link' in values else '')
         self.name.set(values['title'] if 'title' in values else '')
+        self.winfo_toplevel().event_generate(
+            '<<MatchListChanged>>', when='tail')
 
 
 __all__ = ['SwissesFrame', 'MatchPhaseFrame', 'MatchSettingsFrame']

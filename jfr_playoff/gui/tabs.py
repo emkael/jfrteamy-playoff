@@ -220,6 +220,8 @@ class MatchesTab(PlayoffTab):
         newPhase = max(self.phases.keys()) + 1 if len(self.phases) else 1
         self.phaseFrame.add(phase, text='Faza #%d' % (newPhase))
         self.phases[newPhase] = phase
+        self.winfo_toplevel().event_generate(
+            '<<MatchListChanged>>', when='tail')
         return newPhase
 
     def removePhase(self, phase=None):
@@ -234,6 +236,8 @@ class MatchesTab(PlayoffTab):
                     break
             if key_to_delete:
                 self.phases.pop(key_to_delete)
+        self.winfo_toplevel().event_generate(
+            '<<MatchListChanged>>', when='tail')
 
     def _renameTabs(self, *args):
         for idx, tab in self.phases.iteritems():
