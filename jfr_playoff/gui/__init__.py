@@ -16,6 +16,7 @@ class PlayoffGUI(tk.Tk):
         self._title = tk.StringVar()
         self._title.trace('w', self._setTitle)
         self._dirty = False
+        self._filepath = None
 
     def run(self):
         self.notebook = ttk.Notebook(self)
@@ -37,6 +38,7 @@ class PlayoffGUI(tk.Tk):
         self._setValues({})
 
     def newFile(self):
+        self._filepath = None
         self.newFileIndex += 1
         self._title.set('Nowa drabinka %d' % (self.newFileIndex))
         self._resetValues()
@@ -49,6 +51,7 @@ class PlayoffGUI(tk.Tk):
         ))
 
     def openFile(self, filepath):
+        self._filepath = filepath
         self._title.set(os.path.basename(filepath))
         self._setValues(json.load(open(filepath)))
 
