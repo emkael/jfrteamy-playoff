@@ -7,7 +7,8 @@ from tkinter import ttk
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
 from ..frames import WidgetRepeater, RepeatableEntry, getIntVal
 from ..frames import SelectionFrame, SelectionButton, RefreshableOptionMenu
-from ..frames.team import DBSelectionField, TeamList, TeamSelectionButton
+from ..frames.team import DBSelectionField, TeamSelectionFrame
+from ..frames.team import TeamSelectionButton
 from ..frames.visual import PositionsSelectionFrame
 
 class SwissSettingsFrame(RepeatableFrame):
@@ -265,27 +266,38 @@ class BracketMatchSettingsFrame(GuiFrame):
         self.winners = matches
         self._configChangeNotify()
 
+    def _setTeams(self, teams):
+        if not self._lockTeams:
+            allTeams = [team[0] for team in self.teamWidgets[0].getOptions()]
+            self.teams = [allTeams[idx-1] for idx in teams]
+
     def renderContent(self):
         self.source = tk.IntVar()
         self.source.trace('w', self._enablePanels)
         self.source.trace('w', self._configChangeNotify)
-        self.team = tk.StringVar()
         self.selected = tk.IntVar()
         self.selected.trace('w', self._enablePanels)
         self.selectedIndex = tk.StringVar()
         self.positions = []
         self.winners = []
         self.losers = []
+        self.teams = []
+        self._lockTeams = True
+        self.winfo_toplevel().bind(
+            '<<TeamListChanged>>', self._onTeamListChange, add='+')
 
         buttons = [
             ttk.Radiobutton(
                 self, variable=self.source, value=self.SOURCE_TEAM,
-                text='Konkretny team'),
+                text='Konkretne teamy'),
             ttk.Radiobutton(
                 self, variable=self.source, value=self.SOURCE_BRACKET,
                 text='Z drabinki')]
         self.teamWidgets = [
-            TeamList(self, self.team, self.team.get())]
+            TeamSelectionButton(
+                self, prompt='Wybierz drużyny:',
+                dialogclass=TeamSelectionFrame,
+                callback=self._setTeams)]
         self.bracketWidgets = [
             ttk.Label(self, text='Zwycięzcy meczów:'),
             MatchSelectionButton(
@@ -314,15 +326,31 @@ class BracketMatchSettingsFrame(GuiFrame):
         for idx, widget in enumerate(self.bracketWidgets):
             widget.grid(row=1+idx/2, column=1+idx%2, sticky=tk.W)
 
+        self._lockTeams = True
+
+    def _onTeamListChange(self, *args):
+        teamsToSet = []
+        teams = [team[0] for team in self.teamWidgets[0].getOptions()]
+        for team in self.teams:
+            try:
+                teamsToSet.append(teams.index(team)+1)
+            except ValueError:
+                pass
+        self._lockTeams = True
+        self.teamWidgets[0].setPositions(teamsToSet)
+        self._lockTeams = False
+
     def setValue(self, value):
-        if isinstance(value, str):
+        if isinstance(value, (str, unicode)):
+            value = [value]
+        if isinstance(value, list):
             self.source.set(self.SOURCE_TEAM)
-            self.team.set(value)
+            self.teams = list(set(value))
             for idx in self.LIST_WIDGETS.values():
                 self.bracketWidgets[idx].setPositions([])
         else:
             self.source.set(self.SOURCE_BRACKET)
-            self.team.set('')
+            self.teams = []
             for key, idx in self.LIST_WIDGETS.iteritems():
                 self.bracketWidgets[idx].setPositions(
                     value[key]
@@ -339,13 +367,13 @@ class BracketMatchSettingsFrame(GuiFrame):
 
     def getConfig(self):
         if self.source.get() == self.SOURCE_TEAM:
-            return self.team.get()
+            return self.teams
         else:
             config = {}
             lists = {
-                1: self.positions,
-                3: self.winners,
-                5: self.losers
+                5: self.positions,
+                1: self.winners,
+                3: self.losers
             }
             for key, idx in self.LIST_WIDGETS.iteritems():
                 values = lists[idx]
