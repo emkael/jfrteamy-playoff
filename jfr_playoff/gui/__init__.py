@@ -1,4 +1,4 @@
-import json, sys
+import json, os, sys
 
 import tkinter as tk
 from tkinter import ttk
@@ -13,6 +13,9 @@ class PlayoffGUI(tk.Tk):
         self.geometry('920x640')
         self.tabs = {}
         self.newFileIndex = 0
+        self._title = tk.StringVar()
+        self._title.trace('w', self._setTitle)
+        self._dirty = False
 
     def run(self):
         self.notebook = ttk.Notebook(self)
@@ -35,10 +38,18 @@ class PlayoffGUI(tk.Tk):
 
     def newFile(self):
         self.newFileIndex += 1
-        self.title('Nowa drabinka %d' % (self.newFileIndex))
+        self._title.set('Nowa drabinka %d' % (self.newFileIndex))
         self._resetValues()
 
+    def _setTitle(self, *args):
+        self.title('%s - %s%s' % (
+            'TeamyPlayOff',
+            self._title.get(),
+            '* ' if self._dirty else ''
+        ))
+
     def openFile(self, filepath):
+        self._title.set(os.path.basename(filepath))
         self._setValues(json.load(open(filepath)))
 
     def getDbConfig(self):
