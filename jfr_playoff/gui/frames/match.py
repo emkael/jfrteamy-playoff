@@ -568,9 +568,20 @@ class MatchSettingsFrame(RepeatableFrame):
     def getMatchID(self):
         return self.matchID.get()
 
+    def _getPhase(self):
+        obj = self
+        while not isinstance(obj, MatchPhaseFrame):
+            obj = obj.master
+            if obj is None:
+                break
+        return obj
+
     @property
     def label(self):
-        return 'Mecz nr %d' % (self.getMatchID())
+        phase = self._getPhase()
+        return 'Mecz #%d (%s)' % (
+            self.getMatchID(),
+            phase.master.tab(phase)['text'] if phase is not None else '')
 
     def setValue(self, value):
         self.matchID.set(value['id'] if 'id' in value else 0)
