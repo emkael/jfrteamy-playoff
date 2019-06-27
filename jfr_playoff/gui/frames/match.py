@@ -351,10 +351,10 @@ class MatchSettingsFrame(RepeatableFrame):
             ],
             self.SCORE_SOURCE_CUSTOM: [
                 ttk.Entry(
-                    scoreGroup, textvariable=self.scoreCustom[0], width=3),
+                    scoreGroup, textvariable=self.scoreCustom[0], width=5),
                 ttk.Label(scoreGroup, text=':'),
                 ttk.Entry(
-                    scoreGroup, textvariable=self.scoreCustom[1], width=3),
+                    scoreGroup, textvariable=self.scoreCustom[1], width=5),
                 ttk.Checkbutton(
                     scoreGroup, variable=self.scoreNotFinished,
                     text='mecz nie został zakończony, rozegrano:'),
