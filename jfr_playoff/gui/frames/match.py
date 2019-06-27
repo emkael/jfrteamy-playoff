@@ -302,6 +302,12 @@ class MatchSettingsFrame(RepeatableFrame):
     def _updateName(self, *args):
         self.nameLabel.configure(text=self.label)
 
+    def _setWinnerPositions(self, values):
+        self.winnerPositions = values
+
+    def _setLoserPositions(self, values):
+        self.loserPositions = values
+
     def renderContent(self):
         self.nameLabel = ttk.Label(self)
         self.matchID = tk.IntVar()
@@ -319,6 +325,9 @@ class MatchSettingsFrame(RepeatableFrame):
         self.scoreNotFinished = tk.IntVar()
         self.scoreNotFinished.trace('w', self._enablePanels)
         self.scoreBoards = tk.IntVar()
+
+        self.winnerPositions = []
+        self.loserPositions = []
 
         self.nameLabel.grid(row=0, column=0, sticky=tk.W)
         (ttk.Label(self, text='Link:')).grid(row=0, column=1, sticky=tk.E)
@@ -415,6 +424,21 @@ class MatchSettingsFrame(RepeatableFrame):
             self.scoreWidgets[self.SCORE_SOURCE_CUSTOM][idx].grid(
                 row=2, column=idx+5)
 
+        (ttk.Label(bracketGroup, text='Zwycięzca zajmie miejsca:')).grid(
+            row=1, column=0, sticky=tk.E)
+        self.winnerPositionsBtn = TeamSelectionButton(
+            bracketGroup, prompt='Wybierz pozycje końcowe:',
+            dialogclass=PositionsSelectionFrame,
+            callback=self._setWinnerPositions)
+        self.winnerPositionsBtn.grid(row=1, column=1, sticky=tk.W)
+        (ttk.Label(bracketGroup, text='Przegrany zajmie miejsca:')).grid(
+            row=2, column=0, sticky=tk.E)
+        self.loserPositionsBtn = TeamSelectionButton(
+            bracketGroup, prompt='Wybierz pozycje końcowe:',
+            dialogclass=PositionsSelectionFrame,
+            callback=self._setLoserPositions)
+        self.loserPositionsBtn.grid(row=2, column=1, sticky=tk.W)
+
         self.winfo_toplevel().event_generate(
             '<<MatchListChanged>>', when='tail')
 
@@ -466,6 +490,16 @@ class MatchSettingsFrame(RepeatableFrame):
         else:
             for idx in range(0, 2):
                 self.bracketSettings[idx].setValue({})
+
+        self.winnerPositionsBtn.setPositions(
+            value['winner']
+            if 'winner' in value and isinstance(value['winner'], list)
+            else [])
+        self.loserPositionsBtn.setPositions(
+            value['loser']
+            if 'loser' in value and isinstance(value['loser'], list)
+            else [])
+
 
 class MatchSeparator(RepeatableFrame):
     def renderContent(self):
