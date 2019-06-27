@@ -285,6 +285,8 @@ class BracketMatchSettingsFrame(GuiFrame):
         self._lockTeams = True
         self.winfo_toplevel().bind(
             '<<TeamListChanged>>', self._onTeamListChange, add='+')
+        self.winfo_toplevel().bind(
+            '<<MatchListChanged>>', self._onMatchListChange, add='+')
 
         buttons = [
             ttk.Radiobutton(
@@ -326,7 +328,7 @@ class BracketMatchSettingsFrame(GuiFrame):
         for idx, widget in enumerate(self.bracketWidgets):
             widget.grid(row=1+idx/2, column=1+idx%2, sticky=tk.W)
 
-        self._lockTeams = True
+        self._lockTeams = False
 
     def _onTeamListChange(self, *args):
         teamsToSet = []
@@ -339,6 +341,21 @@ class BracketMatchSettingsFrame(GuiFrame):
         self._lockTeams = True
         self.teamWidgets[0].setPositions(teamsToSet)
         self._lockTeams = False
+
+    def _onMatchListChange(self, *args):
+        try:
+            matches = [
+                match.getMatchID() for match
+                in self.bracketWidgets[
+                    self.LIST_WIDGETS['winner']].getOptions()]
+            self.bracketWidgets[self.LIST_WIDGETS['winner']].setPositions([
+                winner for winner in self.winners if winner in matches])
+            self.bracketWidgets[self.LIST_WIDGETS['loser']].setPositions([
+                loser for loser in self.losers if loser in matches])
+        except tk.TclError as e:
+            # we're probably trying to update our widget when
+            # WE'RE the match that's being destroyed
+            pass
 
     def setValue(self, value):
         if isinstance(value, (str, unicode)):
