@@ -196,7 +196,7 @@ class TeamsTab(PlayoffTab):
             'team_aliases': self.aliasFrame.getConfig()
         }
         tieConfig = self.previewFrame.getTieConfig()
-        if tieConfig is not None:
+        if tieConfig is not None and isinstance(config['teams'], dict):
             config['teams']['ties'] = tieConfig
         return config
 
