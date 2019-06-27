@@ -1,4 +1,4 @@
-import json
+import json, sys
 
 import tkinter as tk
 from tkinter import ttk
@@ -20,7 +20,10 @@ class PlayoffGUI(tk.Tk):
         for tab in tabs.__all__:
             self.tabs[tab] = globals()[tab](self.notebook)
             self.notebook.add(self.tabs[tab], text=self.tabs[tab].title)
-        self.newFile()
+        if len(sys.argv) > 1:
+            self.openFile(sys.argv[1])
+        else:
+            self.newFile()
         self.mainloop()
 
     def _setValues(self, config):
@@ -28,12 +31,15 @@ class PlayoffGUI(tk.Tk):
             tab.setValues(config)
 
     def _resetValues(self):
-        self._setValues(json.load(open('../pzbs-liga-playoff/eklasa.json')))
+        self._setValues({})
 
     def newFile(self):
         self.newFileIndex += 1
         self.title('Nowa drabinka %d' % (self.newFileIndex))
         self._resetValues()
+
+    def openFile(self, filepath):
+        self._setValues(json.load(open(filepath)))
 
     def getDbConfig(self):
         return self.tabs['NetworkTab'].getDB()
