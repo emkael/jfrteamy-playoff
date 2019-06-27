@@ -169,11 +169,6 @@ class RemoteConfigurationFrame(ScrollableFrame):
         self.repeater.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
     def setValues(self, values):
-        for idx, value in enumerate(values):
-            if idx >= len(self.repeater.widgets):
-                self.repeater._addWidget()
-            self.repeater.widgets[idx].setValue(value)
-        for idx in range(len(values), len(self.repeater.widgets)):
-            self.repeater._removeWidget(idx)
+        self.repeater.setValue(values)
 
 __all__ = ['MySQLConfigurationFrame', 'GoniecConfigurationFrame', 'RemoteConfigurationFrame']

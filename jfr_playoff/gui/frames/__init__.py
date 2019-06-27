@@ -117,6 +117,8 @@ class WidgetRepeater(tk.Frame):
             if i >= len(self.widgets):
                 self._addWidget()
             self.widgets[i].setValue(value[i])
+        for idx in range(len(value), len(self.widgets)):
+            self._removeWidget(idx)
 
 class GuiFrame(tk.Frame):
     def __init__(self, *args, **kwargs):

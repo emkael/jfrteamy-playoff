@@ -248,17 +248,15 @@ class BoxPositionsFrame(ScrollableFrame):
 
     def setValues(self, values):
         values = sorted(list(values.iteritems()), key=lambda v: int(v[0]))
+        values_to_set = []
         for idx, val in enumerate(values):
             value = [val[0]]
             if isinstance(val[1], list):
                 value += val[1]
             else:
                 value.append(val[1])
-            if idx >= len(self.positions.widgets):
-                self.positions._addWidget()
-            self.positions.widgets[idx].setValue(value)
-        for idx in range(len(values), len(self.positions.widgets)):
-            self.positions._removeWidget(idx)
+            values_to_set.append(value)
+        self.positions.setValue(values_to_set)
 
 class LineStyle(GuiFrame):
     def _selectColour(self):
@@ -396,11 +394,6 @@ class PositionStylesFrame(ScrollableFrame):
         self.styles.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
     def setValues(self, values):
-        for idx, value in enumerate(values):
-            if idx >= len(self.styles.widgets):
-                self.styles._addWidget()
-            self.styles.widgets[idx].setValue(value)
-        for idx in range(len(values), len(self.styles.widgets)):
-            self.styles._removeWidget(idx)
+        self.styles.setValue(values)
 
 __all__ = ['VisualSettingsFrame', 'BoxPositionsFrame', 'LineStylesFrame', 'PositionStylesFrame']
