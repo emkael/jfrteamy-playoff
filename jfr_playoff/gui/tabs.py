@@ -319,6 +319,15 @@ class NetworkTab(PlayoffTab):
         self.winfo_toplevel().bind(
             '<<DBSettingsChanged>>', self._onDBSettingsChange, add='+')
 
+    def setValues(self, config):
+        self.mysqlFrame.setValues(
+            config['database'] if 'database' in config else {})
+        self.goniecFrame.setValues(
+            config['goniec'] if 'goniec' in config else {})
+        self.remoteFrame.setValues(
+            config['remotes'] if 'remotes' in config else [])
+
+
 class VisualTab(PlayoffTab):
     @property
     def title(self):
