@@ -1,6 +1,7 @@
 #coding=utf-8
 
 from functools import partial
+import types
 
 import tkinter as tk
 from tkinter import ttk
@@ -34,6 +35,7 @@ class WidgetRepeater(tk.Frame):
         self.widgetClassParams = classParams
         self.widgets = []
         self.headers = headers
+        self.headerFrame = None
         self.addButton = ttk.Button(
             self, text='[+]', width=5, command=self._addWidget)
         self.renderContent()
@@ -87,19 +89,22 @@ class WidgetRepeater(tk.Frame):
         self._updateGrid()
 
     def _updateGrid(self):
+        headeridx = int(self.headerFrame is not None)
         for idx, widget in enumerate(self.widgets):
-            widget.grid(row=idx, column=1, sticky=tk.W+tk.E+tk.N+tk.S)
+            widget.grid(
+                row=idx+headeridx, column=1, sticky=tk.W+tk.E+tk.N+tk.S)
+        if self.headerFrame is not None:
+            self.headerFrame.grid(row=0, column=1, sticky=tk.W+tk.E+tk.N+tk.S)
         self.addButton.grid(
             row=len(self.widgets), column=0, columnspan=1, sticky=tk.W+tk.N)
 
     def _renderHeader(self):
         if self.headers:
-            headerFrame = tk.Frame(self)
+            self.headerFrame = tk.Frame(self)
             for idx, header in enumerate(self.headers):
-                headerFrame.columnconfigure(idx, weight=1)
-                widget = header[0](headerFrame, **header[1])
+                self.headerFrame.columnconfigure(idx, weight=1)
+                widget = header[0](self.headerFrame, **header[1])
                 widget.grid(row=0, column=idx, sticky=tk.W+tk.E+tk.N)
-            self.widgets.append(headerFrame)
             (tk.Label(self, text=' ')).grid(
                 row=0, column=0, sticky=tk.W+tk.E+tk.N)
 
@@ -109,16 +114,33 @@ class WidgetRepeater(tk.Frame):
         self._updateGrid()
 
     def getValue(self):
-        return [widget.getValue() for widget in self.widgets
-                if isinstance(widget, self.widgetClass)]
+        return [widget.getValue() for widget in self.widgets]
 
-    def setValue(self, value):
-        for i in range(0, len(value)):
+    def _getParamsForWidgetClass(self, widgetClass):
+        if not isinstance(self.widgetClass, list):
+            return self.widgetClassParams
+        if not isinstance(self.widgetClassParams, list):
+            return self.widgetClassParams
+        for idx, widget in enumerate(self.widgetClass):
+            if widget == widgetClass:
+                return self.widgetClassParams[idx]
+        return None
+
+    def setValue(self, values):
+        for i, value in enumerate(values):
+            typedWidget = isinstance(value, tuple) \
+                and isinstance(value[0], (types.TypeType, types.ClassType))
             if i >= len(self.widgets):
-                self._addWidget()
-            self.widgets[i].setValue(value[i])
-        for idx in range(len(value), len(self.widgets)):
-            self._removeWidget(idx)
+                if typedWidget:
+                    self._createWidget(
+                        value[0], self._getParamsForWidgetClass(value[0]))
+                else:
+                    self._addWidget()
+            self.widgets[i].setValue(value[1] if typedWidget else value)
+        for idx in range(len(values), len(self.widgets)):
+            self._removeWidget(len(self.widgets)-1)
+        self.winfo_toplevel().event_generate(
+            '<<MatchListChanged>>', when='tail')
 
 class GuiFrame(tk.Frame):
     def __init__(self, *args, **kwargs):
