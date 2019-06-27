@@ -178,7 +178,6 @@ class VisualSettingsFrame(GuiFrame):
         self.teamNamePrefix.set(values['team_boxes']['name_prefix'])
 
 
-
 class MatchList(RefreshableOptionMenu):
     def __init__(self, *args, **kwargs):
         RefreshableOptionMenu.__init__(self, *args, **kwargs)
@@ -191,9 +190,6 @@ class MatchList(RefreshableOptionMenu):
 
     def getValues(self):
         return self.winfo_toplevel().getMatches()
-
-    def cmpValue(self, match):
-        return match.id == getIntVal(self._variable, 0)
 
 
 class BoxPositionFrame(RepeatableFrame):
@@ -214,7 +210,6 @@ class BoxPositionFrame(RepeatableFrame):
             self, textvariable=self.horizontal, from_=-1, to=9999,
             width=5, justify=tk.RIGHT)).grid(
                 row=0, column=4)
-
         self.setValue([])
 
     def setValue(self, value):
