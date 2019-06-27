@@ -220,9 +220,11 @@ class MatchesTab(PlayoffTab):
         newPhase = max(self.phases.keys()) + 1 if len(self.phases) else 1
         self.phaseFrame.add(phase, text='Faza #%d' % (newPhase))
         self.phases[newPhase] = phase
+        return newPhase
 
-    def removePhase(self):
-        selected = self.phaseFrame.select()
+    def removePhase(self, phase=None):
+        selected = self.phaseFrame.select() if phase is None \
+            else self.phases[phase]
         if selected:
             self.phaseFrame.forget(selected)
             key_to_delete = None
@@ -261,9 +263,23 @@ class MatchesTab(PlayoffTab):
     def getMatches(self):
         matches = []
         for phase in self.phases.values():
-            matches +=  [w for w in phase.matches.widgets
-                         if isinstance(w, MatchSettingsFrame)]
+            matches += [w for w in phase.matches.widgets
+                        if isinstance(w, MatchSettingsFrame)]
         return matches
+
+    def setValues(self, config):
+        phases = config['phases'] if 'phases' in config else []
+        for idx in self.phases:
+            self.removePhase(idx)
+        for phase in phases:
+            newPhase = self.addPhase()
+            self.phases[newPhase].setValues(phase)
+        for phase in self.phases.values():
+            for match in phase.matches.widgets:
+                if isinstance(match, MatchSettingsFrame) \
+                   and match.getMatchID == 0:
+                    match.matchID.set(
+                        self.winfo_toplevel().getNewMatchID(match))
 
 class SwissesTab(PlayoffTab):
     @property

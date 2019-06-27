@@ -267,7 +267,22 @@ class BracketMatchSettingsFrame(GuiFrame):
             widget.grid(row=1+idx/2, column=1+idx%2)
 
         self.source.trace('w', self._enablePanels)
-        self.source.set(self.SOURCE_TEAM)
+
+    def setValue(self, value):
+        widgets = {'place': 1, 'winner': 3, 'loser': 5}
+        if isinstance(value, str):
+            self.source.set(self.SOURCE_TEAM)
+            self.team.set(value)
+            for idx in widgets.values():
+                self.bracketWidgets[idx].setPositions([])
+        else:
+            self.source.set(self.SOURCE_BRACKET)
+            self.team.set('')
+            for key, idx in widgets.iteritems():
+                self.bracketWidgets[idx].setPositions(
+                    value[key]
+                    if key in value and isinstance(value[key], list)
+                    else [])
 
 class MatchSettingsFrame(RepeatableFrame):
     SCORE_SOURCE_DB = 0
@@ -284,12 +299,29 @@ class MatchSettingsFrame(RepeatableFrame):
             self.scoreWidgets[self.SCORE_SOURCE_CUSTOM][-2].configure(
                 state=tk.DISABLED)
 
+    def _updateName(self, *args):
+        self.nameLabel.configure(text=self.label)
+
     def renderContent(self):
-        self.matchID = self.winfo_toplevel().getNewMatchID(self)
-        (ttk.Label(self, text='Mecz #%d' % (self.matchID))).grid(
-            row=0, column=0, sticky=tk.W)
-        (ttk.Label(self, text='Link:')).grid(row=0, column=1, sticky=tk.E)
+        self.nameLabel = ttk.Label(self)
+        self.matchID = tk.IntVar()
+        self.matchID.trace('w', self._updateName)
+        self.matchID.set(self.winfo_toplevel().getNewMatchID(self))
         self.link = tk.StringVar()
+
+        self.source = tk.IntVar()
+        self.source.trace('w', self._enablePanels)
+
+        self.scoreDB = tk.StringVar()
+        self.scoreRound = tk.IntVar()
+        self.scoreTable = tk.IntVar()
+        self.scoreCustom = [tk.StringVar(), tk.StringVar()]
+        self.scoreNotFinished = tk.IntVar()
+        self.scoreNotFinished.trace('w', self._enablePanels)
+        self.scoreBoards = tk.IntVar()
+
+        self.nameLabel.grid(row=0, column=0, sticky=tk.W)
+        (ttk.Label(self, text='Link:')).grid(row=0, column=1, sticky=tk.E)
         (ttk.Entry(self, textvariable=self.link)).grid(
             row=0, column=2, sticky=tk.W)
 
@@ -307,17 +339,6 @@ class MatchSettingsFrame(RepeatableFrame):
             bracket = BracketMatchSettingsFrame(frame)
             bracket.grid(row=0, column=0, sticky=tk.N+tk.S+tk.W+tk.E)
             self.bracketSettings.append(bracket)
-
-        self.source = tk.IntVar()
-        self.source.trace('w', self._enablePanels)
-
-        self.scoreDB = tk.StringVar()
-        self.scoreRound = tk.IntVar()
-        self.scoreTable = tk.IntVar()
-        self.scoreCustom = [tk.StringVar(), tk.StringVar()]
-        self.scoreNotFinished = tk.IntVar()
-        self.scoreNotFinished.trace('w', self._enablePanels)
-        self.scoreBoards = tk.IntVar()
 
         scoreGroup = ttk.LabelFrame(self, text='Dane wyniku meczu')
         scoreGroup.grid(row=4, column=0, columnspan=3, sticky=tk.W+tk.E)
@@ -394,8 +415,6 @@ class MatchSettingsFrame(RepeatableFrame):
             self.scoreWidgets[self.SCORE_SOURCE_CUSTOM][idx].grid(
                 row=2, column=idx+5)
 
-        self.source.set(self.SCORE_SOURCE_CUSTOM)
-
         self.winfo_toplevel().event_generate(
             '<<MatchListChanged>>', when='tail')
 
@@ -404,11 +423,49 @@ class MatchSettingsFrame(RepeatableFrame):
         return 'Nowy mecz'
 
     def getMatchID(self):
-        return self.matchID
+        return self.matchID.get()
 
     @property
     def label(self):
         return 'Mecz nr %d' % (self.getMatchID())
+
+    def setValue(self, value):
+        self.matchID.set(value['id'] if 'id' in value else 0)
+        self.link.set(value['link'] if 'link' in value else '')
+
+        self.scoreDB.set(value['database'] if 'database' in value else '')
+        self.scoreRound.set(value['round'] if 'round' in value else 1)
+        self.scoreTable.set(value['table'] if 'table' in value else 1)
+
+        if 'score' in value:
+            for idx in range(0, 2):
+                self.scoreCustom[idx].set(
+                    value['score'][idx]
+                    if isinstance(value['score'], list)
+                    and len(value['score']) > 1
+                    else 0)
+                self.scoreNotFinished.set(
+                    'running' in value and value['running'] >= 0)
+                self.scoreBoards.set(
+                    value['running'] if 'running' in value
+                    and value['running'] >= 0 else 0)
+        else:
+            self.scoreNotFinished.set(0)
+            self.scoreBoards.set(0)
+
+        self.source.set(
+            self.SCORE_SOURCE_DB if 'database' in value else (
+                self.SCORE_SOURCE_CUSTOM if 'table' not in value
+                else self.SCORE_SOURCE_LINK
+        ))
+
+        if 'teams' in value and isinstance(value['teams'], list):
+            for idx, val in enumerate(value['teams']):
+                if idx < 2:
+                    self.bracketSettings[idx].setValue(val)
+        else:
+            for idx in range(0, 2):
+                self.bracketSettings[idx].setValue({})
 
 class MatchSeparator(RepeatableFrame):
     def renderContent(self):
@@ -433,14 +490,15 @@ class MatchPhaseFrame(ScrollableFrame):
         self.winfo_toplevel().event_generate('<<PhaseRenamed>>', when='tail')
 
     def renderContent(self, container):
+        self.name = tk.StringVar()
+        self.link = tk.StringVar()
         self.previousLink = ''
+
         headerFrame = tk.Frame(container)
         headerFrame.pack(side=tk.TOP, fill=tk.X, expand=True)
         (ttk.Label(headerFrame, text='Nazwa:')).pack(side=tk.LEFT)
-        self.name = tk.StringVar()
         (ttk.Entry(headerFrame, textvariable=self.name)).pack(side=tk.LEFT)
         (ttk.Label(headerFrame, text='Link:')).pack(side=tk.LEFT)
-        self.link = tk.StringVar()
         (ttk.Entry(headerFrame, textvariable=self.link)).pack(side=tk.LEFT)
 
         self.matches = WidgetRepeater(
@@ -449,6 +507,20 @@ class MatchPhaseFrame(ScrollableFrame):
 
         self.link.trace('w', self._updateLinks)
         self.name.trace('w', self._signalPhaseRename)
+
+    def setValues(self, values):
+        matches = values['matches'] if 'matches' in values else []
+        dummies = values['dummies'] if 'dummies' in values else []
+        objects = [(MatchSeparator, None)] * (len(matches) + len(dummies))
+        idx = 0
+        for match in matches:
+            while idx in dummies:
+                idx += 1
+            objects[idx] = (MatchSettingsFrame, match)
+            idx += 1
+        self.matches.setValue(objects)
+        self.link.set(values['link'] if 'link' in values else '')
+        self.name.set(values['title'] if 'title' in values else '')
 
 
 __all__ = ['SwissesFrame', 'MatchPhaseFrame', 'MatchSettingsFrame']
