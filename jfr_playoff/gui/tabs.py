@@ -347,6 +347,16 @@ class StyleTab(PlayoffTab):
             container, vertical=True)
         self.positionStylesFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+    def setValues(self, config):
+        if 'canvas' in config:
+            self.linesFrame.setValues(config['canvas'])
+        else:
+            self.linesFrame.setValues({})
+        if 'position_styles' in config:
+            self.positionStylesFrame.setValues(config['position_styles'])
+        else:
+            self.positionStylesFrame.setValues([])
+
 class TranslationsTab(PlayoffTab):
     @property
     def title(self):

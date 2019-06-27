@@ -212,30 +212,40 @@ class LineStyle(GuiFrame):
         self.vOffset.set(value[2])
 
 class LineStylesFrame(GuiFrame):
+    DEFAULT_VALUES = [
+        ('winner', ('#00ff00', 5, -10),
+         'Zwycięzcy meczów: '),
+        ('loser', ('#ff0000', 20, 10),
+         'Przegrani meczów: '),
+        ('place_winner', ('#00dddd', 10, 2),
+         'Pozycje startowe (wybierający): '),
+        ('place_loser', ('#dddd00', 15, 9),
+         'Pozycje startowe (wybierani): '),
+        ('finish_winner', ('#00ff00', 5, -10),
+         'Zwycięzcy meczów kończący rozgrywki: '),
+        ('finish_loser', ('#ff0000', 20, 10),
+         'Przegrani meczów kończący rozgrywki: ')
+    ]
+
     def renderContent(self):
-        lines = [
-            ('winner', ('#00ff00', 5, -10),
-             'Zwycięzcy meczów: '),
-            ('loser', ('#ff0000', 20, 10),
-             'Przegrani meczów: '),
-            ('place_winner', ('#00dddd', 10, 2),
-             'Pozycje startowe (wybierający): '),
-            ('place_loser', ('#dddd00', 15, 9),
-             'Pozycje startowe (wybierani): '),
-            ('finish_winner', ('#00ff00', 5, -10),
-             'Zwycięzcy meczów kończący rozgrywki: '),
-            ('finish_loser', ('#ff0000', 20, 10),
-             'Przegrani meczów kończący rozgrywki: ')
-        ]
         self.lines = {}
-        for idx, line in enumerate(lines):
+        for idx, line in enumerate(self.DEFAULT_VALUES):
             self.lines[line[0]] = LineStyle(self)
             self.lines[line[0]].grid(row=idx+1, column=1, sticky=tk.W)
-            self.lines[line[0]].setValue(line[1])
             (ttk.Label(self, text=line[2])).grid(
                 row=idx+1, column=0, sticky=tk.E)
         (ttk.Label(self, text='Kolory linii')).grid(
             row=0, column=0, columnspan=2, sticky=tk.W)
+
+    def setValues(self, values):
+        for line in self.DEFAULT_VALUES:
+            value = list(line[1])
+            for idx, key in enumerate(['colour', 'h_offset', 'v_offset']):
+                key = '%s_%s' % (line[0], key)
+                if key in values:
+                    value[idx] = values[key]
+            self.lines[line[0]].setValue(value)
+
 
 class PositionsSelectionFrame(SelectionFrame):
     COLUMN_COUNT=10
@@ -265,18 +275,37 @@ class PositionStyleFrame(RepeatableFrame):
         self.positions = values
 
     def renderContent(self):
-        (ttk.Label(self, text='Styl:')).grid(row=0, column=0)
         self.name = tk.StringVar()
+        self.description = tk.StringVar()
+
+        (ttk.Label(self, text='Styl:')).grid(row=0, column=0)
         (ttk.Entry(self, textvariable=self.name)).grid(row=0, column=1)
+
         (ttk.Label(self, text='Pozycje końcowe:')).grid(row=0, column=2)
         self.positionBtn = TeamSelectionButton(
             self, prompt='Wybierz pozycje końcowe:',
             dialogclass=PositionsSelectionFrame,
             callback=self._setPositions)
         self.positionBtn.grid(row=0, column=3)
+
         (ttk.Label(self, text='Opis w legendzie:')).grid(row=0, column=4)
-        self.description = tk.StringVar()
         (ttk.Entry(self, textvariable=self.description)).grid(row=0, column=5)
+
+        self.setValue({})
+
+    def setValue(self, value):
+        if 'class' in value:
+            self.name.set(value['class'])
+        else:
+            self.name.set('')
+        if 'positions' in value:
+            self.positionBtn.setPositions(value['positions'])
+        else:
+            self.positionBtn.setPositions([])
+        if 'caption' in value:
+            self.description.set(value['caption'])
+        else:
+            self.description.set('')
 
 class PositionStylesFrame(ScrollableFrame):
     def renderContent(self, container):
@@ -284,5 +313,13 @@ class PositionStylesFrame(ScrollableFrame):
             side=tk.TOP, anchor=tk.W)
         self.styles = WidgetRepeater(container, PositionStyleFrame)
         self.styles.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+    def setValues(self, values):
+        for idx, value in enumerate(values):
+            if idx >= len(self.styles.widgets):
+                self.styles._addWidget()
+            self.styles.widgets[idx].setValue(value)
+        for idx in range(len(values), len(self.styles.widgets)):
+            self.styles._removeWidget(idx)
 
 __all__ = ['VisualSettingsFrame', 'BoxPositionsFrame', 'LineStylesFrame', 'PositionStylesFrame']
