@@ -5,12 +5,45 @@ from tkinter import ttk
 import tkColorChooser as tkcc
 
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
-from ..frames import WidgetRepeater
+from ..frames import WidgetRepeater, getIntVal
 from ..frames import SelectionFrame, RefreshableOptionMenu
 from ..frames.team import TeamSelectionButton
 
 class VisualSettingsFrame(GuiFrame):
+    DEFAULT_VALUES = {
+        'width': 250,
+        'height': 80,
+        'margin': 60,
+        'starting_position_indicators': 0,
+        'finishing_position_indicators': 0,
+        'team_boxes': {
+            'label_length_limit': 25,
+            'predict_teams': 1,
+            'label_separator': ' / ',
+            'label_placeholder': '??',
+            'label_ellipsis': '(...)',
+            'name_separator': '<br />',
+            'name_prefix': '&nbsp;&nbsp;',
+            'sort_eligible_first': 1
+        }
+    }
+
     def renderContent(self):
+        self.startingPositionIndicators = tk.IntVar()
+        self.finishingPositionIndicators = tk.IntVar()
+        self.boxWidth = tk.IntVar()
+        self.boxHeight = tk.IntVar()
+        self.boxMargin = tk.IntVar()
+        self.shortenTeamNames = tk.IntVar()
+        self.teamNameLength = tk.IntVar()
+        self.teamNameEllipsis = tk.StringVar()
+        self.teamNamePredict = tk.IntVar()
+        self.teamNamePlaceholder = tk.StringVar()
+        self.teamNameSortPredictions = tk.IntVar()
+        self.teamLabelSeparator = tk.StringVar()
+        self.teamNameSeparator = tk.StringVar()
+        self.teamNamePrefix = tk.StringVar()
+
         indicatorsFrame = ttk.LabelFrame(self, text='Znaczniki pozycji:')
         indicatorsFrame.grid(row=0, column=0, sticky=tk.W+tk.E+tk.N+tk.S)
         dimensionsFrame = ttk.LabelFrame(self, text='Wymiary tabelki meczu:')
@@ -22,8 +55,6 @@ class VisualSettingsFrame(GuiFrame):
 
         self._fieldsToEnable = []
 
-        self.startingPositionIndicators = tk.IntVar()
-        self.finishingPositionIndicators = tk.IntVar()
         (ttk.Checkbutton(
             indicatorsFrame, text='początkowych',
             variable=self.startingPositionIndicators)).grid(
@@ -33,9 +64,6 @@ class VisualSettingsFrame(GuiFrame):
             variable=self.finishingPositionIndicators)).grid(
                 row=1, column=0, sticky=tk.W)
 
-        self.boxWidth = tk.IntVar()
-        self.boxHeight = tk.IntVar()
-        self.boxMargin = tk.IntVar()
         (tk.Spinbox(
             dimensionsFrame, width=5, justify=tk.RIGHT, from_=1, to=999,
             textvariable=self.boxWidth)).grid(
@@ -52,12 +80,6 @@ class VisualSettingsFrame(GuiFrame):
             textvariable=self.boxMargin)).grid(
                 row=1, column=2, sticky=tk.W)
 
-        self.shortenTeamNames = tk.IntVar()
-        self.teamNameLength = tk.IntVar()
-        self.teamNameEllipsis = tk.StringVar()
-        self.teamNamePredict = tk.IntVar()
-        self.teamNamePlaceholder = tk.StringVar()
-        self.teamNameSortPredictions = tk.IntVar()
         (ttk.Checkbutton(
             teamNamesFrame, text='skracaj do',
             variable=self.shortenTeamNames)).grid(
@@ -97,9 +119,6 @@ class VisualSettingsFrame(GuiFrame):
             (self.teamNamePredict,
              [namePlaceholder, placeholderLabel, predictSort]))
 
-        self.teamLabelSeparator = tk.StringVar()
-        self.teamNameSeparator = tk.StringVar()
-        self.teamNamePrefix = tk.StringVar()
         (ttk.Label(separatorsFrame, text=' ')).grid(row=0, column=0)
         (ttk.Label(separatorsFrame, text='w drabince (skrócone nazwy)')).grid(
             row=0, column=1, sticky=tk.E)
@@ -120,25 +139,44 @@ class VisualSettingsFrame(GuiFrame):
             textvariable=self.teamNamePrefix)).grid(
                 row=2, column=2, sticky=tk.W)
 
-        self.boxWidth.set(250)
-        self.boxHeight.set(80)
-        self.boxMargin.set(60)
-        self.teamNameLength.set(25)
-        self.teamNameEllipsis.set('(...)')
-        self.teamNamePlaceholder.set('??')
-        self.teamNameSortPredictions.set(1)
-        self.teamLabelSeparator.set(' / ')
-        self.teamNameSeparator.set('<br />')
-        self.teamNamePrefix.set('&nbsp;')
-
         for var, fields in self._fieldsToEnable:
             var.trace('w', self._enableFields)
         self._enableFields()
+
+        self.setValues({})
 
     def _enableFields(self, *args):
         for var, fields in self._fieldsToEnable:
             for field in fields:
                 field.configure(state=tk.NORMAL if var.get() else tk.DISABLED)
+
+    def setValues(self, values):
+        default_values = self.DEFAULT_VALUES
+        if 'team_boxes' in values:
+            default_values['team_boxes'].update(values['team_boxes'])
+            del values['team_boxes']
+        default_values.update(values)
+        values = default_values
+
+        self.startingPositionIndicators.set(
+            values['starting_position_indicators'])
+        self.finishingPositionIndicators.set(
+            values['finishing_position_indicators'])
+        self.boxWidth.set(values['width'])
+        self.boxHeight.set(values['height'])
+        self.boxMargin.set(values['margin'])
+        self.shortenTeamNames.set(
+            values['team_boxes']['label_length_limit'] > 0)
+        self.teamNameLength.set(values['team_boxes']['label_length_limit'])
+        self.teamNameEllipsis.set(values['team_boxes']['label_ellipsis'])
+        self.teamNamePredict.set(values['team_boxes']['predict_teams'])
+        self.teamNamePlaceholder.set(values['team_boxes']['label_placeholder'])
+        self.teamNameSortPredictions.set(
+            values['team_boxes']['sort_eligible_first'])
+        self.teamLabelSeparator.set(values['team_boxes']['label_separator'])
+        self.teamNameSeparator.set(values['team_boxes']['name_separator'])
+        self.teamNamePrefix.set(values['team_boxes']['name_prefix'])
+
 
 
 class MatchList(RefreshableOptionMenu):
@@ -147,9 +185,23 @@ class MatchList(RefreshableOptionMenu):
         self.winfo_toplevel().bind(
             '<<MatchListChanged>>', self.refreshOptions, add='+')
         self.configure(width=10)
+        self._variable.trace('w', self._valueSet)
+        self._valueLock = False
 
     def getOptions(self):
         return [match.label for match in self.winfo_toplevel().getMatches()]
+
+    def _valueSet(self, *args):
+        if not self._valueLock:
+            self._valueLock = True
+            value = getIntVal(self._variable, 0)
+            for match in self.winfo_toplevel().getMatches():
+                if match.id == value:
+                    self._variable.set(match.label)
+                    self._valueLock = False
+                    return
+            self._variable.set('')
+            self._valueLock = False
 
 
 class BoxPositionFrame(RepeatableFrame):
@@ -157,7 +209,6 @@ class BoxPositionFrame(RepeatableFrame):
         self.match = tk.StringVar()
         self.vertical = tk.IntVar()
         self.horizontal = tk.IntVar()
-        self.horizontal.set(-1)
         self.matchBox = MatchList(self, self.match)
         self.matchBox.grid(row=0, column=0)
         (ttk.Label(self, text=' w pionie:')).grid(row=0, column=1)
@@ -172,12 +223,42 @@ class BoxPositionFrame(RepeatableFrame):
             width=5, justify=tk.RIGHT)).grid(
                 row=0, column=4)
 
+        self.setValue([])
+
+    def setValue(self, value):
+        if len(value) > 1:
+            self.match.set(value[0])
+            self.vertical.set(value[1])
+            if len(value) > 2:
+                self.horizontal.set(value[2])
+            else:
+                self.horizontal.set(-1)
+        else:
+            self.match.set('')
+            self.vertical.set(0)
+            self.horizontal.set(-1)
+
 class BoxPositionsFrame(ScrollableFrame):
     def renderContent(self, container):
         (ttk.Label(container, text='Pozycje tabelek meczów:')).pack(
             side=tk.TOP, anchor=tk.W)
-        (WidgetRepeater(container, BoxPositionFrame)).pack(
+        self.positions = WidgetRepeater(container, BoxPositionFrame)
+        self.positions.pack(
             side=tk.TOP, fill=tk.BOTH, expand=True)
+
+    def setValues(self, values):
+        values = sorted(list(values.iteritems()), key=lambda v: int(v[0]))
+        for idx, val in enumerate(values):
+            value = [val[0]]
+            if isinstance(val[1], list):
+                value += val[1]
+            else:
+                value.append(val[1])
+            if idx >= len(self.positions.widgets):
+                self.positions._addWidget()
+            self.positions.widgets[idx].setValue(value)
+        for idx in range(len(values), len(self.positions.widgets)):
+            self.positions._removeWidget(idx)
 
 class LineStyle(GuiFrame):
     def _selectColour(self):

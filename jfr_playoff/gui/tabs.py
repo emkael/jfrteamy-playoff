@@ -331,6 +331,16 @@ class VisualTab(PlayoffTab):
         self.positionFrame = BoxPositionsFrame(container, vertical=True)
         self.positionFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+    def setValues(self, config):
+        if 'page' in config:
+            self.settingsFrame.setValues(config['page'])
+        else:
+            self.settingsFrame.setValues({})
+        if 'canvas' in config and 'box_positioning' in config['canvas']:
+            self.positionFrame.setValues(config['canvas']['box_positioning'])
+        else:
+            self.positionFrame.setValues({})
+
 class StyleTab(PlayoffTab):
     @property
     def title(self):

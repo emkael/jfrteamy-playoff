@@ -1,3 +1,5 @@
+import json
+
 import tkinter as tk
 from tkinter import ttk
 
@@ -26,7 +28,7 @@ class PlayoffGUI(tk.Tk):
             tab.setValues(config)
 
     def _resetValues(self):
-        self._setValues({})
+        self._setValues(json.load(open('../pzbs-liga-playoff/eklasa.json')))
 
     def newFile(self):
         self.newFileIndex += 1
