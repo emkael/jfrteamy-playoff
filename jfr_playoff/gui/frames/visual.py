@@ -365,18 +365,11 @@ class PositionStyleFrame(RepeatableFrame):
         self.setValue({})
 
     def setValue(self, value):
-        if 'class' in value:
-            self.name.set(value['class'])
-        else:
-            self.name.set('')
-        if 'positions' in value:
-            self.positionBtn.setPositions(value['positions'])
-        else:
-            self.positionBtn.setPositions([])
-        if 'caption' in value:
-            self.description.set(value['caption'])
-        else:
-            self.description.set('')
+        self.name.set(value['class'] if 'class' in value else '')
+        self.positionBtn.setPositions(
+            value['positions'] if 'positions' in value else [])
+        self.description.set(value['caption'] if 'caption' in value else '')
+
 
 class PositionStylesFrame(ScrollableFrame):
     def renderContent(self, container):
