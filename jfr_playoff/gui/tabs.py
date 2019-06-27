@@ -270,6 +270,9 @@ class SwissesTab(PlayoffTab):
         self.swisses = SwissesFrame(container, vertical=True)
         self.swisses.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+    def setValues(self, config):
+        self.swisses.setValues(config['swiss'] if 'swiss' in config else [])
+
 class NetworkTab(PlayoffTab):
     @property
     def title(self):

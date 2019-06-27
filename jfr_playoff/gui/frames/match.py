@@ -43,14 +43,23 @@ class SwissSettingsFrame(RepeatableFrame):
                     else tk.DISABLED)
 
     def renderContent(self):
+        self.source = tk.IntVar()
+        self.fetchDB = tk.StringVar()
+        self.fetchLink = tk.StringVar()
+        self.setFrom = tk.StringVar()
+        self.setToEnabled = tk.IntVar()
+        self.setTo = tk.StringVar()
+        self.fetchFromEnabled = tk.IntVar()
+        self.fetchFrom = tk.StringVar()
+        self.linkLabel = tk.StringVar()
+        self.linkRelPath = tk.StringVar()
+
         (ttk.Label(self, text='Źródło danych:')).grid(
             row=0, column=0, sticky=tk.W)
-        self.source = tk.IntVar()
         (ttk.Radiobutton(
             self, text='Baza danych',
             variable=self.source, value=self.SOURCE_DB)).grid(
                 row=1, column=0, sticky=tk.W)
-        self.fetchDB = tk.StringVar()
         self.fetchDBField = DBSelectionField(
             self, self.fetchDB, self.fetchDB.get())
         self.fetchDBField.grid(row=1, column=1, sticky=tk.W+tk.E)
@@ -58,7 +67,6 @@ class SwissSettingsFrame(RepeatableFrame):
             self, text='Strona turnieju',
             variable=self.source, value=self.SOURCE_LINK)).grid(
                 row=2, column=0, sticky=tk.W)
-        self.fetchLink = tk.StringVar()
         (ttk.Entry(self, textvariable=self.fetchLink, width=20)).grid(
             row=2, column=1, sticky=tk.W+tk.E)
 
@@ -68,27 +76,22 @@ class SwissSettingsFrame(RepeatableFrame):
         (ttk.Label(
             self, text='Ustaw od miejsca: ')).grid(
                 row=4, column=0, sticky=tk.W, padx=18)
-        self.setFrom = tk.StringVar()
         (tk.Spinbox(
             self, textvariable=self.setFrom,
             from_=1, to=999, width=5)).grid(
                 row=4, column=1, sticky=tk.W)
-        self.setToEnabled = tk.IntVar()
         (ttk.Checkbutton(
             self, variable=self.setToEnabled,
             text='Ustaw do miejsca: ')).grid(
                 row=5, column=0, sticky=tk.W)
-        self.setTo = tk.StringVar()
         (tk.Spinbox(
             self, textvariable=self.setTo,
             from_=1, to=999, width=5)).grid(
                 row=5, column=1, sticky=tk.W)
-        self.fetchFromEnabled = tk.IntVar()
         (ttk.Checkbutton(
             self, variable=self.fetchFromEnabled,
             text='Pobierz od miejsca: ')).grid(
                 row=6, column=0, sticky=tk.W)
-        self.fetchFrom = tk.StringVar()
         (tk.Spinbox(
             self, textvariable=self.fetchFrom,
             from_=1, to=999, width=5)).grid(
@@ -103,7 +106,6 @@ class SwissSettingsFrame(RepeatableFrame):
 
         (ttk.Label(self, text='Etykieta linku:')).grid(
             row=8, column=0, sticky=tk.E)
-        self.linkLabel = tk.StringVar()
         (ttk.Entry(self, textvariable=self.linkLabel, width=20)).grid(
             row=8, column=1, sticky=tk.W)
         (ttk.Label(self, text='(domyślnie: "Turniej o #. miejsce")')).grid(
@@ -111,7 +113,6 @@ class SwissSettingsFrame(RepeatableFrame):
 
         (ttk.Label(self, text='Względna ścieżka linku do swissa:')).grid(
             row=1, column=2)
-        self.linkRelPath = tk.StringVar()
         (ttk.Entry(self, textvariable=self.linkRelPath, width=20)).grid(
             row=1, column=3)
 
@@ -134,12 +135,43 @@ class SwissSettingsFrame(RepeatableFrame):
         self.winfo_toplevel().bind(
             '<<TeamListChanged>>', self._setPositionInfo, add='+')
 
+    def setValue(self, value):
+        if 'database' in value:
+            self.source.set(self.SOURCE_DB)
+            self.fetchDB.set(value['database'])
+            self.fetchLink.set('')
+        else:
+            self.source.set(self.SOURCE_LINK)
+            self.fetchDB.set('')
+            if 'link' in value:
+                self.fetchLink.set(value['link'])
+            else:
+                self.fetchLink.set('')
+        self.setFrom.set(value['position'] if 'position' in value else 1)
+        if 'position_to' in value:
+            self.setToEnabled.set(1)
+            self.setTo.set(value['position_to'])
+        else:
+            self.setToEnabled.set(0)
+            self.setTo.set(1)
+        if 'swiss_position' in value:
+            self.fetchFromEnabled.set(1)
+            self.fetchFrom.set(value['swiss_position'])
+        else:
+            self.fetchFromEnabled.set(0)
+            self.fetchFrom.set(1)
+        self.linkLabel.set(value['label'] if 'label' in value else '')
+        self.linkRelPath.set(
+            value['relative_path'] if 'relative_path' in value else '')
+
 
 class SwissesFrame(ScrollableFrame):
     def renderContent(self, container):
         self.swisses = WidgetRepeater(container, SwissSettingsFrame)
         self.swisses.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+    def setValues(self, values):
+        self.swisses.setValue(values)
 
 class MatchSelectionButton(SelectionButton):
     @property
