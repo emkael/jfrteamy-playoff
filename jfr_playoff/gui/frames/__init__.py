@@ -314,19 +314,20 @@ class SelectionFrame(ScrollableFrame):
 class RefreshableOptionMenu(ttk.OptionMenu):
     def __init__(self, *args, **kwargs):
         ttk.OptionMenu.__init__(self, *args, **kwargs)
-        self.refreshOptions()
+        self._oldValue = self._variable.get()
         self._variable.trace('w', self._valueSet)
         self._valueLock = False
+        self.refreshOptions()
 
     def refreshOptions(self, *args):
-        oldValue = self._variable.get()
         options = self.getOptions()
         self['menu'].delete(0, tk.END)
         for option in options:
             self['menu'].add_command(
                 label=option, command=tk._setit(self._variable, option))
-        if oldValue not in options:
-            self._variable.set('')
+        self._valueLock = True
+        self._variable.set(self._oldValue if self._oldValue in options else '')
+        self._valueLock = False
 
     def getOptions(self):
         return [self.getLabel(value) for value in self.getValues()]
@@ -338,12 +339,13 @@ class RefreshableOptionMenu(ttk.OptionMenu):
         pass
 
     def cmpValue(self, value):
-        return self._variable.get().strip() == self.getLabel(value)
+        return self._variable.get() == self.getLabel(value)
 
     def _valueSet(self, *args):
         if not self._valueLock:
             self._valueLock = True
-            for idx, value in self.getValues():
+            self._oldValue = self._variable.get()
+            for value in self.getValues():
                 if self.cmpValue(value):
                     self._variable.set(self.getLabel(value))
                     self._valueLock = False
