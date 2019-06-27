@@ -315,6 +315,8 @@ class RefreshableOptionMenu(ttk.OptionMenu):
     def __init__(self, *args, **kwargs):
         ttk.OptionMenu.__init__(self, *args, **kwargs)
         self.refreshOptions()
+        self._variable.trace('w', self._valueSet)
+        self._valueLock = False
 
     def refreshOptions(self, *args):
         oldValue = self._variable.get()
@@ -327,7 +329,27 @@ class RefreshableOptionMenu(ttk.OptionMenu):
             self._variable.set('')
 
     def getOptions(self):
+        return [self.getLabel(value) for value in self.getValues()]
+
+    def getLabel(self, value):
         pass
+
+    def getValues(self):
+        pass
+
+    def cmpValue(self, value):
+        return self._variable.get().strip() == self.getLabel(value)
+
+    def _valueSet(self, *args):
+        if not self._valueLock:
+            self._valueLock = True
+            for idx, value in self.getValues():
+                if self.cmpValue(value):
+                    self._variable.set(self.getLabel(value))
+                    self._valueLock = False
+                    return
+            self._variable.set('')
+            self._valueLock = False
 
 class TraceableText(tk.Text):
     def __init__(self, *args, **kwargs):

@@ -283,8 +283,12 @@ class TeamList(RefreshableOptionMenu):
             '<<TeamListChanged>>', self.refreshOptions, add='+')
         self.configure(width=10)
 
-    def getOptions(self):
-        return [team[0] for team in self.winfo_toplevel().getTeams()]
+    def getLabel(self, team):
+        return team[0]
+
+    def getValues(self):
+        return self.winfo_toplevel().getTeams()
+
 
 class TeamAliasRow(RepeatableFrame):
     def renderContent(self):

@@ -185,23 +185,15 @@ class MatchList(RefreshableOptionMenu):
         self.winfo_toplevel().bind(
             '<<MatchListChanged>>', self.refreshOptions, add='+')
         self.configure(width=10)
-        self._variable.trace('w', self._valueSet)
-        self._valueLock = False
 
-    def getOptions(self):
-        return [match.label for match in self.winfo_toplevel().getMatches()]
+    def getLabel(self, match):
+        return match.label
 
-    def _valueSet(self, *args):
-        if not self._valueLock:
-            self._valueLock = True
-            value = getIntVal(self._variable, 0)
-            for match in self.winfo_toplevel().getMatches():
-                if match.id == value:
-                    self._variable.set(match.label)
-                    self._valueLock = False
-                    return
-            self._variable.set('')
-            self._valueLock = False
+    def getValues(self):
+        return self.winfo_toplevel().getMatches()
+
+    def cmpValue(self, match):
+        return match.id == getIntVal(self._variable, 0)
 
 
 class BoxPositionFrame(RepeatableFrame):
