@@ -6,7 +6,7 @@ from tkinter import ttk
 
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
 from ..frames import WidgetRepeater, RepeatableEntry, getIntVal
-from ..frames import SelectionFrame, SelectionButton
+from ..frames import SelectionFrame, SelectionButton, RefreshableOptionMenu
 from ..frames.team import DBSelectionField, TeamList, TeamSelectionButton
 from ..frames.visual import PositionsSelectionFrame
 
@@ -204,9 +204,37 @@ class MatchSelectionFrame(SelectionFrame):
         return self.options[idx].getMatchID()
 
 
+class SelectedTeamList(RefreshableOptionMenu):
+    VALUE_LABELS = {
+        'none': u'%s',
+        'winner': u'Zwycięzca meczu %d',
+        'loser': u'Przegrany meczu %d',
+        'place': u'Drużyna z miejsca %d'
+    }
+
+    def __init__(self, *args, **kwargs):
+        RefreshableOptionMenu.__init__(self, *args, **kwargs)
+        self.master.bind(
+            '<<BracketConfigChanged>>', self.refreshOptions, add='+')
+
+    def getValues(self):
+        config = self.master.getConfig()
+        values = [('none', '')]
+        if isinstance(config, dict):
+            for key in ['winner', 'loser', 'place']:
+                if key in config:
+                    for value in config[key]:
+                        values.append((key, value))
+        return values
+
+    def getLabel(self, value):
+        return self.VALUE_LABELS[value[0]] % (value[1])
+
+
 class BracketMatchSettingsFrame(GuiFrame):
     SOURCE_TEAM=0
     SOURCE_BRACKET=1
+    LIST_WIDGETS = {'place': 5, 'winner': 1, 'loser': 3}
 
     def _enablePanels(self, *args):
         for widget in self.teamWidgets:
@@ -217,19 +245,34 @@ class BracketMatchSettingsFrame(GuiFrame):
             widget.configure(
                 state=tk.NORMAL if self.source.get() == self.SOURCE_BRACKET
                 else tk.DISABLED)
+            if self.source.get() == self.SOURCE_BRACKET \
+               and isinstance(widget, SelectedTeamList) \
+               and not self.selected.get():
+                widget.configure(state=tk.DISABLED)
+
+    def _configChangeNotify(self, *args):
+        self.event_generate('<<BracketConfigChanged>>', when='tail')
 
     def _setPositions(self, positions):
         self.positions = positions
+        self._configChangeNotify()
 
     def _setLosers(self, matches):
         self.losers = matches
+        self._configChangeNotify()
 
     def _setWinners(self, matches):
         self.winners = matches
+        self._configChangeNotify()
 
     def renderContent(self):
         self.source = tk.IntVar()
+        self.source.trace('w', self._enablePanels)
+        self.source.trace('w', self._configChangeNotify)
         self.team = tk.StringVar()
+        self.selected = tk.IntVar()
+        self.selected.trace('w', self._enablePanels)
+        self.selectedIndex = tk.StringVar()
         self.positions = []
         self.winners = []
         self.losers = []
@@ -244,11 +287,6 @@ class BracketMatchSettingsFrame(GuiFrame):
         self.teamWidgets = [
             TeamList(self, self.team, self.team.get())]
         self.bracketWidgets = [
-            ttk.Label(self, text='Pozycje początkowe:'),
-            TeamSelectionButton(
-                self, prompt='Wybierz pozycje początkowe:',
-                dialogclass=PositionsSelectionFrame,
-                callback=self._setPositions),
             ttk.Label(self, text='Zwycięzcy meczów:'),
             MatchSelectionButton(
                 self, prompt='Wybierz mecze:',
@@ -258,31 +296,62 @@ class BracketMatchSettingsFrame(GuiFrame):
             MatchSelectionButton(
                 self, prompt='Wybierz mecze:',
                 dialogclass=MatchSelectionFrame,
-                callback=self._setLosers)]
+                callback=self._setLosers),
+            ttk.Label(self, text='Pozycje początkowe:'),
+            TeamSelectionButton(
+                self, prompt='Wybierz pozycje początkowe:',
+                dialogclass=PositionsSelectionFrame,
+                callback=self._setPositions),
+            ttk.Checkbutton(
+                self, text='Uczestnik został wybrany:',
+                variable=self.selected),
+            SelectedTeamList(self, self.selectedIndex)
+        ]
 
         for idx, button in enumerate(buttons):
             button.grid(row=idx, column=0, sticky=tk.W)
         self.teamWidgets[0].grid(row=0, column=1, sticky=tk.W)
         for idx, widget in enumerate(self.bracketWidgets):
-            widget.grid(row=1+idx/2, column=1+idx%2)
-
-        self.source.trace('w', self._enablePanels)
+            widget.grid(row=1+idx/2, column=1+idx%2, sticky=tk.W)
 
     def setValue(self, value):
-        widgets = {'place': 1, 'winner': 3, 'loser': 5}
         if isinstance(value, str):
             self.source.set(self.SOURCE_TEAM)
             self.team.set(value)
-            for idx in widgets.values():
+            for idx in self.LIST_WIDGETS.values():
                 self.bracketWidgets[idx].setPositions([])
         else:
             self.source.set(self.SOURCE_BRACKET)
             self.team.set('')
-            for key, idx in widgets.iteritems():
+            for key, idx in self.LIST_WIDGETS.iteritems():
                 self.bracketWidgets[idx].setPositions(
                     value[key]
                     if key in value and isinstance(value[key], list)
                     else [])
+
+    def setSelectedTeam(self, team):
+        if team > -1:
+            self.selectedIndex.set(self.bracketWidgets[7].getOptions()[team+1])
+            self.selected.set(1)
+        else:
+            self.selectedIndex.set(0)
+            self.selected.set(0)
+
+    def getConfig(self):
+        if self.source.get() == self.SOURCE_TEAM:
+            return self.team.get()
+        else:
+            config = {}
+            lists = {
+                1: self.positions,
+                3: self.winners,
+                5: self.losers
+            }
+            for key, idx in self.LIST_WIDGETS.iteritems():
+                values = lists[idx]
+                if len(values) > 0:
+                    config[key] = values
+            return config
 
 class MatchSettingsFrame(RepeatableFrame):
     SCORE_SOURCE_DB = 0
@@ -499,6 +568,15 @@ class MatchSettingsFrame(RepeatableFrame):
             value['loser']
             if 'loser' in value and isinstance(value['loser'], list)
             else [])
+
+        if 'selected_teams' in value \
+           and isinstance(value['selected_teams'], list):
+            for idx, val in enumerate(value['selected_teams']):
+                if idx < 2:
+                    self.bracketSettings[idx].setSelectedTeam(val)
+        else:
+            for idx in range(0, 2):
+                self.bracketSettings[idx].setSelectedTeam(-1)
 
 
 class MatchSeparator(RepeatableFrame):
