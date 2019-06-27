@@ -192,12 +192,16 @@ class MatchSelectionButton(SelectionButton):
 
 class MatchSelectionFrame(SelectionFrame):
     def renderOption(self, container, option, idx):
-        (ttk.Label(container, text='[%d]' % (idx+1))).grid(
-            row=idx+1, column=0)
+        (ttk.Label(
+            container, text='[%d]' % (self._mapValue(idx, option)))).grid(
+                row=idx+1, column=0)
         (ttk.Checkbutton(
             container, text=option.label,
-            variable=self.values[idx]
+            variable=self.values[self._mapValue(idx, option)]
         )).grid(row=idx+1, column=1, sticky=tk.W)
+
+    def _mapValue(self, idx, value):
+        return self.options[idx].getMatchID()
 
 
 class BracketMatchSettingsFrame(GuiFrame):

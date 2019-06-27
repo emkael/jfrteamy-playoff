@@ -293,7 +293,7 @@ class SelectionButton(ttk.Button):
             selectionFrame = self.dialogclass(
                 dialog, title=self.prompt,
                 options=options,
-                selected=lambda idx, option: idx+1 in self.selected,
+                selected=self.selected,
                 callback=self.setPositions, vertical=True)
             selectionFrame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
@@ -304,7 +304,7 @@ class SelectionFrame(ScrollableFrame):
 
     def __init__(self, master, title='', options=[],
                  selected=None, callback=None, *args, **kwargs):
-        self.values = []
+        self.values = {}
         self.title = title
         self.options = options
         self.selected = selected
@@ -313,11 +313,14 @@ class SelectionFrame(ScrollableFrame):
         (ttk.Button(master, text='Zapisz', command=self._save)).pack(
             side=tk.BOTTOM, fill=tk.Y)
 
+    def _mapValue(self, idx, value):
+        return idx + 1
+
     def _save(self):
         if self.callback:
             self.callback(
-                [idx+1 for idx, value
-                 in enumerate(self.values) if value.get()])
+                [idx for idx, value
+                 in self.values.iteritems() if value.get()])
         self.master.destroy()
 
     def renderHeader(self, container):
@@ -328,10 +331,11 @@ class SelectionFrame(ScrollableFrame):
     def renderContent(self, container):
         self.renderHeader(container)
         for idx, option in enumerate(self.options):
-            self.values.append(tk.IntVar())
+            key = self._mapValue(idx, option)
+            self.values[key] = tk.IntVar()
             self.renderOption(container, option, idx)
-            if self.selected and self.selected(idx, option):
-                self.values[idx].set(True)
+            if self.selected and key in self.selected:
+                self.values[key].set(True)
 
 class RefreshableOptionMenu(ttk.OptionMenu):
     def __init__(self, *args, **kwargs):

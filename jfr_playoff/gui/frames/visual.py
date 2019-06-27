@@ -335,8 +335,8 @@ class PositionsSelectionFrame(SelectionFrame):
 
     def renderOption(self, container, option, idx):
         (ttk.Checkbutton(
-            container, text=str(idx+1),
-            variable=self.values[idx]
+            container, text=str(self._mapValue(idx, option)),
+            variable=self.values[self._mapValue(idx, option)]
         )).grid(
             row=(idx/self.COLUMN_COUNT)+1, column=idx%self.COLUMN_COUNT,
             sticky=tk.W)
