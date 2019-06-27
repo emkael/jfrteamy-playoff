@@ -50,6 +50,7 @@ class MainSettingsTab(PlayoffTab):
         self.pageTitle = tk.StringVar()
         self.pageLogoh = tk.StringVar()
         self.refresh = tk.IntVar()
+        self.refresh.trace('w', self._updateRefreshFields)
         self.refreshInterval = tk.StringVar()
 
     def _chooseOutputPath(self):
@@ -63,22 +64,17 @@ class MainSettingsTab(PlayoffTab):
                 filename = filename + '.html'
             self.outputPath.set(filename)
 
-    def _updateRefreshFields(self):
+    def _updateRefreshFields(self, *args):
         self.intervalField.configure(
             state=tk.NORMAL if self.refresh.get() else tk.DISABLED)
 
     def setValues(self, config):
-        if 'output' in config:
-            self.outputPath.set(config['output'])
-        else:
-            self.outputPath.set('')
+        self.outputPath.set(config['output'] if 'output' in config else '')
         if 'page' in config:
-            self.pageTitle.set(config['page']['title']
-                               if 'title' in config['page']
-                               else '')
-            self.pageLogoh.set(config['page']['logoh']
-                               if 'logoh' in config['page']
-                               else '')
+            self.pageTitle.set(
+                config['page']['title'] if 'title' in config['page'] else '')
+            self.pageLogoh.set(
+                config['page']['logoh'] if 'logoh' in config['page'] else '')
             try:
                 interval = int(config['page']['refresh'])
                 if interval > 0:
@@ -95,7 +91,6 @@ class MainSettingsTab(PlayoffTab):
             self.pageLogoh.set('')
             self.refresh.set(0)
             self.refreshInterval.set(self.DEFAULT_INTERVAL)
-        self._updateRefreshFields()
 
     def renderContent(self, container):
         (ttk.Label(container, text='Plik wynikowy:')).grid(
