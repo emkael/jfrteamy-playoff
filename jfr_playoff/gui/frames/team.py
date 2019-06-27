@@ -53,6 +53,9 @@ class TeamManualSettingsFrame(GuiFrame):
     def getTeams(self):
         return [val for val in self.repeater.getValue() if len(val[0].strip())]
 
+    def setValues(self, values):
+        self.repeater.setValue(values)
+
 class TeamSelectionFrame(SelectionFrame):
     def renderOption(self, container, option, idx):
         (ttk.Label(container, text='[%d]' % (idx+1))).grid(
@@ -172,17 +175,22 @@ class TeamFetchSettingsFrame(GuiFrame):
             self.fetchDBField.configure(state=tk.NORMAL)
 
     def renderContent(self):
+        self.fetchSource = tk.IntVar()
+        self.fetchSource.trace('w', self._sourceChange)
+        self.fetchSource.trace('w', self._changeNotify)
+        self.fetchDB = tk.StringVar()
+        self.fetchDB.trace('w', self._changeNotify)
+        self.link = tk.StringVar()
+        self.link.trace('w', self._changeNotify)
+        self.fetchLimit = tk.StringVar()
+        self.fetchLimit.trace('w', self._changeNotify)
+
         (ttk.Label(self, text=' ')).grid(row=0, column=0, rowspan=2)
 
-        self.fetchSource = tk.IntVar()
-        self.fetchSource.set(self.SOURCE_LINK)
-        self.fetchSource.trace('w', self._sourceChange)
         (ttk.Radiobutton(
             self, text='Baza danych',
             variable=self.fetchSource, value=self.SOURCE_DB)).grid(
                 row=0, column=1, columnspan=2, sticky=tk.W)
-        self.fetchDB = tk.StringVar()
-        self.fetchDB.trace('w', self._changeNotify)
         self.fetchDBField = DBSelectionField(
             self, self.fetchDB, self.fetchDB.get())
         self.fetchDBField.grid(row=0, column=3, sticky=tk.W+tk.E)
@@ -191,17 +199,11 @@ class TeamFetchSettingsFrame(GuiFrame):
             self, text='Strona wyników',
             variable=self.fetchSource, value=self.SOURCE_LINK)).grid(
                 row=1, column=1, columnspan=2, sticky=tk.W)
-        self.link = tk.StringVar()
-        self.link.set('')
-        self.link.trace('w', self._changeNotify)
         self.fetchLink = ttk.Entry(self, width=20, textvariable=self.link)
         self.fetchLink.grid(row=1, column=3)
 
         (ttk.Label(self, text='Pobierz do ')).grid(
             row=2, column=0, columnspan=2, sticky=tk.W)
-        self.fetchLimit = tk.StringVar()
-        self.fetchLimit.set(0)
-        self.fetchLimit.trace('w', self._changeNotify)
         (tk.Spinbox(
             self, from_=0, to=9999, width=5, justify=tk.RIGHT,
             textvariable=self.fetchLimit)).grid(
@@ -211,13 +213,27 @@ class TeamFetchSettingsFrame(GuiFrame):
 
         (ttk.Label(self, text='Pozycje końcowe: ')).grid(
             row=3, column=0, columnspan=3, sticky=tk.W+tk.E)
-        finishingPositionsBtn = TeamSelectionButton(
+        self.finishingPositionsBtn = TeamSelectionButton(
             self, callback=self._setFinishingPositions,
             prompt='Wybierz teamy, które zakończyły rozgrywki ' + \
             'na swojej pozycji:',
             dialogclass=TeamSelectionFrame)
-        finishingPositionsBtn.grid(row=3, column=3, sticky=tk.W)
-        finishingPositionsBtn.setPositions([])
+        self.finishingPositionsBtn.grid(row=3, column=3, sticky=tk.W)
+        self.finishingPositionsBtn.setPositions([])
+
+    def setValues(self, values):
+        if 'database' in values:
+            self.fetchSource.set(self.SOURCE_DB)
+            self.fetchDB.set(values['database'])
+            self.link.set('')
+        else:
+            self.fetchSource.set(self.SOURCE_LINK)
+            self.fetchDB.set('')
+            self.link.set(values['link'] if 'link' in values else '')
+        self.fetchLimit.set(
+            values['max_teams'] if 'max_teams' in values else 0)
+        self.finishingPositionsBtn.setPositions(
+            values['final_positions'] if 'final_positions' in values else [])
 
 class TeamSettingsFrame(ScrollableFrame):
     FORMAT_FETCH = 0
@@ -264,7 +280,6 @@ class TeamSettingsFrame(ScrollableFrame):
         self.manualSettingsFrame = TeamManualSettingsFrame(container)
         self.manualSettingsFrame.grid(row=4, column=0, sticky=tk.W+tk.E)
 
-        self.teamFormat.set(self.FORMAT_MANUAL)
         self.teams = []
         self.winfo_toplevel().bind(
             '<<TeamListChanged>>', self.setTeams, add='+')
@@ -275,6 +290,16 @@ class TeamSettingsFrame(ScrollableFrame):
         elif self.teamFormat.get() == self.FORMAT_FETCH:
             return self.fetchSettingsFrame.getTeams()
         return []
+
+    def setValues(self, values):
+        if isinstance(values, list):
+            self.teamFormat.set(self.FORMAT_MANUAL)
+            self.manualSettingsFrame.setValues(values)
+            self.fetchSettingsFrame.setValues({})
+        else:
+            self.teamFormat.set(self.FORMAT_FETCH)
+            self.manualSettingsFrame.setValues([])
+            self.fetchSettingsFrame.setValues(values)
 
 class TeamList(RefreshableOptionMenu):
     def __init__(self, *args, **kwargs):
@@ -305,6 +330,10 @@ class TeamAliasRow(RepeatableFrame):
             self.teamName.get().strip(),
             [val.strip() for val in self.names.getValue()])
 
+    def setValue(self, value):
+        self.teamName.set(value[0])
+        self.names.setValue(value[1])
+
 
 class TeamAliasFrame(ScrollableFrame):
     def renderContent(self, container):
@@ -317,6 +346,9 @@ class TeamAliasFrame(ScrollableFrame):
     def getConfig(self):
         return {val[0]: val[1] for val in self.repeater.getValue() if val[0]}
 
+    def setValues(self, values):
+        self.repeater.setValue(list(values.iteritems()))
+
 class TeamPreviewFrame(ScrollableFrame):
     def __init__(self, *args, **kwags):
         self.tieValues = []
@@ -325,6 +357,10 @@ class TeamPreviewFrame(ScrollableFrame):
         ScrollableFrame.__init__(self, *args, **kwags)
         self.winfo_toplevel().bind(
             '<<TeamListChanged>>', self.refreshTeams, add='+')
+        self.winfo_toplevel().bind(
+            '<<TieConfigChanged>>', self._collectTieConfig, add='+')
+        self._tieConfig = []
+        self._lockTieValues = False
 
     def setTeams(self, container, teams):
         self.teamList.grid(
@@ -342,6 +378,7 @@ class TeamPreviewFrame(ScrollableFrame):
             self.teamList.insert('', tk.END, values=team, tag=idx)
             if idx >= len(self.tieFields):
                 self.tieValues.append(tk.StringVar())
+                self.tieValues[idx].trace('w', self._tieValueChangeNotify)
                 self.tieFields.append(
                     tk.Spinbox(
                         container, from_=0, to=9999,
@@ -381,18 +418,43 @@ class TeamPreviewFrame(ScrollableFrame):
             self.teamList.heading(col, text=heading[0])
             if heading[1]:
                 self.teamList.column(col, width=heading[1], stretch=True)
-
         self.container = container
 
-        self.setTeams(self.container, [])
-
     def getTieConfig(self):
-        ties = [getIntVal(val, 0) for val in self.tieValues]
-        if len(ties) and max(ties) == 0:
-            return None
-        return ties
+        teams = self._getTeams()
+        ties = [(teams[idx], getIntVal(val, 0))
+                for idx, val in enumerate(self.tieValues)]
+        return [team[0][0] for team
+                in sorted(ties, key=lambda t: t[1])
+                if team[1] > 0]
+
+    def setTieConfig(self, values):
+        self._tieConfig = values
+        self.refreshTeams(None)
+
+    def _tieValueChangeNotify(self, *args):
+        if not self._lockTieValues:
+            self.winfo_toplevel().event_generate(
+                '<<TieConfigChanged>>', when='tail')
+
+    def _getTeams(self):
+        return self.winfo_toplevel().getTeams()
+
+    def _collectTieConfig(self, *args):
+        if not self._lockTieValues:
+            self._tieConfig = self.getTieConfig()
 
     def refreshTeams(self, event):
-        self.setTeams(self.container, self.winfo_toplevel().getTeams())
+        self._lockTieValues = True
+        teams = self._getTeams()
+        self.setTeams(self.container, teams)
+        for tidx, team in enumerate(teams):
+            self.tieValues[tidx].set(0)
+            for idx, tie in enumerate(self._tieConfig):
+                if team[0] == tie:
+                    self.tieValues[tidx].set(idx+1)
+                    break
+        self._lockTieValues = False
+
 
 __all__ = ['TeamSettingsFrame', 'TeamAliasFrame', 'TeamPreviewFrame']
