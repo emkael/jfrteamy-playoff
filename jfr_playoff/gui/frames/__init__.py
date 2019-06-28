@@ -337,26 +337,45 @@ class SelectionFrame(ScrollableFrame):
                 self.values[key].set(True)
 
 class RefreshableOptionMenu(ttk.OptionMenu):
-    def __init__(self, *args, **kwargs):
-        ttk.OptionMenu.__init__(self, *args, **kwargs)
-        self._lastValue = self._variable.get()
-        self._variable.trace('w', self._valueSet)
+    def __init__(self, master, variable, *args, **kwargs):
+        self._valueVariable = variable
+        self._valueVariable.trace('w', self._valueSet)
+        self._lastValue = variable.get()
+        newVar = tk.StringVar()
+        ttk.OptionMenu.__init__(self, master, newVar, *args, **kwargs)
         self._valueLock = False
         self.refreshOptions()
+
+    class _setit(tk._setit):
+        def __init__(self, var, valVar, label, value, callback=None):
+            tk._setit.__init__(self, var, label, callback)
+            self._valueVariable = valVar
+            self._properValue = value
+        def __call__(self, *args):
+            self.__var.set(self.__value)
+            self._valueVariable.set(self._properValue)
+            if self.__callback:
+                self.__callback(self._valueVariable, *args)
 
     def refreshOptions(self, *args):
         options = self.getOptions()
         self['menu'].delete(0, tk.END)
-        for option in options:
+        for label, option in options:
             self['menu'].add_command(
-                label=option, command=tk._setit(self._variable, option))
+                label=label,
+                command=self._setit(
+                    self._variable, self._valueVariable,
+                    label, option, self._callback))
         self._valueLock = True
-        self._variable.set(
-            self._lastValue if self._lastValue in options else '')
+        self._valueVariable.set(
+            self._lastValue
+            if self._lastValue in [option[1] for option in options] else '')
         self._valueLock = False
 
     def getOptions(self):
-        return [self.getLabel(value) for value in self.getValues()]
+        return [
+            (self.getLabel(value), self.getVarValue(value))
+            for value in self.getValues()]
 
     def getLabel(self, value):
         pass
@@ -364,9 +383,19 @@ class RefreshableOptionMenu(ttk.OptionMenu):
     def getValues(self):
         pass
 
+    def getVarValue(self, value):
+        return self.getLabel(value)
+
     def _valueSet(self, *args):
         if not self._valueLock:
-            self._lastValue = self._variable.get()
+            self._lastValue = self._valueVariable.get()
+        options = self.getOptions()
+        value = self._valueVariable.get()
+        for label, val in options:
+            if unicode(value) == unicode(val):
+                tk._setit(self._variable, label)()
+                return
+        tk._setit(self._variable, '')()
 
 class TraceableText(tk.Text):
     def __init__(self, *args, **kwargs):

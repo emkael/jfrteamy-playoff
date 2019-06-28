@@ -191,6 +191,9 @@ class MatchList(RefreshableOptionMenu):
     def getValues(self):
         return self.winfo_toplevel().getMatches()
 
+    def getVarValue(self, match):
+        return unicode(match.getMatchID())
+
 
 class BoxPositionFrame(RepeatableFrame):
     def renderContent(self):

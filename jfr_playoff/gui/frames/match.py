@@ -231,6 +231,9 @@ class SelectedTeamList(RefreshableOptionMenu):
     def getLabel(self, value):
         return self.VALUE_LABELS[value[0]] % (value[1])
 
+    def getVarValue(self, value):
+        return unicode(value)
+
 
 class BracketMatchSettingsFrame(GuiFrame):
     SOURCE_TEAM=0
@@ -376,10 +379,10 @@ class BracketMatchSettingsFrame(GuiFrame):
 
     def setSelectedTeam(self, team):
         if team > -1:
-            self.selectedIndex.set(self.bracketWidgets[7].getOptions()[team+1])
+            self.selectedIndex.set(self.bracketWidgets[7].getValues()[team+1])
             self.selected.set(1)
         else:
-            self.selectedIndex.set(0)
+            self.selectedIndex.set(('none', ''))
             self.selected.set(0)
 
     def getConfig(self):
