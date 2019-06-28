@@ -48,10 +48,12 @@ class WidgetRepeater(tk.Frame):
         return None
 
     def _createWidget(self, widgetClass, widgetClassParams=None):
+        headeridx = int(self.headerFrame is not None)
         removeButton = ttk.Button(
             self, text='[-]', width=5,
             command=lambda i=len(self.widgets): self._removeWidget(i))
-        removeButton.grid(row=len(self.widgets), column=0, sticky=tk.N)
+        removeButton.grid(
+            row=len(self.widgets)+headeridx, column=0, sticky=tk.N)
         widget = widgetClass(self)
         if widgetClassParams is not None:
             widget.configureContent(**widgetClassParams)
@@ -96,7 +98,8 @@ class WidgetRepeater(tk.Frame):
         if self.headerFrame is not None:
             self.headerFrame.grid(row=0, column=1, sticky=tk.W+tk.E+tk.N+tk.S)
         self.addButton.grid(
-            row=len(self.widgets), column=0, columnspan=1, sticky=tk.W+tk.N)
+            row=len(self.widgets)+headeridx, column=0, columnspan=1,
+            sticky=tk.W+tk.N)
 
     def _renderHeader(self):
         if self.headers:
