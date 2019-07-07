@@ -113,6 +113,8 @@ class MainSettingsTab(PlayoffTab):
         pageSettings.grid(
             row=2, column=0, columnspan=2, sticky=tk.W+tk.E+tk.N+tk.S, pady=5)
 
+        pageSettings.columnconfigure(1, weight=1)
+
         (ttk.Label(pageSettings, text='Tytuł:')).grid(
             row=0, column=0, sticky=tk.E, pady=2)
         (tk.Entry(pageSettings, textvariable=self.pageTitle)).grid(
@@ -150,15 +152,21 @@ class TeamsTab(PlayoffTab):
     def renderContent(self, container):
         leftFrame = tk.Frame(container)
         leftFrame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
         self.settingsFrame = TeamSettingsFrame(
             leftFrame, vertical=True, padx=5, pady=5)
         self.settingsFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
         (ttk.Separator(
             leftFrame, orient=tk.HORIZONTAL)).pack(
                 side=tk.TOP, fill=tk.X)
-        self.aliasFrame = TeamAliasFrame(leftFrame, vertical=True)
+
+        self.aliasFrame = TeamAliasFrame(
+            leftFrame, vertical=True, padx=5, pady=5)
         self.aliasFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        self.previewFrame = TeamPreviewFrame(container, vertical=True)
+
+        self.previewFrame = TeamPreviewFrame(
+            container, vertical=True, padx=5, pady=5)
         self.previewFrame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
         self._teamList = []
@@ -326,20 +334,19 @@ class NetworkTab(PlayoffTab):
         return self.mysqlFrame.getConfig()
 
     def renderContent(self, container):
-        self.mysqlFrame = MySQLConfigurationFrame(container)
-        self.mysqlFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        container.columnconfigure(0, weight=1)
+        container.columnconfigure(1, weight=1)
+        container.rowconfigure(1, weight=1)
 
-        (ttk.Separator(container, orient=tk.HORIZONTAL)).pack(
-            side=tk.TOP, fill=tk.X)
+        self.mysqlFrame = MySQLConfigurationFrame(container)
+        self.mysqlFrame.grid(row=0, column=0, sticky=tk.W+tk.E+tk.N+tk.S)
 
         self.goniecFrame = GoniecConfigurationFrame(container)
-        self.goniecFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-
-        (ttk.Separator(container, orient=tk.HORIZONTAL)).pack(
-            side=tk.TOP, fill=tk.X)
+        self.goniecFrame.grid(row=0, column=1, sticky=tk.W+tk.E+tk.N+tk.S)
 
         self.remoteFrame = RemoteConfigurationFrame(container, vertical=True)
-        self.remoteFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.remoteFrame.grid(
+            row=1, column=0, columnspan=2, sticky=tk.W+tk.E+tk.N+tk.S)
 
         self._dbList = []
         self.dbFetchTimer = None
@@ -361,11 +368,14 @@ class VisualTab(PlayoffTab):
         return 'Wygląd'
 
     def renderContent(self, container):
+        container.columnconfigure(0, weight=1)
+        container.rowconfigure(1, weight=1)
+
         self.settingsFrame = VisualSettingsFrame(container)
-        self.settingsFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.settingsFrame.grid(row=0, column=0, sticky=tk.S+tk.N+tk.E+tk.W)
 
         self.positionFrame = BoxPositionsFrame(container, vertical=True)
-        self.positionFrame.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.positionFrame.grid(row=1, column=0, sticky=tk.S+tk.N+tk.E+tk.W)
 
     def setValues(self, config):
         if 'page' in config:

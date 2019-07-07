@@ -12,10 +12,10 @@ class TranslationRow(RepeatableFrame):
     def renderContent(self):
         self.key = tk.StringVar()
         (ttk.Entry(self, textvariable=self.key, width=40)).pack(
-            side=tk.LEFT)
+            side=tk.LEFT, fill=tk.BOTH, expand=True)
         self.value = tk.StringVar()
         (ttk.Entry(self, textvariable=self.value, width=80)).pack(
-            side=tk.RIGHT)
+            side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
     def setValue(self, value):
         self.key.set(value[0])

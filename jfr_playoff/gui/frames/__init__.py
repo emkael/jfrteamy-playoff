@@ -200,24 +200,30 @@ class ScrollableFrame(tk.Frame):
             horizontal = kwargs['horizontal']
             del kwargs['horizontal']
         tk.Frame.__init__(self, *args, **kwargs)
-        canvas = tk.Canvas(self, borderwidth=0, highlightthickness=0)
+        self.canvas = tk.Canvas(self, borderwidth=0, highlightthickness=0)
         if horizontal:
             hscroll = tk.Scrollbar(
-                self, orient=tk.HORIZONTAL, command=canvas.xview)
+                self, orient=tk.HORIZONTAL, command=self.canvas.xview)
             hscroll.pack(side=tk.BOTTOM, fill=tk.X)
-            canvas.configure(xscrollcommand=hscroll.set)
+            self.canvas.configure(xscrollcommand=hscroll.set)
         if vertical:
             vscroll = tk.Scrollbar(
-                self, orient=tk.VERTICAL, command=canvas.yview)
+                self, orient=tk.VERTICAL, command=self.canvas.yview)
             vscroll.pack(side=tk.RIGHT, fill=tk.Y)
-            canvas.configure(yscrollcommand=vscroll.set)
-        frame = tk.Frame(canvas, borderwidth=0, highlightthickness=0)
-        canvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        canvas.create_window((0,0), window=frame, anchor=tk.N+tk.W)
-        frame.bind(
-            '<Configure>',
-            lambda ev: canvas.configure(scrollregion=canvas.bbox('all')))
+            self.canvas.configure(yscrollcommand=vscroll.set)
+        frame = tk.Frame(self.canvas, borderwidth=0, highlightthickness=0)
+        self.canvas.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        self.canvasFrame = self.canvas.create_window(
+            (0,0), window=frame, anchor=tk.N+tk.W)
+        frame.bind('<Configure>', self._onFrameConfigure)
+        self.canvas.bind('<Configure>', self._onCanvasConfigure)
         self.renderContent(frame)
+
+    def _onFrameConfigure(self, event):
+        self.canvas.configure(scrollregion=self.canvas.bbox('all'))
+
+    def _onCanvasConfigure(self, event):
+        self.canvas.itemconfig(self.canvasFrame, width=event.width)
 
     def renderContent(self, container):
         pass
@@ -300,10 +306,6 @@ class SelectionButton(ttk.Button):
             selectionFrame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
 
 class SelectionFrame(ScrollableFrame):
-
-    def renderOption(self, container, option, idx):
-        pass
-
     def __init__(self, master, title='', options=[],
                  selected=None, callback=None, *args, **kwargs):
         self.values = {}
@@ -314,6 +316,9 @@ class SelectionFrame(ScrollableFrame):
         ScrollableFrame.__init__(self, master=master, *args, **kwargs)
         (ttk.Button(master, text='Zapisz', command=self._save)).pack(
             side=tk.BOTTOM, fill=tk.Y)
+
+    def renderOption(self, container, option, idx):
+        pass
 
     def _mapValue(self, idx, value):
         return idx + 1

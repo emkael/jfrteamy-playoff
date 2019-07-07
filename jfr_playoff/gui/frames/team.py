@@ -186,6 +186,8 @@ class TeamFetchSettingsFrame(GuiFrame):
         self.fetchLimit = tk.StringVar()
         self.fetchLimit.trace('w', self._changeNotify)
 
+        self.columnconfigure(3, weight=1)
+
         (ttk.Label(self, text=' ')).grid(row=0, column=0, rowspan=2)
 
         (ttk.Radiobutton(
@@ -200,8 +202,8 @@ class TeamFetchSettingsFrame(GuiFrame):
             self, text='Strona wyników',
             variable=self.fetchSource, value=self.SOURCE_LINK)).grid(
                 row=1, column=1, columnspan=2, sticky=tk.W)
-        self.fetchLink = ttk.Entry(self, width=20, textvariable=self.link)
-        self.fetchLink.grid(row=1, column=3)
+        self.fetchLink = ttk.Entry(self, textvariable=self.link)
+        self.fetchLink.grid(row=1, column=3, sticky=tk.W+tk.E)
 
         (ttk.Label(self, text='Pobierz do ')).grid(
             row=2, column=0, columnspan=2, sticky=tk.W)
@@ -261,6 +263,8 @@ class TeamSettingsFrame(ScrollableFrame):
         self.teamFormat.trace('w', self._enablePanels)
         self.teamFormat.trace('w', self._changeNotify)
 
+        container.columnconfigure(0, weight=1)
+
         (ttk.Radiobutton(
             container, text='Pobierz z JFR Teamy:',
             variable=self.teamFormat, value=self.FORMAT_FETCH)).grid(
@@ -318,10 +322,12 @@ class TeamList(RefreshableOptionMenu):
 
 class TeamAliasRow(RepeatableFrame):
     def renderContent(self):
-        self.columnconfigure(0, weight=1)
+        self.columnconfigure(0, weight=0)
         self.columnconfigure(1, weight=1)
         self.teamName = tk.StringVar()
-        (TeamList(self, self.teamName, self.teamName.get())).grid(
+        list = TeamList(self, self.teamName, self.teamName.get())
+        list.configure(width=20)
+        list.grid(
             row=0, column=0, sticky=tk.W+tk.E+tk.N)
         self.names = WidgetRepeater(self, RepeatableEntry)
         self.names.grid(row=0, column=1, sticky=tk.W+tk.E)

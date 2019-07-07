@@ -201,6 +201,7 @@ class BoxPositionFrame(RepeatableFrame):
         self.vertical = tk.IntVar()
         self.horizontal = tk.IntVar()
         self.matchBox = MatchList(self, self.match)
+        self.matchBox.configure(width=20)
         self.matchBox.grid(row=0, column=0)
         (ttk.Label(self, text=' w pionie:')).grid(row=0, column=1)
         (tk.Spinbox(
@@ -347,8 +348,12 @@ class PositionStyleFrame(RepeatableFrame):
         self.name = tk.StringVar()
         self.description = tk.StringVar()
 
+        self.columnconfigure(1, weight=1)
+        self.columnconfigure(5, weight=1)
+
         (ttk.Label(self, text='Styl:')).grid(row=0, column=0)
-        (ttk.Entry(self, textvariable=self.name)).grid(row=0, column=1)
+        (ttk.Entry(self, textvariable=self.name)).grid(
+            row=0, column=1, sticky=tk.W+tk.E)
 
         (ttk.Label(self, text='Pozycje końcowe:')).grid(row=0, column=2)
         self.positionBtn = TeamSelectionButton(
@@ -358,7 +363,8 @@ class PositionStyleFrame(RepeatableFrame):
         self.positionBtn.grid(row=0, column=3)
 
         (ttk.Label(self, text='Opis w legendzie:')).grid(row=0, column=4)
-        (ttk.Entry(self, textvariable=self.description)).grid(row=0, column=5)
+        (ttk.Entry(self, textvariable=self.description)).grid(
+            row=0, column=5, sticky=tk.W+tk.E)
 
         self.setValue({})
 

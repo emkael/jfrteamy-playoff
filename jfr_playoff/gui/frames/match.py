@@ -55,6 +55,10 @@ class SwissSettingsFrame(RepeatableFrame):
         self.linkLabel = tk.StringVar()
         self.linkRelPath = tk.StringVar()
 
+        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=1)
+        self.columnconfigure(3, weight=1)
+
         (ttk.Label(self, text='Źródło danych:')).grid(
             row=0, column=0, sticky=tk.W)
         (ttk.Radiobutton(
@@ -108,14 +112,14 @@ class SwissSettingsFrame(RepeatableFrame):
         (ttk.Label(self, text='Etykieta linku:')).grid(
             row=8, column=0, sticky=tk.E)
         (ttk.Entry(self, textvariable=self.linkLabel, width=20)).grid(
-            row=8, column=1, sticky=tk.W)
+            row=8, column=1, sticky=tk.W+tk.E)
         (ttk.Label(self, text='(domyślnie: "Turniej o #. miejsce")')).grid(
             row=8, column=2, sticky=tk.W)
 
         (ttk.Label(self, text='Względna ścieżka linku do swissa:')).grid(
-            row=1, column=2)
+            row=1, column=2, sticky=tk.E)
         (ttk.Entry(self, textvariable=self.linkRelPath, width=20)).grid(
-            row=1, column=3)
+            row=1, column=3, sticky=tk.W+tk.E)
 
         (ttk.Separator(self, orient=tk.HORIZONTAL)).grid(
             row=7, column=0, columnspan=6, sticky=tk.E+tk.W)
@@ -435,6 +439,8 @@ class MatchSettingsFrame(RepeatableFrame):
         self.matchID = tk.IntVar()
         self.matchID.trace('w', self._updateName)
         self.matchID.set(self.winfo_toplevel().getNewMatchID(self))
+        self.winfo_toplevel().bind(
+            '<<PhaseRenamed>>', self._updateName, add='+')
         self.link = tk.StringVar()
 
         self.source = tk.IntVar()
@@ -451,13 +457,19 @@ class MatchSettingsFrame(RepeatableFrame):
         self.winnerPositions = []
         self.loserPositions = []
 
+        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=1)
+
         self.nameLabel.grid(row=0, column=0, sticky=tk.W)
         (ttk.Label(self, text='Link:')).grid(row=0, column=1, sticky=tk.E)
         (ttk.Entry(self, textvariable=self.link)).grid(
-            row=0, column=2, sticky=tk.W)
+            row=0, column=2, sticky=tk.W+tk.E)
 
         bracketGroup = ttk.LabelFrame(self, text='Dane drabinki')
         bracketGroup.grid(row=1, column=0, columnspan=3, sticky=tk.W+tk.E)
+
+        bracketGroup.columnconfigure(0, weight=1)
+        bracketGroup.columnconfigure(1, weight=1)
 
         homeTeam = ttk.LabelFrame(bracketGroup, text='Team gospodarzy')
         homeTeam.grid(row=0, column=0, sticky=tk.W+tk.E)
@@ -473,6 +485,10 @@ class MatchSettingsFrame(RepeatableFrame):
 
         scoreGroup = ttk.LabelFrame(self, text='Dane wyniku meczu')
         scoreGroup.grid(row=4, column=0, columnspan=3, sticky=tk.W+tk.E)
+
+        scoreGroup.columnconfigure(1, weight=1)
+        scoreGroup.columnconfigure(3, weight=1)
+
         self.scoreWidgets = {
             self.SCORE_SOURCE_DB: [
                 DBSelectionField(scoreGroup, self.scoreDB, self.scoreDB.get()),
@@ -503,10 +519,12 @@ class MatchSettingsFrame(RepeatableFrame):
             ],
             self.SCORE_SOURCE_CUSTOM: [
                 ttk.Entry(
-                    scoreGroup, textvariable=self.scoreCustom[0], width=5),
+                    scoreGroup, textvariable=self.scoreCustom[0],
+                    width=10, justify=tk.RIGHT),
                 ttk.Label(scoreGroup, text=':'),
                 ttk.Entry(
-                    scoreGroup, textvariable=self.scoreCustom[1], width=5),
+                    scoreGroup, textvariable=self.scoreCustom[1],
+                    width=10, justify=tk.RIGHT),
                 ttk.Checkbutton(
                     scoreGroup, variable=self.scoreNotFinished,
                     text='mecz nie został zakończony, rozegrano:'),
@@ -521,7 +539,7 @@ class MatchSettingsFrame(RepeatableFrame):
             scoreGroup, variable=self.source, value=self.SCORE_SOURCE_DB,
             text='Baza danych')).grid(row=0, column=0, sticky=tk.W)
         self.scoreWidgets[self.SCORE_SOURCE_DB][0].grid(
-            row=0, column=1, columnspan=3)
+            row=0, column=1, columnspan=3, sticky=tk.W+tk.E)
         for idx in range(1, 5):
             self.scoreWidgets[self.SCORE_SOURCE_DB][idx].grid(
                 row=0, column=idx+3)
@@ -529,7 +547,7 @@ class MatchSettingsFrame(RepeatableFrame):
             scoreGroup, variable=self.source, value=self.SCORE_SOURCE_LINK,
             text='Strona z wynikami')).grid(row=1, column=0, sticky=tk.W)
         self.scoreWidgets[self.SCORE_SOURCE_LINK][0].grid(
-            row=1, column=1, columnspan=3)
+            row=1, column=1, columnspan=3, sticky=tk.W+tk.E)
         self.scoreWidgets[self.SCORE_SOURCE_LINK][1].grid(
             row=1, column=4)
         self.scoreWidgets[self.SCORE_SOURCE_LINK][2].grid(
@@ -539,7 +557,7 @@ class MatchSettingsFrame(RepeatableFrame):
             text='Ustaw ręcznie')).grid(row=2, column=0, sticky=tk.W)
         for idx in range(0, 3):
             self.scoreWidgets[self.SCORE_SOURCE_CUSTOM][idx].grid(
-                row=2, column=idx+1)
+                row=2, column=idx+1, sticky=tk.E if idx == 0 else tk.W)
         self.scoreWidgets[self.SCORE_SOURCE_CUSTOM][3].grid(
             row=2, column=4, columnspan=4)
         for idx in range(4, 6):
@@ -673,9 +691,11 @@ class MatchPhaseFrame(ScrollableFrame):
         headerFrame = tk.Frame(container)
         headerFrame.pack(side=tk.TOP, fill=tk.X, expand=True)
         (ttk.Label(headerFrame, text='Nazwa:')).pack(side=tk.LEFT)
-        (ttk.Entry(headerFrame, textvariable=self.name)).pack(side=tk.LEFT)
+        (ttk.Entry(headerFrame, textvariable=self.name)).pack(
+            side=tk.LEFT, fill=tk.X, expand=True)
         (ttk.Label(headerFrame, text='Link:')).pack(side=tk.LEFT)
-        (ttk.Entry(headerFrame, textvariable=self.link)).pack(side=tk.LEFT)
+        (ttk.Entry(headerFrame, textvariable=self.link)).pack(
+            side=tk.LEFT, fill=tk.X, expand=True)
 
         self.matches = WidgetRepeater(
             container, [MatchSettingsFrame, MatchSeparator])

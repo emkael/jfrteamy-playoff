@@ -52,44 +52,47 @@ class MySQLConfigurationFrame(GuiFrame):
 
     def renderContent(self):
         self.host = tk.StringVar()
-        self.port = tk.StringVar()
-        self.user = tk.StringVar()
-        self.pass_ = tk.StringVar()
-
-        (ttk.Label(self, text='Ustawienia MySQL')).grid(
-            row=0, column=0, columnspan=4, sticky=tk.E+tk.W)
-        (ttk.Label(self, text='Host:')).grid(
-            row=1, column=0, sticky=tk.E)
         self.host.trace('w', self._changeNotify)
-        (ttk.Entry(self, textvariable=self.host)).grid(
+        self.port = tk.StringVar()
+        self.port.trace('w', self._changeNotify)
+        self.user = tk.StringVar()
+        self.user.trace('w', self._changeNotify)
+        self.pass_ = tk.StringVar()
+        self.pass_.trace('w', self._changeNotify)
+
+        self.columnconfigure(0, weight=1)
+
+        frame = ttk.LabelFrame(self, text='Ustawienia MySQL')
+        frame.grid(row=0, column=0, columnspan=4, sticky=tk.E+tk.W+tk.N+tk.S)
+
+        (ttk.Label(frame, text='Host:')).grid(
+            row=0, column=0, sticky=tk.E)
+        (ttk.Entry(frame, textvariable=self.host)).grid(
+            row=0, column=1, sticky=tk.E+tk.W)
+
+        (ttk.Label(frame, text='Port:')).grid(
+            row=0, column=2, sticky=tk.E)
+        (tk.Spinbox(
+            frame, textvariable=self.port, width=5,
+            from_=0, to=65535)).grid(row=0, column=3, sticky=tk.W)
+
+        (ttk.Label(frame, text='Użytkownik:')).grid(
+            row=1, column=0, sticky=tk.E)
+        (ttk.Entry(frame, textvariable=self.user)).grid(
             row=1, column=1, sticky=tk.E+tk.W)
 
-        (ttk.Label(self, text='Port:')).grid(
-            row=1, column=2, sticky=tk.E)
-        self.port.trace('w', self._changeNotify)
-        (tk.Spinbox(
-            self, textvariable=self.port, width=5,
-            from_=0, to=65535)).grid(row=1, column=3, sticky=tk.W)
-
-        (ttk.Label(self, text='Użytkownik:')).grid(
-            row=2, column=0, sticky=tk.E)
-        self.user.trace('w', self._changeNotify)
-        (ttk.Entry(self, textvariable=self.user)).grid(
-            row=2, column=1, sticky=tk.E+tk.W)
-
         (ttk.Button(
-            self, text='Testuj ustawienia', command=self._testDB)).grid(
-                row=2, column=3)
+            frame, text='Testuj ustawienia', command=self._testDB)).grid(
+                row=1, column=3)
         self.dbError = None
-        self.dbTestLabel = ttk.Label(self)
-        self.dbTestLabel.grid(row=2, column=4)
+        self.dbTestLabel = ttk.Label(frame)
+        self.dbTestLabel.grid(row=1, column=4)
         self.dbTestLabel.bind('<Button-1>', self._dbError)
 
-        (ttk.Label(self, text='Hasło:')).grid(
-            row=3, column=0, sticky=tk.E)
-        self.pass_.trace('w', self._changeNotify)
-        (ttk.Entry(self, textvariable=self.pass_, show='*')).grid(
-            row=3, column=1, sticky=tk.E+tk.W)
+        (ttk.Label(frame, text='Hasło:')).grid(
+            row=2, column=0, sticky=tk.E)
+        (ttk.Entry(frame, textvariable=self.pass_, show='*')).grid(
+            row=2, column=1, sticky=tk.E+tk.W)
 
         self.setValues({})
 
@@ -124,31 +127,33 @@ class GoniecConfigurationFrame(GuiFrame):
 
     def renderContent(self):
         self.enable = tk.IntVar()
+        self.enable.trace('w', self._enableWidgets)
         self.host = tk.StringVar()
         self.port = tk.StringVar()
 
-        (ttk.Label(self, text='Konfiguracja Gońca:')).grid(
-            row=0, column=0, columnspan=4, sticky=tk.W)
+        self.columnconfigure(0, weight=1)
+
+        frame = ttk.LabelFrame(self, text='Konfiguracja Gońca:')
+        frame.grid(row=0, column=0, columnspan=4, sticky=tk.W+tk.E+tk.N+tk.S)
         (ttk.Checkbutton(
-            self, text='Włącz obsługę Gońca', variable=self.enable)).grid(
-                row=1, column=0, columnspan=2, sticky=tk.W)
-        self.enable.trace('w', self._enableWidgets)
+            frame, text='Włącz obsługę Gońca', variable=self.enable)).grid(
+                row=0, column=0, columnspan=2, sticky=tk.W)
 
-        (ttk.Label(self, text='Host:')).grid(row=2, column=0)
-        self.hostField = ttk.Entry(self, textvariable=self.host)
-        self.hostField.grid(row=2, column=1)
+        (ttk.Label(frame, text='Host:')).grid(row=1, column=0)
+        self.hostField = ttk.Entry(frame, textvariable=self.host)
+        self.hostField.grid(row=1, column=1)
 
-        (ttk.Label(self, text='Port:')).grid(row=2, column=2)
+        (ttk.Label(frame, text='Port:')).grid(row=1, column=2)
         self.portField = tk.Spinbox(
-            self, textvariable=self.port, width=5)
-        self.portField.grid(row=2, column=3)
+            frame, textvariable=self.port, width=5)
+        self.portField.grid(row=1, column=3)
 
         self.testButton = ttk.Button(
-            self, text='Testuj ustawienia', command=self._test)
-        self.testButton.grid(row=3, column=1, sticky=tk.E)
+            frame, text='Testuj ustawienia', command=self._test)
+        self.testButton.grid(row=2, column=1, sticky=tk.E)
         self.testError = None
-        self.testLabel = ttk.Label(self)
-        self.testLabel.grid(row=3, column=2, sticky=tk.W)
+        self.testLabel = ttk.Label(frame)
+        self.testLabel.grid(row=2, column=2, sticky=tk.W)
         self.testLabel.bind('<Button-1>', self._testError)
 
         self.setValues({})
@@ -162,10 +167,11 @@ class GoniecConfigurationFrame(GuiFrame):
 
 class RemoteConfigurationFrame(ScrollableFrame):
     def renderContent(self, container):
-        (ttk.Label(container, text='Zdalne pliki konfiguracyjne:')).pack(
+        frame = ttk.LabelFrame(container, text='Zdalne pliki konfiguracyjne:')
+        frame.pack(
             side=tk.TOP, fill=tk.BOTH, expand=True)
         self.repeater = WidgetRepeater(
-            container, RepeatableEntry, classParams={'width':100})
+            frame, RepeatableEntry, classParams={'width':100})
         self.repeater.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
     def setValues(self, values):
