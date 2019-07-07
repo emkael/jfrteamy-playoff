@@ -7,13 +7,15 @@ from tkinter import ttk
 
 from ..frames import RepeatableFrame, WidgetRepeater, ScrollableFrame
 from ...i18n import PLAYOFF_I18N_DEFAULTS
+from ..variables import NotifyStringVar
 
 class TranslationRow(RepeatableFrame):
     def renderContent(self):
-        self.key = tk.StringVar()
+        self.key = NotifyStringVar()
+        self.value = NotifyStringVar()
+
         (ttk.Entry(self, textvariable=self.key, width=40)).pack(
             side=tk.LEFT, fill=tk.BOTH, expand=True)
-        self.value = tk.StringVar()
         (ttk.Entry(self, textvariable=self.value, width=80)).pack(
             side=tk.RIGHT, fill=tk.BOTH, expand=True)
 

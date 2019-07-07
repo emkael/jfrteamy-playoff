@@ -5,9 +5,10 @@ from tkinter import ttk
 import tkColorChooser as tkcc
 
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
-from ..frames import WidgetRepeater, getIntVal
-from ..frames import SelectionFrame, RefreshableOptionMenu
+from ..frames import WidgetRepeater
+from ..frames import SelectionFrame, RefreshableOptionMenu, NumericSpinbox
 from ..frames.team import TeamSelectionButton
+from ..variables import NotifyStringVar, NotifyIntVar, NotifyNumericVar
 
 class VisualSettingsFrame(GuiFrame):
     DEFAULT_VALUES = {
@@ -29,20 +30,20 @@ class VisualSettingsFrame(GuiFrame):
     }
 
     def renderContent(self):
-        self.startingPositionIndicators = tk.IntVar()
-        self.finishingPositionIndicators = tk.IntVar()
-        self.boxWidth = tk.IntVar()
-        self.boxHeight = tk.IntVar()
-        self.boxMargin = tk.IntVar()
-        self.shortenTeamNames = tk.IntVar()
-        self.teamNameLength = tk.IntVar()
-        self.teamNameEllipsis = tk.StringVar()
-        self.teamNamePredict = tk.IntVar()
-        self.teamNamePlaceholder = tk.StringVar()
-        self.teamNameSortPredictions = tk.IntVar()
-        self.teamLabelSeparator = tk.StringVar()
-        self.teamNameSeparator = tk.StringVar()
-        self.teamNamePrefix = tk.StringVar()
+        self.startingPositionIndicators = NotifyIntVar()
+        self.finishingPositionIndicators = NotifyIntVar()
+        self.boxWidth = NotifyNumericVar()
+        self.boxHeight = NotifyNumericVar()
+        self.boxMargin = NotifyNumericVar()
+        self.shortenTeamNames = NotifyIntVar()
+        self.teamNameLength = NotifyNumericVar()
+        self.teamNameEllipsis = NotifyStringVar()
+        self.teamNamePredict = NotifyIntVar()
+        self.teamNamePlaceholder = NotifyStringVar()
+        self.teamNameSortPredictions = NotifyIntVar()
+        self.teamLabelSeparator = NotifyStringVar()
+        self.teamNameSeparator = NotifyStringVar()
+        self.teamNamePrefix = NotifyStringVar()
 
         indicatorsFrame = ttk.LabelFrame(self, text='Znaczniki pozycji:')
         indicatorsFrame.grid(row=0, column=0, sticky=tk.W+tk.E+tk.N+tk.S)
@@ -64,19 +65,19 @@ class VisualSettingsFrame(GuiFrame):
             variable=self.finishingPositionIndicators)).grid(
                 row=1, column=0, sticky=tk.W)
 
-        (tk.Spinbox(
-            dimensionsFrame, width=5, justify=tk.RIGHT, from_=1, to=999,
+        (NumericSpinbox(
+            dimensionsFrame, width=5, from_=1, to=999,
             textvariable=self.boxWidth)).grid(
                 row=0, column=0, sticky=tk.W)
         (ttk.Label(dimensionsFrame, text='x')).grid(row=0, column=1)
-        (tk.Spinbox(
-            dimensionsFrame, width=5, justify=tk.RIGHT, from_=1, to=999,
+        (NumericSpinbox(
+            dimensionsFrame, width=5, from_=1, to=999,
             textvariable=self.boxHeight)).grid(
                 row=0, column=2, sticky=tk.W)
         (ttk.Label(dimensionsFrame, text='odstępy')).grid(
             row=1, column=0, columnspan=2, sticky=tk.E)
-        (tk.Spinbox(
-            dimensionsFrame, width=5, justify=tk.RIGHT, from_=1, to=999,
+        (NumericSpinbox(
+            dimensionsFrame, width=5, from_=1, to=999,
             textvariable=self.boxMargin)).grid(
                 row=1, column=2, sticky=tk.W)
 
@@ -84,8 +85,8 @@ class VisualSettingsFrame(GuiFrame):
             teamNamesFrame, text='skracaj do',
             variable=self.shortenTeamNames)).grid(
                 row=0, column=0, columnspan=2)
-        nameLength = tk.Spinbox(
-            teamNamesFrame, width=5, justify=tk.RIGHT, from_=1, to=999,
+        nameLength = NumericSpinbox(
+            teamNamesFrame, width=5, from_=1, to=999,
             textvariable=self.teamNameLength)
         nameLength.grid(row=0, column=2, sticky=tk.W)
         lengthLabel = ttk.Label(teamNamesFrame, text='znaków')
@@ -197,22 +198,23 @@ class MatchList(RefreshableOptionMenu):
 
 class BoxPositionFrame(RepeatableFrame):
     def renderContent(self):
-        self.match = tk.StringVar()
-        self.vertical = tk.IntVar()
-        self.horizontal = tk.IntVar()
+        self.match = NotifyStringVar()
+        self.vertical = NotifyNumericVar()
+        self.horizontal = NotifyNumericVar()
         self.matchBox = MatchList(self, self.match)
         self.matchBox.configure(width=20)
         self.matchBox.grid(row=0, column=0)
+
         (ttk.Label(self, text=' w pionie:')).grid(row=0, column=1)
-        (tk.Spinbox(
+        (NumericSpinbox(
             self, textvariable=self.vertical, from_=0, to=9999,
-            width=5, justify=tk.RIGHT)).grid(
+            width=5)).grid(
                 row=0, column=2)
         (ttk.Label(self, text=' w poziomie (-1 = automatyczna):')).grid(
                 row=0, column=3)
-        (tk.Spinbox(
+        (NumericSpinbox(
             self, textvariable=self.horizontal, from_=-1, to=9999,
-            width=5, justify=tk.RIGHT)).grid(
+            width=5)).grid(
                 row=0, column=4)
         self.setValue([])
 
@@ -262,19 +264,20 @@ class LineStyle(GuiFrame):
         self.colourBtn.configure(bg=colour)
 
     def renderContent(self):
+        self.hOffset = NotifyNumericVar()
+        self.vOffset = NotifyNumericVar()
+
         (ttk.Label(self, text='kolor:')).grid(row=0, column=0)
         self.colourBtn = tk.Button(self, width=2, command=self._selectColour)
         self.colourBtn.grid(row=0, column=1)
         (ttk.Label(self, text='margines w poziomie:')).grid(row=0, column=2)
-        self.hOffset = tk.StringVar()
-        (tk.Spinbox(
+        (NumericSpinbox(
             self, textvariable=self.hOffset, from_=-50, to=50,
-            width=5, justify=tk.RIGHT)).grid(row=0, column=3)
+            width=5)).grid(row=0, column=3)
         (ttk.Label(self, text='margines w pionie:')).grid(row=0, column=4)
-        self.vOffset = tk.StringVar()
-        (tk.Spinbox(
+        (NumericSpinbox(
             self, textvariable=self.vOffset, from_=-50, to=50,
-            width=5, justify=tk.RIGHT)).grid(row=0, column=5)
+            width=5)).grid(row=0, column=5)
 
     def setValue(self, value):
         self._setColour(value[0])
@@ -345,8 +348,8 @@ class PositionStyleFrame(RepeatableFrame):
         self.positions = values
 
     def renderContent(self):
-        self.name = tk.StringVar()
-        self.description = tk.StringVar()
+        self.name = NotifyStringVar()
+        self.description = NotifyStringVar()
 
         self.columnconfigure(1, weight=1)
         self.columnconfigure(5, weight=1)

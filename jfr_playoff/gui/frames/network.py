@@ -7,8 +7,9 @@ from tkinter import ttk
 import tkMessageBox as tkmb
 
 from ...db import PlayoffDB
-from ..frames import RepeatableEntry, WidgetRepeater
-from ..frames import GuiFrame, ScrollableFrame, getIntVal
+from ..frames import RepeatableEntry, WidgetRepeater, NumericSpinbox
+from ..frames import GuiFrame, ScrollableFrame
+from ..variables import NotifyStringVar, NotifyIntVar, NotifyNumericVar
 
 def network_test(connFunction, testLabel):
     try:
@@ -28,7 +29,7 @@ class MySQLConfigurationFrame(GuiFrame):
         if len(self.host.get().strip()):
             return {
                 'host': self.host.get().strip(),
-                'port': getIntVal(self.port, default=3306),
+                'port': self.port.get(default=3306),
                 'user': self.user.get().strip(),
                 'pass': self.pass_.get().strip()
             }
@@ -51,13 +52,13 @@ class MySQLConfigurationFrame(GuiFrame):
             '<<DBSettingsChanged>>', when='tail')
 
     def renderContent(self):
-        self.host = tk.StringVar()
+        self.host = NotifyStringVar()
         self.host.trace('w', self._changeNotify)
-        self.port = tk.StringVar()
+        self.port = NotifyNumericVar()
         self.port.trace('w', self._changeNotify)
-        self.user = tk.StringVar()
+        self.user = NotifyStringVar()
         self.user.trace('w', self._changeNotify)
-        self.pass_ = tk.StringVar()
+        self.pass_ = NotifyStringVar()
         self.pass_.trace('w', self._changeNotify)
 
         self.columnconfigure(0, weight=1)
@@ -72,7 +73,7 @@ class MySQLConfigurationFrame(GuiFrame):
 
         (ttk.Label(frame, text='Port:')).grid(
             row=0, column=2, sticky=tk.E)
-        (tk.Spinbox(
+        (NumericSpinbox(
             frame, textvariable=self.port, width=5,
             from_=0, to=65535)).grid(row=0, column=3, sticky=tk.W)
 
@@ -116,8 +117,8 @@ class GoniecConfigurationFrame(GuiFrame):
         def test():
             goniec = socket.socket()
             goniec.connect(
-                (self.host.get().strip(), getIntVal(
-                    self.port, self.DEFAULT_PORT)))
+                (self.host.get().strip(),
+                 self.port.get(default=self.DEFAULT_PORT)))
             goniec.close()
         self.testError = network_test(test, self.testLabel)
 
@@ -126,10 +127,10 @@ class GoniecConfigurationFrame(GuiFrame):
             tkmb.showerror('Błąd połączenia z Gońcem', self.testError)
 
     def renderContent(self):
-        self.enable = tk.IntVar()
+        self.enable = NotifyIntVar()
         self.enable.trace('w', self._enableWidgets)
-        self.host = tk.StringVar()
-        self.port = tk.StringVar()
+        self.host = NotifyStringVar()
+        self.port = NotifyNumericVar()
 
         self.columnconfigure(0, weight=1)
 
@@ -144,7 +145,7 @@ class GoniecConfigurationFrame(GuiFrame):
         self.hostField.grid(row=1, column=1)
 
         (ttk.Label(frame, text='Port:')).grid(row=1, column=2)
-        self.portField = tk.Spinbox(
+        self.portField = NumericSpinbox(
             frame, textvariable=self.port, width=5)
         self.portField.grid(row=1, column=3)
 

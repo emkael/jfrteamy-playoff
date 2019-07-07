@@ -7,12 +7,13 @@ from tkinter import ttk
 import tkFileDialog as tkfd
 import tkMessageBox as tkmb
 
-from .frames import TraceableText
+from .frames import TraceableText, NumericSpinbox
 from .frames.match import *
 from .frames.network import *
 from .frames.team import *
 from .frames.translations import *
 from .frames.visual import *
+from .variables import NotifyStringVar, NotifyIntVar, NotifyNumericVar
 
 from ..data import PlayoffData
 from ..db import PlayoffDB
@@ -46,12 +47,12 @@ class MainSettingsTab(PlayoffTab):
         return 'Główne ustawienia'
 
     def initData(self):
-        self.outputPath = tk.StringVar()
-        self.pageTitle = tk.StringVar()
-        self.pageLogoh = tk.StringVar()
-        self.refresh = tk.IntVar()
+        self.outputPath = NotifyStringVar()
+        self.pageTitle = NotifyStringVar()
+        self.pageLogoh = NotifyStringVar()
+        self.refresh = NotifyIntVar()
         self.refresh.trace('w', self._updateRefreshFields)
-        self.refreshInterval = tk.StringVar()
+        self.refreshInterval = NotifyNumericVar()
 
     def _chooseOutputPath(self):
         currentPath = self.outputPath.get()
@@ -135,7 +136,7 @@ class MainSettingsTab(PlayoffTab):
             command=self._updateRefreshFields, variable=self.refresh)).grid(
                 row=0, column=0)
         (ttk.Label(refreshPanel, text='co:')).grid(row=0, column=1)
-        self.intervalField = tk.Spinbox(
+        self.intervalField = NumericSpinbox(
             refreshPanel, from_=30, to=3600, width=5, justify=tk.RIGHT,
             textvariable=self.refreshInterval)
         self.intervalField.grid(row=0, column=2)

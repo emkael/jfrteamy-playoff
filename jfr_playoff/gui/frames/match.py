@@ -5,23 +5,24 @@ from tkinter.font import Font
 from tkinter import ttk
 
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
-from ..frames import WidgetRepeater, RepeatableEntry, getIntVal
+from ..frames import WidgetRepeater, RepeatableEntry, NumericSpinbox
 from ..frames import SelectionFrame, SelectionButton, RefreshableOptionMenu
 from ..frames.team import DBSelectionField, TeamSelectionFrame
 from ..frames.team import TeamSelectionButton
 from ..frames.visual import PositionsSelectionFrame
+from ..variables import NotifyStringVar, NotifyIntVar, NotifyNumericVar
 
 class SwissSettingsFrame(RepeatableFrame):
     SOURCE_LINK = 0
     SOURCE_DB = 1
 
     def _setPositionInfo(self, *args):
-        tournamentFrom = getIntVal(self.setFrom, default=1)
+        tournamentFrom = self.setFrom.get(default=1)
         tournamentTo = min(
-            getIntVal(self.setTo, default=1) \
+            self.setTo.get(default=1) \
             if self.setToEnabled.get() else 9999,
             len(self.winfo_toplevel().getTeams()))
-        swissFrom = getIntVal(self.fetchFrom, default=1)
+        swissFrom = self.fetchFrom.get(default=1)
         swissTo = swissFrom + tournamentTo - tournamentFrom
         if tournamentTo < tournamentFrom:
             self.positionsInfo.configure(text='brak miejsc do ustawienia')
@@ -44,16 +45,16 @@ class SwissSettingsFrame(RepeatableFrame):
                     else tk.DISABLED)
 
     def renderContent(self):
-        self.source = tk.IntVar()
-        self.fetchDB = tk.StringVar()
-        self.fetchLink = tk.StringVar()
-        self.setFrom = tk.StringVar()
-        self.setToEnabled = tk.IntVar()
-        self.setTo = tk.StringVar()
-        self.fetchFromEnabled = tk.IntVar()
-        self.fetchFrom = tk.StringVar()
-        self.linkLabel = tk.StringVar()
-        self.linkRelPath = tk.StringVar()
+        self.source = NotifyIntVar()
+        self.fetchDB = NotifyStringVar()
+        self.fetchLink = NotifyStringVar()
+        self.setFrom = NotifyNumericVar()
+        self.setToEnabled = NotifyIntVar()
+        self.setTo = NotifyNumericVar()
+        self.fetchFromEnabled = NotifyIntVar()
+        self.fetchFrom = NotifyNumericVar()
+        self.linkLabel = NotifyStringVar()
+        self.linkRelPath = NotifyStringVar()
 
         self.columnconfigure(1, weight=1)
         self.columnconfigure(2, weight=1)
@@ -81,7 +82,7 @@ class SwissSettingsFrame(RepeatableFrame):
         (ttk.Label(
             self, text='Ustaw od miejsca: ')).grid(
                 row=4, column=0, sticky=tk.W, padx=18)
-        (tk.Spinbox(
+        (NumericSpinbox(
             self, textvariable=self.setFrom,
             from_=1, to=999, width=5)).grid(
                 row=4, column=1, sticky=tk.W)
@@ -89,7 +90,7 @@ class SwissSettingsFrame(RepeatableFrame):
             self, variable=self.setToEnabled,
             text='Ustaw do miejsca: ')).grid(
                 row=5, column=0, sticky=tk.W)
-        (tk.Spinbox(
+        (NumericSpinbox(
             self, textvariable=self.setTo,
             from_=1, to=999, width=5)).grid(
                 row=5, column=1, sticky=tk.W)
@@ -97,7 +98,7 @@ class SwissSettingsFrame(RepeatableFrame):
             self, variable=self.fetchFromEnabled,
             text='Pobierz od miejsca: ')).grid(
                 row=6, column=0, sticky=tk.W)
-        (tk.Spinbox(
+        (NumericSpinbox(
             self, textvariable=self.fetchFrom,
             from_=1, to=999, width=5)).grid(
                 row=6, column=1, sticky=tk.W)
@@ -279,12 +280,12 @@ class BracketMatchSettingsFrame(GuiFrame):
             self.teams = [allTeams[idx-1] for idx in teams]
 
     def renderContent(self):
-        self.source = tk.IntVar()
+        self.source = NotifyIntVar()
         self.source.trace('w', self._enablePanels)
         self.source.trace('w', self._configChangeNotify)
-        self.selected = tk.IntVar()
+        self.selected = NotifyIntVar()
         self.selected.trace('w', self._enablePanels)
-        self.selectedIndex = tk.StringVar()
+        self.selectedIndex = NotifyStringVar()
         self.positions = []
         self.winners = []
         self.losers = []
@@ -436,23 +437,23 @@ class MatchSettingsFrame(RepeatableFrame):
 
     def renderContent(self):
         self.nameLabel = ttk.Label(self)
-        self.matchID = tk.IntVar()
+        self.matchID = NotifyIntVar()
         self.matchID.trace('w', self._updateName)
         self.matchID.set(self.winfo_toplevel().getNewMatchID(self))
         self.winfo_toplevel().bind(
             '<<PhaseRenamed>>', self._updateName, add='+')
-        self.link = tk.StringVar()
+        self.link = NotifyStringVar()
 
-        self.source = tk.IntVar()
+        self.source = NotifyIntVar()
         self.source.trace('w', self._enablePanels)
 
-        self.scoreDB = tk.StringVar()
-        self.scoreRound = tk.IntVar()
-        self.scoreTable = tk.IntVar()
-        self.scoreCustom = [tk.StringVar(), tk.StringVar()]
-        self.scoreNotFinished = tk.IntVar()
+        self.scoreDB = NotifyStringVar()
+        self.scoreRound = NotifyNumericVar()
+        self.scoreTable = NotifyNumericVar()
+        self.scoreCustom = [NotifyStringVar(), NotifyStringVar()]
+        self.scoreNotFinished = NotifyIntVar()
         self.scoreNotFinished.trace('w', self._enablePanels)
-        self.scoreBoards = tk.IntVar()
+        self.scoreBoards = NotifyNumericVar()
 
         self.winnerPositions = []
         self.loserPositions = []
@@ -493,11 +494,11 @@ class MatchSettingsFrame(RepeatableFrame):
             self.SCORE_SOURCE_DB: [
                 DBSelectionField(scoreGroup, self.scoreDB, self.scoreDB.get()),
                 ttk.Label(scoreGroup, text='Runda:'),
-                tk.Spinbox(
+                NumericSpinbox(
                     scoreGroup, width=3,
                     textvariable=self.scoreRound, from_=1, to=999),
                 ttk.Label(scoreGroup, text='Stół:'),
-                tk.Spinbox(
+                NumericSpinbox(
                     scoreGroup, width=3,
                     textvariable=self.scoreTable, from_=1, to=999)
             ],
@@ -505,15 +506,15 @@ class MatchSettingsFrame(RepeatableFrame):
                 ttk.Entry(scoreGroup, textvariable=self.link),
                 # TODO: TC support (Round/Session)
                 #ttk.Label(scoreGroup, text='Sesja:'),
-                #tk.Spinbox(
+                #NumericSpinbox(
                 #    scoreGroup,
                 #textvariable=self.scoreSession, from_=1, to=999),
                 #ttk.Label(scoreGroup, text='Runda:'),
-                #tk.Spinbox(
+                #NumericSpinbox(
                 #    scoreGroup,
                 #textvariable=self.scoreRound, from_=1, to=999),
                 ttk.Label(scoreGroup, text='Stół:'),
-                tk.Spinbox(
+                NumericSpinbox(
                     scoreGroup, width=3,
                     textvariable=self.scoreTable, from_=1, to=999)
             ],
@@ -528,7 +529,7 @@ class MatchSettingsFrame(RepeatableFrame):
                 ttk.Checkbutton(
                     scoreGroup, variable=self.scoreNotFinished,
                     text='mecz nie został zakończony, rozegrano:'),
-                tk.Spinbox(
+                NumericSpinbox(
                     scoreGroup, width=3,
                     textvariable=self.scoreBoards, from_=0, to=999),
                 ttk.Label(scoreGroup, text='rozdań')
@@ -684,8 +685,8 @@ class MatchPhaseFrame(ScrollableFrame):
         self.winfo_toplevel().event_generate('<<PhaseRenamed>>', when='tail')
 
     def renderContent(self, container):
-        self.name = tk.StringVar()
-        self.link = tk.StringVar()
+        self.name = NotifyStringVar()
+        self.link = NotifyStringVar()
         self.previousLink = ''
 
         headerFrame = tk.Frame(container)

@@ -7,11 +7,7 @@ import tkinter as tk
 from tkinter import ttk
 import tkMessageBox
 
-def getIntVal(widget, default=0):
-    try:
-        return int(widget.get().strip())
-    except ValueError:
-        return default
+from ..variables import NotifyStringVar, NotifyIntVar, NotifyNumericVar
 
 def setPanelState(frame, state):
     for child in frame.winfo_children():
@@ -175,7 +171,7 @@ class RepeatableFrame(tk.Frame):
 
 class RepeatableEntry(RepeatableFrame):
     def renderContent(self):
-        self.value = tk.StringVar()
+        self.value = NotifyStringVar()
         self.field = ttk.Entry(self, textvariable=self.value)
         self.field.pack(expand=True, fill=tk.BOTH)
 
@@ -262,7 +258,7 @@ class WidgetSelectionFrame(ScrollableFrame):
         addBtn.pack(side=tk.BOTTOM)
 
     def renderContent(self, container):
-        self.value = tk.IntVar()
+        self.value = NotifyIntVar()
         for idx, widget in enumerate(self.widgets):
             (ttk.Radiobutton(
                 container, variable=self.value, value=idx,
@@ -359,7 +355,7 @@ class SelectionFrame(ScrollableFrame):
         self.renderHeader(container)
         for idx, option in enumerate(self.options):
             key = self._mapValue(idx, option)
-            self.values[key] = tk.IntVar()
+            self.values[key] = NotifyIntVar()
             self.renderOption(container, option, idx)
             if self.selected and key in self.selected:
                 self.values[key].set(True)
@@ -369,7 +365,7 @@ class RefreshableOptionMenu(ttk.OptionMenu):
         self._valueVariable = variable
         self._valueVariable.trace('w', self._valueSet)
         self._lastValue = variable.get()
-        newVar = tk.StringVar()
+        newVar = NotifyStringVar()
         ttk.OptionMenu.__init__(self, master, newVar, *args, **kwargs)
         self._valueLock = False
         self.refreshOptions()
@@ -457,4 +453,21 @@ class TraceableText(tk.Text):
             self._variableLock = False
         return result
 
-# TODO: NumericSpinBox instead of getIntVal
+class NumericSpinbox(tk.Spinbox):
+    def __init__(self, *args, **kwargs):
+        kwargs['justify'] = tk.RIGHT
+        self._variable = None
+        if 'textvariable' in kwargs:
+            self._variable = kwargs['textvariable']
+        self._default = kwargs['from_'] if 'from_' in kwargs else 0
+        tk.Spinbox.__init__(self, *args, **kwargs)
+        if self._variable is not None:
+            if not isinstance(self._variable, NotifyNumericVar):
+                raise AttributeError(
+                    'NumericSpinbox variable must be NotifyNumericVar')
+            self._variable.trace('w', self._onChange)
+
+    def _onChange(self, *args):
+        val = self._variable.get()
+        if val is None:
+            self._variable.set(self._default)

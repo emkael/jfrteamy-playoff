@@ -5,31 +5,34 @@ from tkinter.font import Font
 from tkinter import ttk
 
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
-from ..frames import WidgetRepeater, RepeatableEntry
+from ..frames import WidgetRepeater, RepeatableEntry, NumericSpinbox
 from ..frames import SelectionButton, SelectionFrame, RefreshableOptionMenu
-from ..frames import getIntVal, setPanelState
+from ..frames import setPanelState
+from ..variables import NotifyStringVar, NotifyIntVar, NotifyNumericVar
 
 class ManualTeamRow(RepeatableFrame):
     def renderContent(self):
-        self.fullname = tk.StringVar()
-        fullnameField = ttk.Entry(self, width=20, textvariable=self.fullname)
-        fullnameField.grid(row=0, column=0)
-        self.shortname = tk.StringVar()
-        shortnameField = ttk.Entry(self, width=20, textvariable=self.shortname)
-        shortnameField.grid(row=0, column=1)
-        self.flag = tk.StringVar()
-        flagField = ttk.Entry(self, width=10, textvariable=self.flag)
-        flagField.grid(row=0, column=2)
-        self.position = tk.StringVar()
-        positionField = ttk.Entry(self, width=10, textvariable=self.position)
-        positionField.grid(row=0, column=3)
+        self.fullname = NotifyStringVar()
+        self.shortname = NotifyStringVar()
+        self.flag = NotifyStringVar()
+        self.position = NotifyNumericVar()
         for var in [self.fullname, self.shortname, self.flag, self.position]:
             var.trace('w', self._changeNotify)
+
+        fullnameField = ttk.Entry(self, width=20, textvariable=self.fullname)
+        fullnameField.grid(row=0, column=0)
+        shortnameField = ttk.Entry(self, width=20, textvariable=self.shortname)
+        shortnameField.grid(row=0, column=1)
+        flagField = ttk.Entry(self, width=10, textvariable=self.flag)
+        flagField.grid(row=0, column=2)
+        positionField = ttk.Entry(self, width=10, textvariable=self.position)
+        positionField.grid(row=0, column=3)
+
         self._changeNotify(None)
 
     def getValue(self):
         flag = self.flag.get().strip()
-        position = getIntVal(self.position, None)
+        position = self.position.get()
         return [
             self.fullname.get().strip(), self.shortname.get().strip(),
             flag if len(flag) else None, position
@@ -162,7 +165,7 @@ class TeamFetchSettingsFrame(GuiFrame):
             teams['database'] = self.fetchDB.get()
         if len(self.finishingPositions):
             teams['final_positions'] = self.finishingPositions
-        maxTeams = getIntVal(self.fetchLimit)
+        maxTeams = self.fetchLimit.get()
         if maxTeams:
             teams['max_teams'] = maxTeams
         return teams
@@ -176,14 +179,14 @@ class TeamFetchSettingsFrame(GuiFrame):
             self.fetchDBField.configure(state=tk.NORMAL)
 
     def renderContent(self):
-        self.fetchSource = tk.IntVar()
+        self.fetchSource = NotifyIntVar()
         self.fetchSource.trace('w', self._sourceChange)
         self.fetchSource.trace('w', self._changeNotify)
-        self.fetchDB = tk.StringVar()
+        self.fetchDB = NotifyStringVar()
         self.fetchDB.trace('w', self._changeNotify)
-        self.link = tk.StringVar()
+        self.link = NotifyStringVar()
         self.link.trace('w', self._changeNotify)
-        self.fetchLimit = tk.StringVar()
+        self.fetchLimit = NotifyNumericVar()
         self.fetchLimit.trace('w', self._changeNotify)
 
         self.columnconfigure(3, weight=1)
@@ -207,7 +210,7 @@ class TeamFetchSettingsFrame(GuiFrame):
 
         (ttk.Label(self, text='Pobierz do ')).grid(
             row=2, column=0, columnspan=2, sticky=tk.W)
-        (tk.Spinbox(
+        (NumericSpinbox(
             self, from_=0, to=9999, width=5, justify=tk.RIGHT,
             textvariable=self.fetchLimit)).grid(
                 row=2, column=2, sticky=tk.W)
@@ -259,7 +262,7 @@ class TeamSettingsFrame(ScrollableFrame):
         self.teams = self.winfo_toplevel().getTeams()
 
     def renderContent(self, container):
-        self.teamFormat = tk.IntVar()
+        self.teamFormat = NotifyIntVar()
         self.teamFormat.trace('w', self._enablePanels)
         self.teamFormat.trace('w', self._changeNotify)
 
@@ -324,7 +327,7 @@ class TeamAliasRow(RepeatableFrame):
     def renderContent(self):
         self.columnconfigure(0, weight=0)
         self.columnconfigure(1, weight=1)
-        self.teamName = tk.StringVar()
+        self.teamName = NotifyStringVar()
         list = TeamList(self, self.teamName, self.teamName.get())
         list.configure(width=20)
         list.grid(
@@ -384,10 +387,10 @@ class TeamPreviewFrame(ScrollableFrame):
                 team[2] = ''
             self.teamList.insert('', tk.END, values=team, tag=idx)
             if idx >= len(self.tieFields):
-                self.tieValues.append(tk.StringVar())
+                self.tieValues.append(NotifyNumericVar())
                 self.tieValues[idx].trace('w', self._tieValueChangeNotify)
                 self.tieFields.append(
-                    tk.Spinbox(
+                    NumericSpinbox(
                         container, from_=0, to=9999,
                         width=5, font=Font(size=10),
                         textvariable=self.tieValues[idx]))
@@ -429,7 +432,7 @@ class TeamPreviewFrame(ScrollableFrame):
 
     def getTieConfig(self):
         teams = self._getTeams()
-        ties = [(teams[idx], getIntVal(val, 0))
+        ties = [(teams[idx], val.get(default=0))
                 for idx, val in enumerate(self.tieValues)]
         return [team[0][0] for team
                 in sorted(ties, key=lambda t: t[1])
