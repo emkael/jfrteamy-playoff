@@ -440,7 +440,7 @@ class TraceableText(tk.Text):
             self._variableLock = True
             self.delete('1.0', tk.END)
             self.insert(tk.END, self._variable.get())
-            self._varaibleLock = False
+            self._variableLock = False
 
     def _proxy(self, command, *args):
         cmd = (self._orig, command) + args

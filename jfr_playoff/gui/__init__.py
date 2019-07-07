@@ -15,7 +15,8 @@ class PlayoffGUI(tk.Tk):
         self.newFileIndex = 0
         self._title = tk.StringVar()
         self._title.trace('w', self._setTitle)
-        self._dirty = False
+        self._dirty = tk.BooleanVar()
+        self._dirty.trace('w', self._setTitle)
         self._filepath = None
 
     def run(self):
@@ -28,7 +29,11 @@ class PlayoffGUI(tk.Tk):
             self.openFile(sys.argv[1])
         else:
             self.newFile()
+        self.bind('<<ValueChanged>>', self._onFileChange, add='+')
         self.mainloop()
+
+    def _onFileChange(self, *args):
+        self._dirty.set(True)
 
     def _setValues(self, config):
         for tab in self.tabs.values():
@@ -42,18 +47,20 @@ class PlayoffGUI(tk.Tk):
         self.newFileIndex += 1
         self._title.set('Nowa drabinka %d' % (self.newFileIndex))
         self._resetValues()
+        self.after(0, self._dirty.set, False)
 
     def _setTitle(self, *args):
         self.title('%s - %s%s' % (
             'TeamyPlayOff',
             self._title.get(),
-            '* ' if self._dirty else ''
+            ' *' if self._dirty.get() else ''
         ))
 
     def openFile(self, filepath):
         self._filepath = filepath
         self._title.set(os.path.basename(filepath))
         self._setValues(json.load(open(filepath)))
+        self.after(0, self._dirty.set, False)
 
     def getDbConfig(self):
         return self.tabs['NetworkTab'].getDB()
