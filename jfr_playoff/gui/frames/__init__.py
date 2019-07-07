@@ -217,7 +217,27 @@ class ScrollableFrame(tk.Frame):
             (0,0), window=frame, anchor=tk.N+tk.W)
         frame.bind('<Configure>', self._onFrameConfigure)
         self.canvas.bind('<Configure>', self._onCanvasConfigure)
+        self.bind('<Enter>', partial(self._setScroll, value=True))
+        self.bind('<Leave>', partial(self._setScroll, value=False))
         self.renderContent(frame)
+
+    def _setScroll(self, event, value):
+        if value:
+            self.bind_all('<MouseWheel>', self._onVscroll)
+            self.bind_all('<Shift-MouseWheel>', self._onHscroll)
+        else:
+            self.unbind_all('<MouseWheel>')
+            self.unbind_all('<Shift-MouseWheel>')
+
+    def _onHscroll(self, event):
+        self._onScroll(tk.X, -1 if event.delta > 0 else 1)
+
+    def _onVscroll(self, event):
+        self._onScroll(tk.Y, -1 if event.delta > 0 else 1)
+
+    def _onScroll(self, direction, delta):
+        getattr(
+            self.canvas, '%sview' % (direction))(tk.SCROLL, delta, tk.UNITS)
 
     def _onFrameConfigure(self, event):
         self.canvas.configure(scrollregion=self.canvas.bbox('all'))
