@@ -382,19 +382,24 @@ class RefreshableOptionMenu(ttk.OptionMenu):
                 self.__callback(self._valueVariable, *args)
 
     def refreshOptions(self, *args):
-        options = self.getOptions()
-        self['menu'].delete(0, tk.END)
-        for label, option in options:
-            self['menu'].add_command(
-                label=label,
-                command=self._setit(
-                    self._variable, self._valueVariable,
-                    label, option, self._callback))
-        self._valueLock = True
-        self._valueVariable.set(
-            self._lastValue
-            if self._lastValue in [option[1] for option in options] else '')
-        self._valueLock = False
+        try:
+            options = self.getOptions()
+            self['menu'].delete(0, tk.END)
+            for label, option in options:
+                self['menu'].add_command(
+                    label=label,
+                    command=self._setit(
+                        self._variable, self._valueVariable,
+                        label, option, self._callback))
+            self._valueLock = True
+            self._valueVariable.set(
+                self._lastValue
+                if self._lastValue in [option[1] for option in options]
+                else '')
+            self._valueLock = False
+        except tk.TclError:
+            # we're probably being destroyed, ignore
+            pass
 
     def getOptions(self):
         return [

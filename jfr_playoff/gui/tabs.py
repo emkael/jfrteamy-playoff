@@ -282,7 +282,7 @@ class MatchesTab(PlayoffTab):
 
     def setValues(self, config):
         phases = config['phases'] if 'phases' in config else []
-        for idx in self.phases:
+        for idx in self.phases.keys():
             self.removePhase(idx)
         for phase in phases:
             newPhase = self.addPhase()

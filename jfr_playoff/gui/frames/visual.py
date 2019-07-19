@@ -190,7 +190,11 @@ class MatchList(RefreshableOptionMenu):
         return match.label
 
     def getValues(self):
-        return self.winfo_toplevel().getMatches()
+        try:
+            return self.winfo_toplevel().getMatches()
+        except tk.TclError:
+            # we're probably being destroyed, ignore
+            return []
 
     def getVarValue(self, match):
         return unicode(match.getMatchID())

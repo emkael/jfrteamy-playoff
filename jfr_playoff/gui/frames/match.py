@@ -600,10 +600,14 @@ class MatchSettingsFrame(RepeatableFrame):
 
     @property
     def label(self):
-        phase = self._getPhase()
-        return 'Mecz #%d (%s)' % (
-            self.getMatchID(),
-            phase.master.tab(phase)['text'] if phase is not None else '')
+        try:
+            phase = self._getPhase()
+            return 'Mecz #%d (%s)' % (
+                self.getMatchID(),
+                phase.master.tab(phase)['text'] if phase is not None else '')
+        except tk.TclError:
+            # we're probably just being created, ignore
+            return ''
 
     def setValue(self, value):
         self.matchID.set(value['id'] if 'id' in value else 0)
