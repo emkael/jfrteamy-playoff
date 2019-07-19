@@ -65,22 +65,13 @@ class PlayoffGUI(tk.Tk):
     def _buildMenu(self):
         menu = tk.Frame(self)
         menu.pack(side=tk.TOP, fill=tk.X)
-        (ttk.Button(
-            menu,
-            image=GuiImage.get_icon('new'), command=self.onNewFile)).pack(
-            side=tk.LEFT)
-        (ttk.Button(
-            menu,
-            image=GuiImage.get_icon('open'), command=self.onFileOpen)).pack(
-            side=tk.LEFT)
-        (ttk.Button(
-            menu,
-            image=GuiImage.get_icon('save'), command=self.onSave)).pack(
-            side=tk.LEFT)
-        (ttk.Button(
-            menu,
-            image=GuiImage.get_icon('saveas'), command=self.onSaveAs)).pack(
-            side=tk.LEFT)
+        for icon, command in [('new', self.onNewFile),
+                              ('open', self.onFileOpen),
+                              ('save', self.onSave),
+                              ('saveas', self.onSaveAs)]:
+            (ttk.Button(
+                menu, image=GuiImage.get_icon(icon), command=command)).pack(
+                    side=tk.LEFT)
 
     def onNewFile(self):
         self._checkSave()
