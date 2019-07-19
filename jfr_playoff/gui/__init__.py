@@ -1,9 +1,14 @@
+#coding=utf-8
+
 import json, os, sys
 
 import tkinter as tk
 from tkinter import ttk
+import tkFileDialog as tkfd
+import tkMessageBox as tkmb
 
 from .tabs import *
+from .icons import GuiImage
 
 class PlayoffGUI(tk.Tk):
     def __init__(self):
@@ -18,6 +23,7 @@ class PlayoffGUI(tk.Tk):
         self._dirty = tk.BooleanVar()
         self._dirty.trace('w', self._setTitle)
         self._filepath = None
+        self._buildMenu()
 
     def run(self):
         self.notebook = ttk.Notebook(self)
@@ -35,19 +41,12 @@ class PlayoffGUI(tk.Tk):
     def _onFileChange(self, *args):
         self._dirty.set(True)
 
-    def _setValues(self, config):
-        for tab in self.tabs.values():
-            tab.setValues(config)
-
-    def _resetValues(self):
-        self._setValues({})
-
-    def newFile(self):
-        self._filepath = None
-        self.newFileIndex += 1
-        self._title.set('Nowa drabinka %d' % (self.newFileIndex))
-        self._resetValues()
-        self.after(0, self._dirty.set, False)
+    def _checkSave(self):
+        if self._dirty.get():
+            if tkmb.askyesno(
+                    'Zapisz zmiany',
+                    'Czy chcesz zapisać zmiany w bieżącej drabince?'):
+                self.onSave()
 
     def _setTitle(self, *args):
         self.title('%s - %s%s' % (
@@ -56,11 +55,77 @@ class PlayoffGUI(tk.Tk):
             ' *' if self._dirty.get() else ''
         ))
 
+    def _setValues(self, config):
+        for tab in self.tabs.values():
+            tab.setValues(config)
+
+    def _resetValues(self):
+        self._setValues({})
+
+    def _buildMenu(self):
+        menu = tk.Frame(self)
+        menu.pack(side=tk.TOP, fill=tk.X)
+        (ttk.Button(
+            menu,
+            image=GuiImage.get_icon('new'), command=self.onNewFile)).pack(
+            side=tk.LEFT)
+        (ttk.Button(
+            menu,
+            image=GuiImage.get_icon('open'), command=self.onFileOpen)).pack(
+            side=tk.LEFT)
+        (ttk.Button(
+            menu,
+            image=GuiImage.get_icon('save'), command=self.onSave)).pack(
+            side=tk.LEFT)
+        (ttk.Button(
+            menu,
+            image=GuiImage.get_icon('saveas'), command=self.onSaveAs)).pack(
+            side=tk.LEFT)
+
+    def onNewFile(self):
+        self._checkSave()
+        self.newFile()
+
+    def onFileOpen(self):
+        self._checkSave()
+        filename = tkfd.askopenfilename(
+            title='Wybierz plik drabniki',
+            filetypes=(('JFR Teamy Play-Off files', '*.jtpo'),
+                       ('JSON files', '*.json'),))
+        if filename:
+            self.openFile(filename)
+
+    def onSave(self):
+        if self._filepath is not None:
+            self.saveFile(self._filepath)
+        else:
+            self.onSaveAs()
+
+    def onSaveAs(self):
+        filename = tkfd.asksaveasfilename(
+            title='Wybierz plik drabniki',
+            filetypes=(('JFR Teamy Play-Off files', '*.jtpo'),
+                       ('JSON files', '*.json'),))
+        if filename:
+            if not filename.lower().endswith('.jtpo'):
+                filename = filename + '.jtpo'
+            self.saveFile(filename)
+
+    def newFile(self):
+        self._filepath = None
+        self.newFileIndex += 1
+        self._title.set('Nowa drabinka %d' % (self.newFileIndex))
+        self._resetValues()
+        self.after(0, self._dirty.set, False)
+
     def openFile(self, filepath):
         self._filepath = filepath
         self._title.set(os.path.basename(filepath))
         self._setValues(json.load(open(filepath)))
         self.after(0, self._dirty.set, False)
+
+    def saveFile(self, filepath):
+        pass
 
     def getDbConfig(self):
         return self.tabs['NetworkTab'].getDB()
