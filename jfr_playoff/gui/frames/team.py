@@ -38,6 +38,16 @@ class ManualTeamRow(RepeatableFrame):
             flag if len(flag) else None, position
         ]
 
+    def setValue(self, value):
+        self.fullname.set(value[0])
+        self.shortname.set(value[1])
+        if len(value) > 2:
+            if value[2] is not None:
+                self.flag.set(value[2])
+        if len(value) > 3:
+            if value[3] is not None:
+                self.position.set(value[3])
+
     def _changeNotify(self, *args):
         self.winfo_toplevel().event_generate(
             '<<TeamSettingsChanged>>', when='tail')
