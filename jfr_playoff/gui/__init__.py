@@ -17,13 +17,14 @@ class PlayoffGUI(tk.Tk):
         ttk.Style().configure('TLabelframe', padding=5)
         self.geometry('920x640')
         self.tabs = {}
+        self._buildMenu()
         self.newFileIndex = 0
         self._title = tk.StringVar()
         self._title.trace('w', self._setTitle)
         self._dirty = tk.BooleanVar()
         self._dirty.trace('w', self._setTitle)
+        self._dirty.trace('w', self._setMenuButtons)
         self._filepath = None
-        self._buildMenu()
 
     def run(self):
         self.notebook = ttk.Notebook(self)
@@ -55,6 +56,10 @@ class PlayoffGUI(tk.Tk):
             ' *' if self._dirty.get() else ''
         ))
 
+    def _setMenuButtons(self, *args):
+        self.menuButtons['save'].configure(
+            state=tk.NORMAL if self._dirty.get() else tk.DISABLED)
+
     def _setValues(self, config):
         for tab in self.tabs.values():
             tab.setValues(config)
@@ -65,13 +70,14 @@ class PlayoffGUI(tk.Tk):
     def _buildMenu(self):
         menu = tk.Frame(self)
         menu.pack(side=tk.TOP, fill=tk.X)
+        self.menuButtons = {}
         for icon, command in [('new', self.onNewFile),
                               ('open', self.onFileOpen),
                               ('save', self.onSave),
                               ('saveas', self.onSaveAs)]:
-            (ttk.Button(
-                menu, image=GuiImage.get_icon(icon), command=command)).pack(
-                    side=tk.LEFT)
+            self.menuButtons[icon] = ttk.Button(
+                menu, image=GuiImage.get_icon(icon), command=command)
+            self.menuButtons[icon].pack(side=tk.LEFT)
 
     def onNewFile(self):
         self._checkSave()
