@@ -1,5 +1,7 @@
 #coding=utf-8
 
+from collections import OrderedDict
+
 import tkinter as tk
 from tkinter.font import Font
 from tkinter import ttk
@@ -171,7 +173,7 @@ class SwissSettingsFrame(RepeatableFrame):
             value['relative_path'] if 'relative_path' in value else '')
 
     def getValue(self):
-        config = {}
+        config = OrderedDict()
         if self.source.get() == self.SOURCE_DB:
             config['database'] = self.fetchDB.get()
             if self.linkRelPath.get():
@@ -423,7 +425,7 @@ class BracketMatchSettingsFrame(GuiFrame):
         if self.source.get() == self.SOURCE_TEAM:
             return self.teams
         else:
-            config = {}
+            config = OrderedDict()
             lists = {
                 5: self.positions,
                 1: self.winners,
@@ -698,7 +700,7 @@ class MatchSettingsFrame(RepeatableFrame):
                 self.bracketSettings[idx].setSelectedTeam(-1)
 
     def getValue(self):
-        config = {}
+        config = OrderedDict()
         config['id'] = self.matchID.get()
         if self.link.get():
             config['link'] = self.link.get()
@@ -805,7 +807,7 @@ class MatchPhaseFrame(ScrollableFrame):
             '<<MatchListChanged>>', when='tail')
 
     def getConfig(self):
-        config = {}
+        config = OrderedDict
         if self.name.get():
             config['title'] = self.name.get()
         if self.link.get():

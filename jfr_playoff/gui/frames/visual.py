@@ -1,5 +1,7 @@
 #coding=utf-8
 
+from collections import OrderedDict
+
 import tkinter as tk
 from tkinter import ttk
 import tkColorChooser as tkcc
@@ -179,23 +181,24 @@ class VisualSettingsFrame(GuiFrame):
         self.teamNamePrefix.set(values['team_boxes']['name_prefix'])
 
     def getValues(self):
-        return {
-            'width': self.boxWidth.get(default=250),
-            'height': self.boxHeight.get(default=80),
-            'margin': self.boxMargin.get(default=60),
-            'starting_position_indicators': self.startingPositionIndicators.get(),
-            'finishing_position_indicators': self.finishingPositionIndicators.get(),
-            'team_boxes': {
-                'label_length_limit': self.teamNameLength.get(default=25) if self.shortenTeamNames else 0,
-                'predict_teams': self.teamNamePredict.get(),
-                'label_separator': self.teamLabelSeparator.get(),
-                'label_placeholder': self.teamNamePlaceholder.get(),
-                'label_ellipsis': self.teamNameEllipsis.get(),
-                'name_separator': self.teamNameSeparator.get(),
-                'name_prefix': self.teamNamePrefix.get(),
-                'sort_eligible_first': self.teamNameSortPredictions.get()
-            }
-        }
+        return OrderedDict(
+            {
+                'width': self.boxWidth.get(default=250),
+                'height': self.boxHeight.get(default=80),
+                'margin': self.boxMargin.get(default=60),
+                'starting_position_indicators': self.startingPositionIndicators.get(),
+                'finishing_position_indicators': self.finishingPositionIndicators.get(),
+                'team_boxes': {
+                    'label_length_limit': self.teamNameLength.get(default=25) if self.shortenTeamNames else 0,
+                    'predict_teams': self.teamNamePredict.get(),
+                    'label_separator': self.teamLabelSeparator.get(),
+                    'label_placeholder': self.teamNamePlaceholder.get(),
+                    'label_ellipsis': self.teamNameEllipsis.get(),
+                    'name_separator': self.teamNameSeparator.get(),
+                    'name_prefix': self.teamNamePrefix.get(),
+                    'sort_eligible_first': self.teamNameSortPredictions.get()
+                }
+            })
 
 
 class MatchList(RefreshableOptionMenu):
@@ -282,7 +285,8 @@ class BoxPositionsFrame(ScrollableFrame):
         self.positions.setValue(values_to_set)
 
     def getValues(self):
-        return { match: config for match, config in self.positions.getValue() }
+        return OrderedDict(
+            { match: config for match, config in self.positions.getValue() })
 
 class LineStyle(GuiFrame):
     def _selectColour(self):
@@ -338,7 +342,7 @@ class LineStylesFrame(GuiFrame):
     CONFIG_KEYS = ['colour', 'h_offset', 'v_offset']
 
     def renderContent(self):
-        self.lines = {}
+        self.lines = OrderedDict()
         for idx, line in enumerate(self.DEFAULT_VALUES):
             self.lines[line[0]] = LineStyle(self)
             self.lines[line[0]].grid(row=idx+1, column=1, sticky=tk.W)
@@ -357,7 +361,7 @@ class LineStylesFrame(GuiFrame):
             self.lines[line[0]].setValue(value)
 
     def getValues(self):
-        config = {}
+        config = OrderedDict()
         for line, widget in self.lines.iteritems():
             value = widget.getValue()
             for idx, key in enumerate(self.CONFIG_KEYS):
@@ -423,10 +427,10 @@ class PositionStyleFrame(RepeatableFrame):
         self.description.set(value['caption'] if 'caption' in value else '')
 
     def getValue(self):
-        config = {
+        config = OrderedDict({
             'class': self.name.get(),
             'positions': self.positions
-        }
+        })
         caption = self.description.get()
         if caption:
             config['caption'] = caption

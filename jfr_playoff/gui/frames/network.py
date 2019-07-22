@@ -1,6 +1,7 @@
 #coding=utf-8
 
 import socket
+from collections import OrderedDict
 
 import tkinter as tk
 from tkinter import ttk
@@ -27,12 +28,12 @@ class MySQLConfigurationFrame(GuiFrame):
 
     def getConfig(self):
         if len(self.host.get().strip()):
-            return {
+            return OrderedDict({
                 'host': self.host.get().strip(),
                 'port': self.port.get(default=3306),
                 'user': self.user.get().strip(),
                 'pass': self.pass_.get().strip()
-            }
+            })
         return None
 
     def _testDB(self):
@@ -167,9 +168,9 @@ class GoniecConfigurationFrame(GuiFrame):
         self.enable.set(values['enabled'] if 'enabled' in values else 0)
 
     def getValues(self):
-        config = {
+        config = OrderedDict({
             'enabled': self.enable.get()
-        }
+        })
         if self.enable.get():
             config['host'] = self.host.get()
             config['port'] = self.port.get()

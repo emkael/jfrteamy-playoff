@@ -1,6 +1,7 @@
 #coding=utf-8
 
 import copy
+from collections import OrderedDict
 
 import tkinter as tk
 from tkinter import ttk
@@ -37,9 +38,9 @@ class TranslationConfigurationFrame(ScrollableFrame):
         self.repeater.setValue(values)
 
     def getTranslations(self):
-        return {
+        return OrderedDict({
             key: value for key, value in self.repeater.getValue()
-        }
+        })
 
     def renderContent(self, container):
         self.repeater = WidgetRepeater(container, TranslationRow)

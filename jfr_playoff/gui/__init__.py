@@ -1,6 +1,7 @@
 #coding=utf-8
 
 import codecs, copy, json, os, sys
+from collections import OrderedDict
 
 import tkinter as tk
 from tkinter import ttk
@@ -130,7 +131,7 @@ class PlayoffGUI(tk.Tk):
         self.after(0, self._dirty.set, False)
 
     def getConfig(self):
-        config = {} # TODO: OrderderDict, everywhere
+        config = OrderedDict()
         for tab in self.tabs.values():
             tabConfig = tab.getConfig()
             if tabConfig is not None:

@@ -1,5 +1,7 @@
 #coding=utf-8
 
+from collections import OrderedDict
+
 import tkinter as tk
 from tkinter.font import Font
 from tkinter import ttk
@@ -168,7 +170,7 @@ class TeamFetchSettingsFrame(GuiFrame):
             '<<TeamSettingsChanged>>', when='tail')
 
     def getTeams(self):
-        teams = {}
+        teams = OrderedDict()
         if self.fetchSource.get() == self.SOURCE_LINK:
             teams['link'] = self.fetchLink.get()
         elif self.fetchSource.get() == self.SOURCE_DB:
@@ -364,7 +366,8 @@ class TeamAliasFrame(ScrollableFrame):
         self.repeater.grid(row=1, column=0, sticky=tk.W+tk.E)
 
     def getConfig(self):
-        return {val[0]: val[1] for val in self.repeater.getValue() if val[0]}
+        return OrderedDict(
+            {val[0]: val[1] for val in self.repeater.getValue() if val[0]})
 
     def setValues(self, values):
         self.repeater.setValue(list(values.iteritems()))

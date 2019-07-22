@@ -1,6 +1,7 @@
 #coding=utf-8
 
 import os
+from collections import OrderedDict
 
 import tkinter as tk
 from tkinter import ttk
@@ -149,15 +150,15 @@ class MainSettingsTab(PlayoffTab):
         container.rowconfigure(4, weight=1)
 
     def getConfig(self):
-        return {
+        return OrderedDict({
             'output': self.outputPath.get(),
-            'page': {
+            'page': OrderedDict({
                 'title': self.pageTitle.get(),
                 'logoh': self.pageLogoh.get(),
                 'refresh': self.refreshInterval.get() \
                 if self.refresh.get() > 0 else 0
-            }
-        }
+            })
+        })
 
 class TeamsTab(PlayoffTab):
     @property
@@ -214,10 +215,10 @@ class TeamsTab(PlayoffTab):
         return self._teamList
 
     def collectConfig(self):
-        config = {
+        config = OrderedDict({
             'teams': self.settingsFrame.getConfig(),
             'team_aliases': self.aliasFrame.getConfig()
-        }
+        })
         tieConfig = self.previewFrame.getTieConfig()
         if tieConfig is not None and isinstance(config['teams'], dict):
             config['teams']['ties'] = tieConfig
@@ -312,9 +313,9 @@ class MatchesTab(PlayoffTab):
                         self.winfo_toplevel().getNewMatchID(match))
 
     def getConfig(self):
-        return {
+        return OrderedDict({
             'phases': [phase.getConfig() for phase in self.phases.values()]
-        }
+        })
 
 class SwissesTab(PlayoffTab):
     @property
@@ -331,9 +332,9 @@ class SwissesTab(PlayoffTab):
     def getConfig(self):
         swisses = self.swisses.getValues()
         if len(swisses):
-            return {
+            return OrderedDict({
                 'swiss': swisses
-            }
+            })
         else:
             return None
 
@@ -394,7 +395,7 @@ class NetworkTab(PlayoffTab):
             config['remotes'] if 'remotes' in config else [])
 
     def getConfig(self):
-        config = {}
+        config = OrderedDict()
         mysql = self.getDB()
         if mysql is not None:
             config['database'] = mysql
@@ -430,12 +431,12 @@ class VisualTab(PlayoffTab):
             self.positionFrame.setValues({})
 
     def getConfig(self):
-        config = {
+        config = OrderedDict({
             'page': self.settingsFrame.getValues()
-        }
+        })
         boxConfig = self.positionFrame.getValues()
         if boxConfig:
-            config['canvas'] = {}
+            config['canvas'] = OrderedDict()
             config['canvas']['box_positioning'] = boxConfig
         return config
 
@@ -466,10 +467,10 @@ class StyleTab(PlayoffTab):
             self.positionStylesFrame.setValues([])
 
     def getConfig(self):
-        return {
+        return OrderedDict({
             'canvas': self.linesFrame.getValues(),
             'position_styles': self.positionStylesFrame.getValues()
-        }
+        })
 
 class TranslationsTab(PlayoffTab):
     @property
@@ -488,9 +489,9 @@ class TranslationsTab(PlayoffTab):
             self.translationsFrame.setTranslations({})
 
     def getConfig(self):
-        return {
+        return OrderedDict({
             'i18n': self.translationsFrame.getTranslations()
-        }
+        })
 
 __all__ = ['MainSettingsTab', 'TeamsTab', 'MatchesTab', 'SwissesTab',
            'NetworkTab', 'VisualTab', 'StyleTab', 'TranslationsTab']
