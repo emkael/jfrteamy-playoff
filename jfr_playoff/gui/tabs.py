@@ -39,6 +39,9 @@ class PlayoffTab(ttk.Frame):
     def setValues(self, config):
         pass
 
+    def getConfig(self):
+        pass
+
 class MainSettingsTab(PlayoffTab):
     DEFAULT_INTERVAL = 60
 
@@ -145,6 +148,17 @@ class MainSettingsTab(PlayoffTab):
         container.columnconfigure(1, weight=1)
         container.rowconfigure(4, weight=1)
 
+    def getConfig(self):
+        return {
+            'output': self.outputPath.get(),
+            'page': {
+                'title': self.pageTitle.get(),
+                'logoh': self.pageLogoh.get(),
+                'refresh': self.refreshInterval.get() \
+                if self.refresh.get() > 0 else 0
+            }
+        }
+
 class TeamsTab(PlayoffTab):
     @property
     def title(self):
@@ -217,6 +231,9 @@ class TeamsTab(PlayoffTab):
         self.previewFrame.setTieConfig(
             config['teams']['ties']
             if 'teams' in config and 'ties' in config['teams'] else [])
+
+    def getConfig(self):
+        return self.collectConfig()
 
 class MatchesTab(PlayoffTab):
     @property
@@ -294,6 +311,11 @@ class MatchesTab(PlayoffTab):
                     match.matchID.set(
                         self.winfo_toplevel().getNewMatchID(match))
 
+    def getConfig(self):
+        return {
+            'phases': [phase.getConfig() for phase in self.phases.values()]
+        }
+
 class SwissesTab(PlayoffTab):
     @property
     def title(self):
@@ -305,6 +327,15 @@ class SwissesTab(PlayoffTab):
 
     def setValues(self, config):
         self.swisses.setValues(config['swiss'] if 'swiss' in config else [])
+
+    def getConfig(self):
+        swisses = self.swisses.getValues()
+        if len(swisses):
+            return {
+                'swiss': swisses
+            }
+        else:
+            return None
 
 class NetworkTab(PlayoffTab):
     @property
@@ -362,6 +393,16 @@ class NetworkTab(PlayoffTab):
         self.remoteFrame.setValues(
             config['remotes'] if 'remotes' in config else [])
 
+    def getConfig(self):
+        config = {}
+        mysql = self.getDB()
+        if mysql is not None:
+            config['database'] = mysql
+        config['goniec'] = self.goniecFrame.getValues()
+        remotes = self.remoteFrame.getValues()
+        if len(remotes):
+            config['remotes'] = remotes
+        return config
 
 class VisualTab(PlayoffTab):
     @property
@@ -387,6 +428,16 @@ class VisualTab(PlayoffTab):
             self.positionFrame.setValues(config['canvas']['box_positioning'])
         else:
             self.positionFrame.setValues({})
+
+    def getConfig(self):
+        config = {
+            'page': self.settingsFrame.getValues()
+        }
+        boxConfig = self.positionFrame.getValues()
+        if boxConfig:
+            config['canvas'] = {}
+            config['canvas']['box_positioning'] = boxConfig
+        return config
 
 class StyleTab(PlayoffTab):
     @property
@@ -414,6 +465,12 @@ class StyleTab(PlayoffTab):
         else:
             self.positionStylesFrame.setValues([])
 
+    def getConfig(self):
+        return {
+            'canvas': self.linesFrame.getValues(),
+            'position_styles': self.positionStylesFrame.getValues()
+        }
+
 class TranslationsTab(PlayoffTab):
     @property
     def title(self):
@@ -429,6 +486,11 @@ class TranslationsTab(PlayoffTab):
             self.translationsFrame.setTranslations(config['i18n'])
         else:
             self.translationsFrame.setTranslations({})
+
+    def getConfig(self):
+        return {
+            'i18n': self.translationsFrame.getTranslations()
+        }
 
 __all__ = ['MainSettingsTab', 'TeamsTab', 'MatchesTab', 'SwissesTab',
            'NetworkTab', 'VisualTab', 'StyleTab', 'TranslationsTab']

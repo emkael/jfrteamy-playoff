@@ -178,6 +178,25 @@ class VisualSettingsFrame(GuiFrame):
         self.teamNameSeparator.set(values['team_boxes']['name_separator'])
         self.teamNamePrefix.set(values['team_boxes']['name_prefix'])
 
+    def getValues(self):
+        return {
+            'width': self.boxWidth.get(default=250),
+            'height': self.boxHeight.get(default=80),
+            'margin': self.boxMargin.get(default=60),
+            'starting_position_indicators': self.startingPositionIndicators.get(),
+            'finishing_position_indicators': self.finishingPositionIndicators.get(),
+            'team_boxes': {
+                'label_length_limit': self.teamNameLength.get(default=25) if self.shortenTeamNames else 0,
+                'predict_teams': self.teamNamePredict.get(),
+                'label_separator': self.teamLabelSeparator.get(),
+                'label_placeholder': self.teamNamePlaceholder.get(),
+                'label_ellipsis': self.teamNameEllipsis.get(),
+                'name_separator': self.teamNameSeparator.get(),
+                'name_prefix': self.teamNamePrefix.get(),
+                'sort_eligible_first': self.teamNameSortPredictions.get()
+            }
+        }
+
 
 class MatchList(RefreshableOptionMenu):
     def __init__(self, *args, **kwargs):
@@ -235,6 +254,13 @@ class BoxPositionFrame(RepeatableFrame):
             self.vertical.set(0)
             self.horizontal.set(-1)
 
+    def getValue(self):
+            horizontal = self.horizontal.get(default=-1)
+            vertical = self.vertical.get(default=0)
+            return (
+                self.match.get(),
+                [vertical, horizontal] if horizontal >= 0 else vertical)
+
 class BoxPositionsFrame(ScrollableFrame):
     def renderContent(self, container):
         (ttk.Label(container, text='Pozycje tabelek meczów:')).pack(
@@ -254,6 +280,9 @@ class BoxPositionsFrame(ScrollableFrame):
                 value.append(val[1])
             values_to_set.append(value)
         self.positions.setValue(values_to_set)
+
+    def getValues(self):
+        return { match: config for match, config in self.positions.getValue() }
 
 class LineStyle(GuiFrame):
     def _selectColour(self):
@@ -288,6 +317,9 @@ class LineStyle(GuiFrame):
         self.hOffset.set(value[1])
         self.vOffset.set(value[2])
 
+    def getValue(self):
+        return [self._getColour(), self.hOffset.get(), self.vOffset.get()]
+
 class LineStylesFrame(GuiFrame):
     DEFAULT_VALUES = [
         ('winner', ('#00ff00', 5, -10),
@@ -303,6 +335,7 @@ class LineStylesFrame(GuiFrame):
         ('finish_loser', ('#ff0000', 20, 10),
          'Przegrani meczów kończący rozgrywki: ')
     ]
+    CONFIG_KEYS = ['colour', 'h_offset', 'v_offset']
 
     def renderContent(self):
         self.lines = {}
@@ -317,11 +350,19 @@ class LineStylesFrame(GuiFrame):
     def setValues(self, values):
         for line in self.DEFAULT_VALUES:
             value = list(line[1])
-            for idx, key in enumerate(['colour', 'h_offset', 'v_offset']):
+            for idx, key in enumerate(self.CONFIG_KEYS):
                 key = '%s_%s' % (line[0], key)
                 if key in values:
                     value[idx] = values[key]
             self.lines[line[0]].setValue(value)
+
+    def getValues(self):
+        config = {}
+        for line, widget in self.lines.iteritems():
+            value = widget.getValue()
+            for idx, key in enumerate(self.CONFIG_KEYS):
+                config['%s_%s' % (line, key)] = value[idx]
+        return config
 
 
 class PositionsSelectionFrame(SelectionFrame):
@@ -381,6 +422,15 @@ class PositionStyleFrame(RepeatableFrame):
             value['positions'] if 'positions' in value else [])
         self.description.set(value['caption'] if 'caption' in value else '')
 
+    def getValue(self):
+        config = {
+            'class': self.name.get(),
+            'positions': self.positions
+        }
+        caption = self.description.get()
+        if caption:
+            config['caption'] = caption
+        return config
 
 class PositionStylesFrame(ScrollableFrame):
     def renderContent(self, container):
@@ -391,5 +441,8 @@ class PositionStylesFrame(ScrollableFrame):
 
     def setValues(self, values):
         self.styles.setValue(values)
+
+    def getValues(self):
+        return self.styles.getValue()
 
 __all__ = ['VisualSettingsFrame', 'BoxPositionsFrame', 'LineStylesFrame', 'PositionStylesFrame']

@@ -166,6 +166,15 @@ class GoniecConfigurationFrame(GuiFrame):
             values['port'] if 'port' in values else self.DEFAULT_PORT)
         self.enable.set(values['enabled'] if 'enabled' in values else 0)
 
+    def getValues(self):
+        config = {
+            'enabled': self.enable.get()
+        }
+        if self.enable.get():
+            config['host'] = self.host.get()
+            config['port'] = self.port.get()
+        return config
+
 class RemoteConfigurationFrame(ScrollableFrame):
     def renderContent(self, container):
         frame = ttk.LabelFrame(container, text='Zdalne pliki konfiguracyjne:')
@@ -177,5 +186,8 @@ class RemoteConfigurationFrame(ScrollableFrame):
 
     def setValues(self, values):
         self.repeater.setValue(values)
+
+    def getValues(self):
+        return self.repeater.getValue()
 
 __all__ = ['MySQLConfigurationFrame', 'GoniecConfigurationFrame', 'RemoteConfigurationFrame']

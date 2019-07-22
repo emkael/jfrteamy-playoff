@@ -23,6 +23,9 @@ class TranslationRow(RepeatableFrame):
         self.key.set(value[0])
         self.value.set(value[1])
 
+    def getValue(self):
+        return (self.key.get(), self.value.get())
+
 class TranslationConfigurationFrame(ScrollableFrame):
 
     def setTranslations(self, translations):
@@ -32,6 +35,11 @@ class TranslationConfigurationFrame(ScrollableFrame):
         for value in default_translations.iteritems():
             values.append(value)
         self.repeater.setValue(values)
+
+    def getTranslations(self):
+        return {
+            key: value for key, value in self.repeater.getValue()
+        }
 
     def renderContent(self, container):
         self.repeater = WidgetRepeater(container, TranslationRow)

@@ -1,6 +1,6 @@
 #coding=utf-8
 
-import json, os, sys
+import codecs, copy, json, os, sys
 
 import tkinter as tk
 from tkinter import ttk
@@ -122,7 +122,33 @@ class PlayoffGUI(tk.Tk):
         self.after(0, self._dirty.set, False)
 
     def saveFile(self, filepath):
-        pass
+        json.dump(
+            self.getConfig(), codecs.open(filepath, 'w', encoding='utf8'),
+            indent=4, ensure_ascii=False)
+        self._filepath = filepath
+        self._title.set(os.path.basename(filepath))
+        self.after(0, self._dirty.set, False)
+
+    def getConfig(self):
+        config = {} # TODO: OrderderDict, everywhere
+        for tab in self.tabs.values():
+            tabConfig = tab.getConfig()
+            if tabConfig is not None:
+                config = self._mergeConfig(config, tab.getConfig())
+        return config
+
+    def _mergeConfig(self, base, update):
+        result = copy.copy(base)
+        for key, value in update.iteritems():
+            if key in result:
+                if isinstance(result[key], dict):
+                    result[key] = self._mergeConfig(
+                        result[key], update[key])
+                else:
+                    result[key] = update[key]
+            else:
+                result[key] = value
+        return result
 
     def getDbConfig(self):
         return self.tabs['NetworkTab'].getDB()

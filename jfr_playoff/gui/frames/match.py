@@ -170,6 +170,22 @@ class SwissSettingsFrame(RepeatableFrame):
         self.linkRelPath.set(
             value['relative_path'] if 'relative_path' in value else '')
 
+    def getValue(self):
+        config = {}
+        if self.source.get() == self.SOURCE_DB:
+            config['database'] = self.fetchDB.get()
+            if self.linkRelPath.get():
+                config['relative_path'] = self.linkRelPath.get()
+        if self.source.get() == self.SOURCE_LINK:
+            config['link'] = self.fetchLink.get()
+        if self.linkLabel.get():
+            config['label'] = self.linkLabel.get()
+        config['position'] = self.setFrom.get()
+        if self.setToEnabled.get():
+            config['position_to'] = self.setTo.get()
+        if self.fetchFromEnabled.get():
+            config['swiss_position'] = self.fetchFrom.get()
+        return config
 
 class SwissesFrame(ScrollableFrame):
     def renderContent(self, container):
@@ -178,6 +194,9 @@ class SwissesFrame(ScrollableFrame):
 
     def setValues(self, values):
         self.swisses.setValue(values)
+
+    def getValues(self):
+        return self.swisses.getValue()
 
 class MatchSelectionButton(SelectionButton):
     @property
@@ -390,6 +409,16 @@ class BracketMatchSettingsFrame(GuiFrame):
             self.selectedIndex.set(('none', ''))
             self.selected.set(0)
 
+    def getSelectedTeam(self):
+        if self.selected.get():
+            try:
+                return self.bracketWidgets[7].getValues().index(
+                    self.selectedIndex.get())
+            except ValueError:
+                return -1
+        else:
+            return -1
+
     def getConfig(self):
         if self.source.get() == self.SOURCE_TEAM:
             return self.teams
@@ -405,6 +434,9 @@ class BracketMatchSettingsFrame(GuiFrame):
                 if len(values) > 0:
                     config[key] = values
             return config
+
+    def getValue(self):
+        return self.getConfig()
 
 class MatchSettingsFrame(RepeatableFrame):
     SCORE_SOURCE_DB = 0
@@ -665,6 +697,53 @@ class MatchSettingsFrame(RepeatableFrame):
             for idx in range(0, 2):
                 self.bracketSettings[idx].setSelectedTeam(-1)
 
+    def getValue(self):
+        config = {}
+        config['id'] = self.matchID.get()
+        if self.link.get():
+            config['link'] = self.link.get()
+
+        config['teams'] = [bracket.getValue()
+                           for bracket in self.bracketSettings]
+
+        if len(self.winnerPositions):
+            config['winner'] = self.winnerPositions
+        if len(self.loserPositions):
+            config['loser'] = self.loserPositions
+
+        selected = [bracket.getSelectedTeam()
+                    for bracket in self.bracketSettings]
+        if len([s for s in selected if s > -1]):
+            config['selected_teams'] = selected
+
+        if self.source.get() == self.SCORE_SOURCE_DB:
+            config['database'] = self.scoreDB.get()
+            config['round'] = self.scoreRound.get()
+        if self.source.get() != self.SCORE_SOURCE_CUSTOM:
+            config['table'] = self.scoreTable.get()
+
+        if self.source.get() == self.SCORE_SOURCE_CUSTOM:
+            config['score'] = []
+            for score in self.scoreCustom:
+                try:
+                    config['score'].append(float(score.get()))
+                except ValueError:
+                    config['score'].append(0.0)
+            if self.scoreNotFinished.get():
+                config['running'] = self.scoreBoards.get()
+
+        return config
+
+        if 'selected_teams' in value \
+           and isinstance(value['selected_teams'], list):
+            for idx, val in enumerate(value['selected_teams']):
+                if idx < 2:
+                    self.bracketSettings[idx].setSelectedTeam(val)
+        else:
+            for idx in range(0, 2):
+                self.bracketSettings[idx].setSelectedTeam(-1)
+
+
 
 class MatchSeparator(RepeatableFrame):
     def renderContent(self):
@@ -724,6 +803,25 @@ class MatchPhaseFrame(ScrollableFrame):
         self.name.set(values['title'] if 'title' in values else '')
         self.winfo_toplevel().event_generate(
             '<<MatchListChanged>>', when='tail')
+
+    def getConfig(self):
+        config = {}
+        if self.name.get():
+            config['title'] = self.name.get()
+        if self.link.get():
+            config['link'] = self.link.get()
+        values = self.matches.getValue()
+        dummies = []
+        matches = []
+        for idx, value in enumerate(values):
+            if value is None:
+                dummies.append(idx)
+            else:
+                matches.append(value)
+        if len(dummies):
+            config['dummies'] = dummies
+        config['matches'] = matches
+        return config
 
 
 __all__ = ['SwissesFrame', 'MatchPhaseFrame', 'MatchSettingsFrame']
