@@ -476,3 +476,24 @@ class NumericSpinbox(tk.Spinbox):
         val = self._variable.get()
         if val is None:
             self._variable.set(self._default)
+
+class LabelButton(ttk.Button):
+    def __init__(self, *args, **kwargs):
+        self.label = None
+        self.tooltip = None
+        self._prevTooltip = None
+        for param in ['label', 'tooltip']:
+            if param in kwargs:
+                setattr(self, param, kwargs[param])
+                del kwargs[param]
+        ttk.Button.__init__(self, *args, **kwargs)
+        if self.label and self.tooltip:
+            self.bind('<Enter>', self._onEnter)
+            self.bind('<Leave>', self._onLeave)
+
+    def _onEnter(self, *args):
+        self._prevTooltip = self.label.cget('text')
+        self.label.configure(text=self.tooltip)
+
+    def _onLeave(self, *args):
+        self.label.configure(text=self._prevTooltip)

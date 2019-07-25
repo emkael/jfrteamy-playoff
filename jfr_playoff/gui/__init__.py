@@ -10,6 +10,7 @@ import tkMessageBox as tkmb
 
 from .tabs import *
 from .icons import GuiImage
+from .frames import LabelButton
 
 class PlayoffGUI(tk.Tk):
     def __init__(self):
@@ -71,13 +72,17 @@ class PlayoffGUI(tk.Tk):
     def _buildMenu(self):
         menu = tk.Frame(self)
         menu.pack(side=tk.TOP, fill=tk.X)
+        statusBar = ttk.Label(menu)
+        statusBar.pack(side=tk.RIGHT)
         self.menuButtons = {}
-        for icon, command in [('new', self.onNewFile),
-                              ('open', self.onFileOpen),
-                              ('save', self.onSave),
-                              ('saveas', self.onSaveAs)]:
-            self.menuButtons[icon] = ttk.Button(
-                menu, image=GuiImage.get_icon(icon), command=command)
+        for icon, command, tooltip in [
+                ('new', self.onNewFile, 'Nowa drabinka...'),
+                ('open', self.onFileOpen, 'Otwórz drabinkę...'),
+                ('save', self.onSave, 'Zapisz'),
+                ('saveas', self.onSaveAs, 'Zapisz jako...')]:
+            self.menuButtons[icon] = LabelButton(
+                menu, image=GuiImage.get_icon(icon), command=command,
+                tooltip=tooltip, label=statusBar)
             self.menuButtons[icon].pack(side=tk.LEFT)
 
     def onNewFile(self):
