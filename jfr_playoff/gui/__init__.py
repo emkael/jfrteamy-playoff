@@ -10,7 +10,8 @@ import tkMessageBox as tkmb
 
 from .tabs import *
 from .icons import GuiImage
-from .frames import LabelButton
+from .frames import LabelButton, NumericSpinbox
+from .variables import NumericVar
 
 class PlayoffGUI(tk.Tk):
     def __init__(self):
@@ -84,6 +85,28 @@ class PlayoffGUI(tk.Tk):
                 menu, image=GuiImage.get_icon(icon), command=command,
                 tooltip=tooltip, label=statusBar)
             self.menuButtons[icon].pack(side=tk.LEFT)
+        (ttk.Separator(menu, orient=tk.VERTICAL)).pack(
+            side=tk.LEFT, fill=tk.Y, padx=3, pady=1)
+        for icon, command, tooltip in [
+                ('run-once', self.onRunOnce, 'Wygeneruj'),
+                ('run-timed', self.onRunTimed, 'Generuj co X sekund')]:
+            self.menuButtons[icon] = LabelButton(
+                menu, image=GuiImage.get_icon(icon), command=command,
+                tooltip=tooltip, label=statusBar)
+            self.menuButtons[icon].pack(side=tk.LEFT)
+        self.interval = NumericVar()
+        self.intervalField = NumericSpinbox(
+            menu, width=5,
+            textvariable=self.interval, from_=30, to=3600)
+        self.intervalField.pack(side=tk.LEFT)
+        (ttk.Label(menu, text='sekund')).pack(side=tk.LEFT)
+        for icon, command, tooltip in [
+                ('log', self.onLogWindowOpen, 'Dziennik komunikatów')]:
+            self.menuButtons[icon] = LabelButton(
+                menu, image=GuiImage.get_icon(icon), command=command,
+                tooltip=tooltip, label=statusBar)
+            self.menuButtons[icon].pack(side=tk.LEFT)
+
 
     def onNewFile(self):
         self._checkSave()
@@ -113,6 +136,15 @@ class PlayoffGUI(tk.Tk):
             if not filename.lower().endswith('.jtpo'):
                 filename = filename + '.jtpo'
             self.saveFile(filename)
+
+    def onRunOnce(self):
+        pass
+
+    def onRunTimed(self):
+        pass
+
+    def onLogWindowOpen(self):
+        pass
 
     def newFile(self):
         self._filepath = None
