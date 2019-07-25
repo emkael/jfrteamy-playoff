@@ -7,7 +7,7 @@ import tkinter as tk
 from tkinter import ttk
 import tkMessageBox
 
-from ..variables import NotifyStringVar, NotifyIntVar, NotifyNumericVar
+from ..variables import NotifyStringVar, NotifyIntVar, NotifyNumericVar, NumericVar
 
 def setPanelState(frame, state):
     for child in frame.winfo_children():
@@ -467,9 +467,9 @@ class NumericSpinbox(tk.Spinbox):
         self._default = kwargs['from_'] if 'from_' in kwargs else 0
         tk.Spinbox.__init__(self, *args, **kwargs)
         if self._variable is not None:
-            if not isinstance(self._variable, NotifyNumericVar):
+            if not isinstance(self._variable, NumericVar):
                 raise AttributeError(
-                    'NumericSpinbox variable must be NotifyNumericVar')
+                    'NumericSpinbox variable must be NumericVar')
             self._variable.trace('w', self._onChange)
 
     def _onChange(self, *args):

@@ -13,15 +13,18 @@ class NotifyVar(tk.Variable):
             self._root.event_generate('<<ValueChanged>>', when='tail')
         self._prevValue = self.get()
 
+class NumericVar(tk.StringVar):
+    def get(self, default=None):
+        try:
+            return int(str(tk.StringVar.get(self)).strip())
+        except ValueError:
+            return default
+
 class NotifyStringVar(NotifyVar, tk.StringVar):
     pass
 
 class NotifyIntVar(NotifyVar, tk.IntVar):
     pass
 
-class NotifyNumericVar(NotifyStringVar):
-    def get(self, default=None):
-        try:
-            return int(str(NotifyStringVar.get(self)).strip())
-        except ValueError:
-            return default
+class NotifyNumericVar(NotifyVar, NumericVar):
+    pass
