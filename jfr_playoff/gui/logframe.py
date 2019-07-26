@@ -19,16 +19,20 @@ class LogWindow(tk.Toplevel):
         self._counter = -1
 
     def renderContents(self):
-        columns = OrderedDict([
-            ('level', 'Poziom komunikatu'),
-            ('category', 'Moduł'),
-            ('message', 'Komunikat')])
+        columns = [
+            ('level', 'Poziom komunikatu', 150),
+            ('category', 'Moduł', 150),
+            ('message', 'Komunikat', None)]
         self.logList = ttk.Treeview(
             self, show='headings',
-            columns=columns.keys(),
+            columns=[c[0] for c in columns],
             selectmode='browse')
-        for column, heading in columns.iteritems():
+        for column, heading, width in columns:
             self.logList.heading(column, text=heading)
+            if width is not None:
+                self.logList.column(column, width=width, stretch=False)
+            else:
+                self.logList.column(column, stretch=True)
         self.logList.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
         btnFrame = tk.Frame(self)
         btnFrame.pack(side=tk.BOTTOM)
@@ -52,6 +56,7 @@ class LogWindow(tk.Toplevel):
             '', tk.END, tag=self._counter, values=[
                 record.levelname, record.name, record.message
             ])
+        self.logList.yview_moveto(1)
 
     def resetRecords(self):
         self._records = []
@@ -69,8 +74,11 @@ class LogWindow(tk.Toplevel):
     def _saveRecords(self, filename):
         with open(filename, 'w') as fileObj:
             for record, timestamp in self._records:
-                fileObj.write('%s\t%s\t%s\t%s' % (
-                    timestamp, record.levelname, record.name, record.message))
+                fileObj.write((
+                    u'%s\t%s\t%s\t%s\n' % (
+                        timestamp,
+                        record.levelname, record.name, record.message)).encode(
+                            'utf8'))
 
 
 class LogHandler(log.Handler):
