@@ -89,7 +89,7 @@ class PlayoffData(object):
     def prefill_leaderboard(self, teams):
         self.leaderboard = [None] * len(teams)
         for team in teams:
-            if len(team) > 3:
+            if len(team) > 3 and team[3] is not None:
                 self.leaderboard[team[3]-1] = team[0]
         self.fill_swiss_leaderboard(self.swiss, teams)
         PlayoffLogger.get('data').info('leaderboard pre-filled: %s', self.leaderboard)
@@ -167,7 +167,7 @@ class PlayoffData(object):
             max([
                 len(phase['matches']) + len(phase.get('dummies', []))
                 for phase in self.phases
-            ])
+            ] or [0])
         )
         PlayoffLogger.get('data').info('grid dimensions: %s', dimensions)
         return dimensions
