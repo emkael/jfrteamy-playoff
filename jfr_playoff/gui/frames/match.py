@@ -807,7 +807,7 @@ class MatchPhaseFrame(ScrollableFrame):
             '<<MatchListChanged>>', when='tail')
 
     def getConfig(self):
-        config = OrderedDict
+        config = OrderedDict()
         if self.name.get():
             config['title'] = self.name.get()
         if self.link.get():
