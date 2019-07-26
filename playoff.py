@@ -1,4 +1,4 @@
-import traceback
+import logging, traceback
 
 from jfr_playoff.filemanager import PlayoffFileManager
 from jfr_playoff.generator import PlayoffGenerator
@@ -26,9 +26,10 @@ def main():
                                 type=str, nargs='?', default=None)
         arguments = arg_parser.parse_args()
 
-        PlayoffLogger.setup('ERROR' if arguments.quiet else (
-            'INFO' if arguments.verbose else (
-                'DEBUG' if arguments.debug else 'WARNING')))
+        PlayoffLogger.setup(
+            level=logging.ERROR if arguments.quiet else (
+            logging.INFO if arguments.verbose else (
+                logging.DEBUG if arguments.debug else logging.WARNING)))
 
         PlayoffLogger.get().info('started with arguments: %s', arguments)
 

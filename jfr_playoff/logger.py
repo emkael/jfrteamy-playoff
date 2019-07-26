@@ -6,8 +6,7 @@ class PlayoffLogger:
     @classmethod
     def setup(cls, level):
         log.basicConfig(
-            level=getattr(log, level),
-            streamhandler=log.StreamHandler(),
+            level=level,
             format='%(levelname)-8s %(name)-8s %(message)s')
 
     @classmethod

@@ -12,6 +12,7 @@ from .tabs import *
 from .icons import GuiImage
 from .frames import LabelButton, NumericSpinbox
 from .variables import NumericVar
+from .logframe import LogWindow
 
 class PlayoffGUI(tk.Tk):
     def __init__(self):
@@ -20,6 +21,7 @@ class PlayoffGUI(tk.Tk):
         ttk.Style().configure('TLabelframe', padding=5)
         self.geometry('920x640')
         self.tabs = {}
+        self.logWindow = LogWindow(self)
         self._buildMenu()
         self.newFileIndex = 0
         self._title = tk.StringVar()
@@ -144,7 +146,8 @@ class PlayoffGUI(tk.Tk):
         pass
 
     def onLogWindowOpen(self):
-        pass
+        self.logWindow.update()
+        self.logWindow.deiconify()
 
     def newFile(self):
         self._filepath = None
