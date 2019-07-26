@@ -26,5 +26,5 @@ class NotifyStringVar(NotifyVar, tk.StringVar):
 class NotifyIntVar(NotifyVar, tk.IntVar):
     pass
 
-class NotifyNumericVar(NotifyVar, NumericVar):
+class NotifyNumericVar(NumericVar, NotifyVar):
     pass
