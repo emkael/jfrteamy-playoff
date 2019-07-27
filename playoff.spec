@@ -15,4 +15,7 @@ exe = EXE(pyz,
           debug=False,
           strip=None,
           upx=True,
-          console=True, version=".version", icon="playoff.ico" )
+          console=True,
+          version=".version",
+          icon="jfr_playoff/gui/icons/playoff.ico"
+         )
