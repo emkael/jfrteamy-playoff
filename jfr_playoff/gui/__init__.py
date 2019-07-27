@@ -1,12 +1,17 @@
 #coding=utf-8
 
-import codecs, copy, json, os, sys
+import codecs, copy, json, os, sys, tempfile, threading, webbrowser
 from collections import OrderedDict
+import logging as log
 
 import tkinter as tk
 from tkinter import ttk
 import tkFileDialog as tkfd
 import tkMessageBox as tkmb
+
+from jfr_playoff.filemanager import PlayoffFileManager
+from jfr_playoff.generator import PlayoffGenerator
+from jfr_playoff.settings import PlayoffSettings
 
 from .tabs import *
 from .icons import GuiImage
@@ -29,6 +34,7 @@ class PlayoffGUI(tk.Tk):
         self._dirty = tk.BooleanVar()
         self._dirty.trace('w', self._setTitle)
         self._dirty.trace('w', self._setMenuButtons)
+        self._runTimer = None
         self._filepath = None
 
     def run(self):
@@ -42,6 +48,7 @@ class PlayoffGUI(tk.Tk):
         else:
             self.newFile()
         self.bind('<<ValueChanged>>', self._onFileChange, add='+')
+        self.bind('<<BracketGenerated>>', self._onBracketGenerated, add='+')
         self.mainloop()
 
     def _onFileChange(self, *args):
@@ -90,7 +97,16 @@ class PlayoffGUI(tk.Tk):
         (ttk.Separator(menu, orient=tk.VERTICAL)).pack(
             side=tk.LEFT, fill=tk.Y, padx=3, pady=1)
         for icon, command, tooltip in [
-                ('run-once', self.onRunOnce, 'Wygeneruj'),
+                ('run-once', self.onRunOnce, 'Wygeneruj')]:
+            self.menuButtons[icon] = LabelButton(
+                menu, image=GuiImage.get_icon(icon), command=command,
+                tooltip=tooltip, label=statusBar)
+            self.menuButtons[icon].pack(side=tk.LEFT)
+        self.runningLabel = ttk.Label(menu, width=10, text='')
+        self.runningLabel.pack(side=tk.LEFT)
+        (ttk.Separator(menu, orient=tk.VERTICAL)).pack(
+            side=tk.LEFT, fill=tk.Y, padx=3, pady=1)
+        for icon, command, tooltip in [
                 ('run-timed', self.onRunTimed, 'Generuj co X sekund')]:
             self.menuButtons[icon] = LabelButton(
                 menu, image=GuiImage.get_icon(icon), command=command,
@@ -101,14 +117,16 @@ class PlayoffGUI(tk.Tk):
             menu, width=5,
             textvariable=self.interval, from_=30, to=3600)
         self.intervalField.pack(side=tk.LEFT)
-        (ttk.Label(menu, text='sekund')).pack(side=tk.LEFT)
+        self.intervalLabel = ttk.Label(menu, text='sekund')
+        self.intervalLabel.pack(side=tk.LEFT)
+        (ttk.Separator(menu, orient=tk.VERTICAL)).pack(
+            side=tk.LEFT, fill=tk.Y, padx=3, pady=1)
         for icon, command, tooltip in [
                 ('log', self.onLogWindowOpen, 'Dziennik komunikatów')]:
             self.menuButtons[icon] = LabelButton(
                 menu, image=GuiImage.get_icon(icon), command=command,
                 tooltip=tooltip, label=statusBar)
             self.menuButtons[icon].pack(side=tk.LEFT)
-
 
     def onNewFile(self):
         self._checkSave()
@@ -139,11 +157,70 @@ class PlayoffGUI(tk.Tk):
                 filename = filename + '.jtpo'
             self.saveFile(filename)
 
-    def onRunOnce(self):
-        pass
+    def _run(self, config, interactive=True):
+        self._interactive = interactive
+        try:
+            tempPath = None
+            if not len(config.get('output', '')):
+                tempDir = tempfile.mkdtemp(prefix='jfrplayoff-')
+                tempPath = os.path.join(
+                    tempDir, next(tempfile._get_candidate_names()))
+                config['output'] = tempPath + '.html'
+            self._outputPath = config['output']
+            settings = PlayoffSettings(config_obj=config)
+            generator = PlayoffGenerator(settings)
+            content = generator.generate_content()
+            file_manager = PlayoffFileManager(settings)
+            file_manager.write_content(content)
+            file_manager.copy_scripts()
+            file_manager.copy_styles()
+            file_manager.send_files()
+            self.event_generate('<<BracketGenerated>>', when='tail')
+            if tempPath is not None:
+                os.remove(tempPath)
+        except Exception as e:
+            log.getLogger().error(str(e))
+            if interactive:
+                tkmb.showerror('Błąd generowania drabinki', str(e))
+
+    def _onBracketGenerated(self, *args):
+        self._setRunWidgetState(tk.NORMAL)
+        if self._interactive:
+            if tkmb.askyesno(
+                    'Otwórz drabinkę',
+                    'Otworzyć drabinkę w domyślnej przeglądarce?'):
+                webbrowser.open(self._outputPath)
+
+    def _setRunWidgetState(self, state):
+        self.menuButtons['run-once'].configure(state=state)
+        self.runningLabel.configure(
+            text='' if state == tk.NORMAL else 'pracuję...')
+
+    def _setTimerWidgetState(self, state):
+        for widget in [self.intervalField, self.intervalLabel]:
+            widget.configure(state=state)
+        self.menuButtons['run-timed'].configure(
+            image=GuiImage.get_icon('run-timed')
+            if state == tk.NORMAL else GuiImage.get_icon('stop-timed'))
+
+    def onRunOnce(self, interactive=True):
+        self._setRunWidgetState(tk.DISABLED)
+        if not interactive:
+            self._runTimer = self.after(
+                1000 * self.interval.get(default=30), self.onRunOnce, False)
+        config = self.getConfig()
+        thread = threading.Thread(
+            target=self._run, args=(config, interactive,))
+        thread.start()
 
     def onRunTimed(self):
-        pass
+        if self._runTimer is None:
+            self.after(100, self.onRunOnce, False)
+            self._setTimerWidgetState(tk.DISABLED)
+        else:
+            self.after_cancel(self._runTimer)
+            self._runTimer = None
+            self._setTimerWidgetState(tk.NORMAL)
 
     def onLogWindowOpen(self):
         self.logWindow.update()
