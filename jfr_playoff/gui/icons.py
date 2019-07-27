@@ -14,7 +14,8 @@ class GuiImage(object):
 
     @staticmethod
     def get_path(imageType, code, fileType='gif'):
-        return os.path.join(GuiImage.__get_base_path(), imageType, '%s.%s' % (code, fileType))
+        return os.path.join(
+            GuiImage.__get_base_path(), imageType, '%s.%s' % (code, fileType))
 
     @staticmethod
     def __get_image(imageType, cache, code, fileType='gif'):

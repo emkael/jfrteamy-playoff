@@ -25,8 +25,11 @@ class PlayoffGUI(tk.Tk):
         ttk.Style().configure('TLabelframe.Label', foreground='black')
         ttk.Style().configure('TLabelframe', padding=5)
         self.geometry('920x640')
+        self.iconbitmap(GuiImage.get_path('icons', 'playoff', 'ico'))
         self.tabs = {}
         self.logWindow = LogWindow(self)
+        self.logWindow.title('Dziennik komunikatów')
+        self.logWindow.iconbitmap(GuiImage.get_path('icons', 'playoff', 'ico'))
         self._buildMenu()
         self.newFileIndex = 0
         self._title = tk.StringVar()

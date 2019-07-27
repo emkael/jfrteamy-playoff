@@ -14,9 +14,9 @@ class LogWindow(tk.Toplevel):
         self.withdraw()
         self.protocol('WM_DELETE_WINDOW', self.withdraw)
         self.renderContents()
-        self._registerLogging()
         self._records = []
         self._counter = -1
+        self._registerLogging()
 
     def renderContents(self):
         columns = [
