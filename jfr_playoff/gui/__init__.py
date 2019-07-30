@@ -39,6 +39,7 @@ class PlayoffGUI(tk.Tk):
         self._dirty.trace('w', self._setMenuButtons)
         self._runTimer = None
         self._filepath = None
+        self.protocol('WM_DELETE_WINDOW', self.onClose)
 
     def run(self):
         self.notebook = ttk.Notebook(self)
@@ -159,6 +160,10 @@ class PlayoffGUI(tk.Tk):
             if not filename.lower().endswith('.jtpo'):
                 filename = filename + '.jtpo'
             self.saveFile(filename)
+
+    def onClose(self, *args):
+        self._checkSave()
+        self.destroy()
 
     def _run(self, config, interactive=True):
         self._interactive = interactive
