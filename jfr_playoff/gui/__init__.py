@@ -1,6 +1,6 @@
 #coding=utf-8
 
-import codecs, copy, json, os, sys, tempfile, threading, webbrowser
+import codecs, copy, json, os, sys, tempfile, threading, traceback, webbrowser
 from collections import OrderedDict
 import logging as log
 
@@ -190,6 +190,7 @@ class PlayoffGUI(tk.Tk):
                 os.remove(tempPath)
         except Exception as e:
             log.getLogger().error(str(e))
+            traceback.print_exc()
             if interactive:
                 self._runtimeError = e
                 self.event_generate('<<BracketError>>', when='tail')
