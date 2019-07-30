@@ -5,15 +5,15 @@ import re
 from jfr_playoff.logger import PlayoffLogger
 
 PLAYOFF_I18N_DEFAULTS = {
-    'SCORE': 'wynik',
-    'FINAL_STANDINGS': 'klasyfikacja końcowa',
-    'STANDINGS_PLACE': 'miejsce',
-    'STANDINGS_TEAM': 'drużyna',
-    'STANDINGS_CAPTIONS': 'legenda',
-    'FOOTER_GENERATED': 'strona wygenerowana',
-    'SWISS_DEFAULT_LABEL': 'Turniej o&nbsp;%d.&nbsp;miejsce',
-    'DETERMINED_TEAMS': 'Drużyny z pewnym miejscem w tej fazie:',
-    'POSSIBLE_TEAMS': 'Drużyny z trwających meczów poprzedniej fazy:'
+    'SCORE': u'wynik',
+    'FINAL_STANDINGS': u'klasyfikacja końcowa',
+    'STANDINGS_PLACE': u'miejsce',
+    'STANDINGS_TEAM': u'drużyna',
+    'STANDINGS_CAPTIONS': u'legenda',
+    'FOOTER_GENERATED': u'strona wygenerowana',
+    'SWISS_DEFAULT_LABEL': u'Turniej o&nbsp;%d.&nbsp;miejsce',
+    'DETERMINED_TEAMS': u'Drużyny z pewnym miejscem w tej fazie:',
+    'POSSIBLE_TEAMS': u'Drużyny z trwających meczów poprzedniej fazy:'
 }
 
 class PlayoffI18N(object):
@@ -31,7 +31,7 @@ class PlayoffI18N(object):
     def __get_translation(self, string):
         for dictionary in [self.settings, PLAYOFF_I18N_DEFAULTS]:
             if string in dictionary:
-                translation = dictionary[string].decode('utf8')
+                translation = dictionary[string]
                 PlayoffLogger.get('i18n').info(
                     'translation for %s: %s', string, translation)
                 return translation
