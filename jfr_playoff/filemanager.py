@@ -51,6 +51,11 @@ class PlayoffFileManager(object):
         return self.output_file
 
     def copy_file(self, filename, path):
+        source_path = unicode(os.path.join(
+            os.path.dirname(__main__.__file__), filename))
+        if not os.path.exists(source_path):
+            raise IOError('File: %s missing from runtime directory' % (
+                filename))
         output_path = os.path.join(self.output_path, path)
         output_dir = os.path.dirname(output_path)
         if len(output_dir) > 0:
@@ -61,10 +66,7 @@ class PlayoffFileManager(object):
                 os.makedirs(output_dir)
         PlayoffLogger.get('filemanager').info(
             'copying file to %s', output_path)
-        shutil.copy(
-            unicode(os.path.join(
-                os.path.dirname(__main__.__file__), filename)),
-            unicode(output_path))
+        shutil.copy(source_path, unicode(output_path))
         self.register_file(output_path)
         return output_path
 
