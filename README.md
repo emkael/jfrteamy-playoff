@@ -43,8 +43,21 @@ Jeśli w wywołaniu nie podano ścieżki do pliku ustawień, program spyta o ni�
 
 Jego strukturę opisuje dokument [CONFIG](CONFIG.md).
 
+
+Wersja z graficznym interfejsem użytkownika
+-------------------------------------------
+
+Od wersji 2.0 dostępny jest graficzny interfejs użytkownika. Uruchamia się go poprzez plik `playoff-gui.exe` (dla wersji skompilowanej) lub skrypt `gui.py` dla wersji skryptowej.
+
+Interfejs graficzny ma pełną funkcjonalność wersji z wiersza poleceń.
+
+Pliki zapisywane i odczytywane przez interfejs graficzny są kompatybilne z wersją z wiersza poleceń, choć zapisywane są jako pliki `JTPO` (JFR Teamy PlayOff). Ich format jest jednak identyczny z dotychczas stosowanymi plikami `JSON`.
+
+
 Znane ograniczenia
 ------------------
+
+W przypadku korzystania z bazy danych turniejów jako źródła wyników:
 
  *  wszystkie mecze danej fazy muszą lądować na FTP w tej samej ścieżce:
 linki generowane są na podstawie URL całej fazy (linki z datami u góry),
@@ -58,8 +71,6 @@ miejsca bazy, do którego pisze Webmaster, a z jakichś powodów nie pisze
 Admin przy zamykaniu rundy/segmentu), więc nawet w przypadku grania
 "off-line" (Kolektor+statyczne po każdym segmencie), może być potrzeba
 przejechania segmentu Webmasterem
- * przez cały czas trwania play-off pełne nazwy teamów (w bazach i te
-określone w JSONie) muszą się zgadzać - teamy są rozróżniane po nich właśnie
  * nie ma możliwości skonfigurowania więcej niż jednego połączenia do MySQL
 
 Autor
