@@ -38,6 +38,7 @@ class PlayoffGUI(tk.Tk):
         self._dirty.trace('w', self._setTitle)
         self._dirty.trace('w', self._setMenuButtons)
         self._runTimer = None
+        self._runtimeError = None
         self._filepath = None
         self.protocol('WM_DELETE_WINDOW', self.onClose)
 
@@ -53,6 +54,7 @@ class PlayoffGUI(tk.Tk):
             self.newFile()
         self.bind('<<ValueChanged>>', self._onFileChange, add='+')
         self.bind('<<BracketGenerated>>', self._onBracketGenerated, add='+')
+        self.bind('<<BracketError>>', self._onBracketError, add='+')
         self.mainloop()
 
     def _onFileChange(self, *args):
@@ -189,7 +191,8 @@ class PlayoffGUI(tk.Tk):
         except Exception as e:
             log.getLogger().error(str(e))
             if interactive:
-                tkmb.showerror('Błąd generowania drabinki', str(e))
+                self._runtimeError = e
+                self.event_generate('<<BracketError>>', when='tail')
 
     def _onBracketGenerated(self, *args):
         self._setRunWidgetState(tk.NORMAL)
@@ -198,6 +201,11 @@ class PlayoffGUI(tk.Tk):
                     'Otwórz drabinkę',
                     'Otworzyć drabinkę w domyślnej przeglądarce?'):
                 webbrowser.open(self._outputPath)
+
+    def _onBracketError(self, *args):
+        tkmb.showerror('Błąd generowania drabinki', str(self._runtimeError))
+        self._setRunWidgetState(tk.NORMAL)
+        self._runtimeError = None
 
     def _setRunWidgetState(self, state):
         self.menuButtons['run-once'].configure(state=state)
