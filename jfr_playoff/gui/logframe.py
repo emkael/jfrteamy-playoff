@@ -43,11 +43,21 @@ class LogWindow(tk.Toplevel):
             btnFrame, text='Wyczyść dziennik',
             command=self.resetRecords)).pack(side=tk.LEFT)
 
+    def _getGUIHandler(self):
+        return LogHandler(log.INFO, window=self)
+
+    def _getConsoleHandler(self):
+        consoleHandler = log.StreamHandler()
+        consoleHandler.setFormatter(
+            log.Formatter(
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+        return consoleHandler
+
     def _registerLogging(self):
-        logHandler = LogHandler(log.INFO, window=self)
         logger = log.getLogger()
         logger.setLevel(log.INFO)
-        logger.addHandler(logHandler)
+        for handler in [self._getConsoleHandler, self._getGUIHandler]:
+            logger.addHandler(handler())
 
     def addRecord(self, record):
         self._counter += 1
