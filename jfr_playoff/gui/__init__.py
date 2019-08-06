@@ -187,7 +187,7 @@ class PlayoffGUI(tk.Tk):
             file_manager.send_files()
             self.event_generate('<<BracketGenerated>>', when='tail')
             if tempPath is not None:
-                os.remove(tempPath)
+                os.remove(config['output'])
         except Exception as e:
             log.getLogger().error(str(e))
             traceback.print_exc()
