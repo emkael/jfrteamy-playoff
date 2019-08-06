@@ -8,9 +8,11 @@ class GuiImage(object):
     @staticmethod
     def __get_base_path():
         try:
-            return os.path.join(sys._MEIPASS, 'res')
+            return os.path.join(sys._MEIPASS, 'res').decode(
+                sys.getfilesystemencoding())
         except:
-            return os.path.abspath(os.path.dirname(__file__))
+            return os.path.abspath(os.path.dirname(__file__)).decode(
+                sys.getfilesystemencoding())
 
     @staticmethod
     def get_path(imageType, code, fileType='gif'):
