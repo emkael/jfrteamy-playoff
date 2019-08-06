@@ -62,6 +62,8 @@ class LogWindow(tk.Toplevel):
     def addRecord(self, record):
         self._counter += 1
         self._records.append((record, datetime.datetime.now()))
+        if not isinstance(record.message, unicode):
+            record.message = unicode(record.message, errors='replace')
         self.logList.insert(
             '', tk.END, tag=self._counter, values=[
                 record.levelname, record.name, record.message
