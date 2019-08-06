@@ -449,7 +449,11 @@ class TraceableText(tk.Text):
 
     def _proxy(self, command, *args):
         cmd = (self._orig, command) + args
-        result = self.tk.call(cmd)
+        # https://stackoverflow.com/a/53418346 <- it's his fault.
+        try:
+            result = self.tk.call(cmd)
+        except:
+            return None
         if command in ('insert', 'delete', 'replace') and \
            not self._variableLock:
             text = self.get('1.0', tk.END).strip()
