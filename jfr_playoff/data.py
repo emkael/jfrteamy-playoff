@@ -16,6 +16,15 @@ class PlayoffData(object):
                 PlayoffLogger.get('db').warning(
                     PlayoffDB.DATABASE_NOT_CONFIGURED_WARNING)
             self.team_settings = settings.get('teams')
+            self.custom_final_order = []
+            if settings.has_section('custom_final_order'):
+                self.custom_final_order = settings.get('custom_final_order')
+            self.custom_final_order = [
+                t for t in [
+                    self.teams[i-1] if isinstance(i, int)
+                    else self.get_team_data_by_name(i)
+                    for i in self.custom_final_order]
+                if t is not None]
             self.phases = settings.get('phases')
             self.swiss = []
             if settings.has_section('swiss'):
@@ -134,6 +143,13 @@ class PlayoffData(object):
                         leaderboard_teams[loser_key] = []
                     leaderboard_teams[loser_key].append(
                         self.match_info[match['id']].loser)
+        final_order = self.custom_final_order + [
+            t for t in self.teams if t not in self.custom_final_order]
+        PlayoffLogger.get('data').info(
+                'custom order for final positions: %s', self.custom_final_order)
+        PlayoffLogger.get('data').info(
+                'order of teams to fill leaderboard positions: %s',
+                final_order)
         for positions, position_teams in leaderboard_teams.iteritems():
             positions = list(positions)
             PlayoffLogger.get('data').info(
@@ -141,7 +157,7 @@ class PlayoffData(object):
                 positions, position_teams)
             if len(positions) == len([
                     team for team in position_teams if team is not None]):
-                for table_team in self.teams:
+                for table_team in final_order:
                     if table_team[0] in position_teams:
                         position = positions.pop(0)
                         self.leaderboard[position-1] = table_team[0]
@@ -171,6 +187,12 @@ class PlayoffData(object):
         )
         PlayoffLogger.get('data').info('grid dimensions: %s', dimensions)
         return dimensions
+
+    def get_team_data_by_name(self, fullname):
+        for team in self.teams:
+            if team[0] == fullname:
+                return team
+        return None
 
     def get_shortname(self, fullname):
         for team in self.teams:
