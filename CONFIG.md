@@ -129,7 +129,7 @@ Ustawienia teamów - kolejność końcowa
 
 W przypadku zdefiniowania zajmowania przez kilka teamów kilku pozycji końcowych w klasyfikacji, teamy szeregowane są według kolejności na wczytywanej (bądź określonej) liście teamów (np. pobranej z turnieju lub bazy danych).
 
-Aby zmienić tę kolejność (bo np. nie zawsze rozstrzygnięcie kolejności końcowej opiera się o kolejność po fazie zasadniczej), można określić w konfiguracji sekcję`custom_final_order`.
+Aby zmienić tę kolejność (bo np. nie zawsze rozstrzygnięcie kolejności końcowej opiera się o kolejność po fazie zasadniczej), można określić w konfiguracji sekcję `custom_final_order`.
 
 Jest ona tablicą wartości: wartością może być łańcuch tekstowy - pełna nazwa teamu lub liczba - jego pozycja w pobranej liście teamów.
 
