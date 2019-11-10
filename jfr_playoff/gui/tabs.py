@@ -222,6 +222,9 @@ class TeamsTab(PlayoffTab):
         tieConfig = self.previewFrame.getTieConfig()
         if tieConfig is not None and isinstance(config['teams'], dict):
             config['teams']['ties'] = tieConfig
+        orderConfig = self.previewFrame.getOrderConfig()
+        if orderConfig:
+            config['custom_final_order'] = orderConfig
         return config
 
     def setValues(self, config):
@@ -232,6 +235,8 @@ class TeamsTab(PlayoffTab):
         self.previewFrame.setTieConfig(
             config['teams']['ties']
             if 'teams' in config and 'ties' in config['teams'] else [])
+        self.previewFrame.setOrderConfig(
+            config.get('custom_final_order', []))
 
     def getConfig(self):
         return self.collectConfig()

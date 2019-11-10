@@ -376,6 +376,8 @@ class TeamPreviewFrame(ScrollableFrame):
     def __init__(self, *args, **kwags):
         self.tieValues = []
         self.tieFields = []
+        self.orderValues = []
+        self.orderFields = []
         self.labels = []
         ScrollableFrame.__init__(self, *args, **kwags)
         self.winfo_toplevel().bind(
@@ -384,6 +386,10 @@ class TeamPreviewFrame(ScrollableFrame):
             '<<TieConfigChanged>>', self._collectTieConfig, add='+')
         self._tieConfig = []
         self._lockTieValues = False
+        self.winfo_toplevel().bind(
+            '<<OrderConfigChanged>>', self._collectOrderConfig, add='+')
+        self._orderConfig = []
+        self._lockOrderValues = False
 
     def setTeams(self, container, teams):
         self.teamList.grid(
@@ -392,6 +398,10 @@ class TeamPreviewFrame(ScrollableFrame):
         for idx in range(len(teams), len(self.tieFields)):
             self.tieFields[idx].destroy()
         self.tieFields = self.tieFields[0:len(teams)]
+        self.orderValues = self.orderValues[0:len(teams)]
+        for idx in range(len(teams), len(self.orderFields)):
+            self.orderFields[idx].destroy()
+        self.orderFields = self.orderFields[0:len(teams)]
         for label in self.labels:
             label.destroy()
         self.teamList.delete(*self.teamList.get_children())
@@ -410,6 +420,17 @@ class TeamPreviewFrame(ScrollableFrame):
                 self.tieFields[idx].grid(
                     row=idx+2, column=1, sticky=tk.W+tk.E+tk.N)
                 container.rowconfigure(idx+2, weight=0)
+            if idx >= len (self.orderFields):
+                self.orderValues.append(NotifyNumericVar())
+                self.orderValues[idx].trace('w', self._orderValueChangeNotify)
+                self.orderFields.append(
+                    NumericSpinbox(
+                        container, from_=0, to=9999,
+                        width=5, font=Font(size=10),
+                        textvariable=self.orderValues[idx]))
+                self.orderFields[idx].grid(
+                    row=idx+2, column=2, sticky=tk.W+tk.E+tk.N)
+                container.rowconfigure(idx+2, weight=0)
         self.labels.append(ttk.Label(container, text=' '))
         self.labels[-1].grid(row=1, column=1, pady=3)
         self.labels.append(ttk.Label(container, text=' '))
@@ -425,6 +446,15 @@ class TeamPreviewFrame(ScrollableFrame):
         self.labels.append(ttk.Label(container, text='⬏', font=Font(size=20)))
         self.labels[-1].grid(
             row=len(teams)+3, column=1, sticky=tk.W+tk.N)
+        container.rowconfigure(len(teams)+3, weight=1)
+        self.labels.append(ttk.Label(
+            container,
+            text='Ręczne rozstrzyganie kolejności w klasyfikacji końcowej',
+            anchor=tk.E))
+        self.labels[-1].grid(row=len(teams)+4, column=0, columnspan=2, sticky=tk.N+tk.E)
+        self.labels.append(ttk.Label(container, text='⬏', font=Font(size=20)))
+        self.labels[-1].grid(
+            row=len(teams)+4, column=2, sticky=tk.W+tk.N)
         container.rowconfigure(len(teams)+3, weight=1)
 
     def renderContent(self, container):
@@ -443,6 +473,9 @@ class TeamPreviewFrame(ScrollableFrame):
                 self.teamList.column(col, width=heading[1], stretch=True)
         self.container = container
 
+    def _getTeams(self):
+        return self.winfo_toplevel().getTeams()
+
     def getTieConfig(self):
         teams = self._getTeams()
         ties = [(teams[idx], val.get(default=0))
@@ -460,15 +493,34 @@ class TeamPreviewFrame(ScrollableFrame):
             self.winfo_toplevel().event_generate(
                 '<<TieConfigChanged>>', when='tail')
 
-    def _getTeams(self):
-        return self.winfo_toplevel().getTeams()
-
     def _collectTieConfig(self, *args):
         if not self._lockTieValues:
             self._tieConfig = self.getTieConfig()
 
+    def getOrderConfig(self):
+        teams = self._getTeams()
+        order = [(teams[idx], val.get(default=0))
+                 for idx, val in enumerate(self.orderValues)]
+        return [team[0][0] for team
+                in sorted(order, key=lambda t: t[1])
+                if team[1] > 0]
+
+    def setOrderConfig(self, values):
+        self._orderConfig = values
+        self.refreshTeams(None)
+
+    def _orderValueChangeNotify(self, *args):
+        if not self._lockOrderValues:
+            self.winfo_toplevel().event_generate(
+                '<<OrderConfigChanged>>', when='tail')
+
+    def _collectOrderConfig(self, *args):
+        if not self._lockOrderValues:
+            self._orderConfig = self.getOrderConfig()
+
     def refreshTeams(self, event):
         self._lockTieValues = True
+        self._lockOrderValues = True
         teams = self._getTeams()
         self.setTeams(self.container, teams)
         for tidx, team in enumerate(teams):
@@ -477,6 +529,16 @@ class TeamPreviewFrame(ScrollableFrame):
                 if team[0] == tie:
                     self.tieValues[tidx].set(idx+1)
                     break
+            for idx, order in enumerate(self._orderConfig):
+                if isinstance(order, int):
+                    if tidx+1 == order:
+                        self.orderValues[tidx].set(idx+1)
+                        break
+                else:
+                    if team[0] == order:
+                        self.orderValues[tidx].set(idx+1)
+                        break
+        self._lockOrderValues = False
         self._lockTieValues = False
 
 
