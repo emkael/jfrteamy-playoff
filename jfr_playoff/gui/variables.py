@@ -27,4 +27,6 @@ class NotifyIntVar(NotifyVar, tk.IntVar):
     pass
 
 class NotifyNumericVar(NumericVar, NotifyVar):
-    pass
+    def __init__(self, *args, **kwargs):
+        NotifyVar.__init__(self, *args, **kwargs)
+        NumericVar.__init__(self, *args, **kwargs)
