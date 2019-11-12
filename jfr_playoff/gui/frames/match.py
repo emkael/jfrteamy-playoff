@@ -357,6 +357,8 @@ class BracketMatchSettingsFrame(GuiFrame):
         for idx, widget in enumerate(self.bracketWidgets):
             widget.grid(row=1+idx/2, column=1+idx%2, sticky=tk.W)
 
+        self._enablePanels()
+
         self._lockTeams = False
 
     def _onTeamListChange(self, *args):
@@ -613,6 +615,8 @@ class MatchSettingsFrame(RepeatableFrame):
             dialogclass=PositionsSelectionFrame,
             callback=self._setLoserPositions)
         self.loserPositionsBtn.grid(row=2, column=1, sticky=tk.W)
+
+        self._enablePanels()
 
         self.winfo_toplevel().event_generate(
             '<<MatchListChanged>>', when='tail')
