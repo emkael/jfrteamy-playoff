@@ -1,6 +1,6 @@
 #coding=utf-8
 
-import codecs, copy, json, os, sys, tempfile, threading, traceback, webbrowser
+import codecs, copy, json, os, shutil, sys, tempfile, threading, traceback, webbrowser
 from collections import OrderedDict
 import logging as log
 
@@ -170,24 +170,21 @@ class PlayoffGUI(tk.Tk):
     def _run(self, config, interactive=True):
         self._interactive = interactive
         try:
-            tempPath = None
+            self._tempPath = None
             if not len(config.get('output', '')):
                 tempDir = tempfile.mkdtemp(prefix='jfrplayoff-')
-                tempPath = os.path.join(
+                self._tempPath = os.path.join(
                     tempDir, next(tempfile._get_candidate_names()))
-                config['output'] = tempPath + '.html'
-            self._outputPath = config['output']
+                config['output'] = self._tempPath + '.html'
             settings = PlayoffSettings(config_obj=config)
             generator = PlayoffGenerator(settings)
             content = generator.generate_content()
             file_manager = PlayoffFileManager(settings)
-            file_manager.write_content(content)
+            self._outputPath = file_manager.write_content(content)
             file_manager.copy_scripts()
             file_manager.copy_styles()
             file_manager.send_files()
             self.event_generate('<<BracketGenerated>>', when='tail')
-            if tempPath is not None:
-                os.remove(config['output'])
         except Exception as e:
             log.getLogger().error(str(e))
             traceback.print_exc()
@@ -201,7 +198,10 @@ class PlayoffGUI(tk.Tk):
             if tkmb.askyesno(
                     'Otwórz drabinkę',
                     'Otworzyć drabinkę w domyślnej przeglądarce?'):
-                webbrowser.open(self._outputPath)
+                webbrowser.open(os.path.realpath(self._outputPath))
+            else:
+                if self._tempPath is not None:
+                    shutil.rmtree(os.path.dirname(self._outputPath))
 
     def _onBracketError(self, *args):
         tkmb.showerror('Błąd generowania drabinki', str(self._runtimeError))
