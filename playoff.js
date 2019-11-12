@@ -33,6 +33,9 @@ var playoff = {
             var attr = 'data-' + setting.replace(/_/g, '-');
             var attr_value = canvas.getAttribute(attr);
             if (attr_value) {
+                if (attr.substr(attr.length-6) == 'offset') {
+                    attr_value = parseInt(attr_value);
+                }
                 defaults[setting] = attr_value;
             }
         }
