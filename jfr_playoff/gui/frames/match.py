@@ -215,21 +215,37 @@ class MatchSelectionButton(SelectionButton):
         return 'W turnieju nie zdefiniowano żadnych meczów'
 
     def getOptions(self):
-        return self.winfo_toplevel().getMatches()
+        matches = self.winfo_toplevel().getMatches()
+        values = []
+        prev_match = None
+        for match in matches:
+            if prev_match is not None:
+                if prev_match.getPhase() != match.getPhase():
+                    values.append(None)
+            values.append(match)
+            prev_match = match
+        return values
 
 
 class MatchSelectionFrame(SelectionFrame):
     def renderOption(self, container, option, idx):
-        (ttk.Label(
-            container, text='[%d]' % (self._mapValue(idx, option)))).grid(
-                row=idx+1, column=0)
-        (ttk.Checkbutton(
-            container, text=option.label,
-            variable=self.values[self._mapValue(idx, option)]
-        )).grid(row=idx+1, column=1, sticky=tk.W)
+        if option is not None:
+            (ttk.Label(
+                container, text='[%d]' % (self._mapValue(idx, option)))).grid(
+                    row=idx+1, column=0)
+            (ttk.Checkbutton(
+                container, text=option.label,
+                variable=self.values[self._mapValue(idx, option)]
+            )).grid(row=idx+1, column=1, sticky=tk.W)
+        else:
+            (ttk.Separator(
+                container, orient=tk.HORIZONTAL)).grid(
+                    row=idx+1, column=0, columnspan=2,
+                    sticky=tk.E+tk.W, pady=2)
 
     def _mapValue(self, idx, value):
-        return self.options[idx].getMatchID()
+        if self.options[idx] is not None:
+            return self.options[idx].getMatchID()
 
 
 class SelectedTeamList(RefreshableOptionMenu):
@@ -379,7 +395,8 @@ class BracketMatchSettingsFrame(GuiFrame):
             matches = [
                 match.getMatchID() for match
                 in self.bracketWidgets[
-                    self.LIST_WIDGETS['winner']].getOptions()]
+                    self.LIST_WIDGETS['winner']].getOptions()
+                if match is not None]
             self.bracketWidgets[self.LIST_WIDGETS['winner']].setPositions([
                 winner for winner in self.winners if winner in matches])
             self.bracketWidgets[self.LIST_WIDGETS['loser']].setPositions([
@@ -629,7 +646,7 @@ class MatchSettingsFrame(RepeatableFrame):
     def getMatchID(self):
         return self.matchID.get()
 
-    def _getPhase(self):
+    def getPhase(self):
         obj = self
         while not isinstance(obj, MatchPhaseFrame):
             obj = obj.master
@@ -640,7 +657,7 @@ class MatchSettingsFrame(RepeatableFrame):
     @property
     def label(self):
         try:
-            phase = self._getPhase()
+            phase = self.getPhase()
             return 'Mecz #%d [faza: %s]' % (
                 self.getMatchID(),
                 phase.master.tab(phase)['text'].strip()
