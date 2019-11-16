@@ -253,8 +253,11 @@ class MatchesTab(PlayoffTab):
         self.phaseFrame.add(phase)
         self.phases[newPhase] = phase
         self._renameTabs()
+        self.phaseFrame.select(phase)
         self.winfo_toplevel().event_generate(
             '<<MatchListChanged>>', when='tail')
+        self.winfo_toplevel().event_generate(
+            '<<ValueChanged>>', when='tail')
         return newPhase
 
     def removePhase(self, phase=None):
