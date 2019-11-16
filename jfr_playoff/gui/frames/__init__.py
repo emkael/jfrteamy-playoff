@@ -7,7 +7,8 @@ import tkinter as tk
 from tkinter import ttk
 import tkMessageBox
 
-from ..variables import NotifyStringVar, NotifyIntVar, NotifyNumericVar, NumericVar
+from ..variables import NotifyStringVar, NotifyIntVar
+from ..variables import NotifyBoolVar, NotifyNumericVar, NumericVar
 
 def setPanelState(frame, state):
     for child in frame.winfo_children():
@@ -355,7 +356,7 @@ class SelectionFrame(ScrollableFrame):
         self.renderHeader(container)
         for idx, option in enumerate(self.options):
             key = self._mapValue(idx, option)
-            self.values[key] = NotifyIntVar()
+            self.values[key] = NotifyBoolVar()
             self.renderOption(container, option, idx)
             if self.selected and key in self.selected:
                 self.values[key].set(True)

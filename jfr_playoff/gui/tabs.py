@@ -14,7 +14,7 @@ from .frames.network import *
 from .frames.team import *
 from .frames.translations import *
 from .frames.visual import *
-from .variables import NotifyStringVar, NotifyIntVar, NotifyNumericVar
+from .variables import NotifyStringVar, NotifyNumericVar, NotifyBoolVar
 
 from ..data import PlayoffData
 from ..db import PlayoffDB
@@ -54,7 +54,7 @@ class MainSettingsTab(PlayoffTab):
         self.outputPath = NotifyStringVar()
         self.pageTitle = NotifyStringVar()
         self.pageLogoh = NotifyStringVar()
-        self.refresh = NotifyIntVar()
+        self.refresh = NotifyBoolVar()
         self.refresh.trace('w', self._updateRefreshFields)
         self.refreshInterval = NotifyNumericVar()
 

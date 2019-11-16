@@ -10,7 +10,7 @@ import tkMessageBox as tkmb
 from ...db import PlayoffDB
 from ..frames import RepeatableEntry, WidgetRepeater, NumericSpinbox
 from ..frames import GuiFrame, ScrollableFrame
-from ..variables import NotifyStringVar, NotifyIntVar, NotifyNumericVar
+from ..variables import NotifyStringVar, NotifyNumericVar, NotifyBoolVar
 
 def network_test(connFunction, testLabel):
     try:
@@ -128,7 +128,7 @@ class GoniecConfigurationFrame(GuiFrame):
             tkmb.showerror('Błąd połączenia z Gońcem', self.testError)
 
     def renderContent(self):
-        self.enable = NotifyIntVar()
+        self.enable = NotifyBoolVar()
         self.enable.trace('w', self._enableWidgets)
         self.host = NotifyStringVar()
         self.port = NotifyNumericVar()

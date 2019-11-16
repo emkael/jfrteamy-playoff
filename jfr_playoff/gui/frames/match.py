@@ -12,7 +12,8 @@ from ..frames import SelectionFrame, SelectionButton, RefreshableOptionMenu
 from ..frames.team import DBSelectionField, TeamSelectionFrame
 from ..frames.team import TeamSelectionButton
 from ..frames.visual import PositionsSelectionFrame
-from ..variables import NotifyStringVar, NotifyIntVar, NotifyNumericVar
+from ..variables import NotifyStringVar, NotifyIntVar
+from ..variables import NotifyNumericVar, NotifyBoolVar
 
 class SwissSettingsFrame(RepeatableFrame):
     SOURCE_LINK = 0
@@ -51,9 +52,9 @@ class SwissSettingsFrame(RepeatableFrame):
         self.fetchDB = NotifyStringVar()
         self.fetchLink = NotifyStringVar()
         self.setFrom = NotifyNumericVar()
-        self.setToEnabled = NotifyIntVar()
+        self.setToEnabled = NotifyBoolVar()
         self.setTo = NotifyNumericVar()
-        self.fetchFromEnabled = NotifyIntVar()
+        self.fetchFromEnabled = NotifyBoolVar()
         self.fetchFrom = NotifyNumericVar()
         self.linkLabel = NotifyStringVar()
         self.linkRelPath = NotifyStringVar()
@@ -304,7 +305,7 @@ class BracketMatchSettingsFrame(GuiFrame):
         self.source = NotifyIntVar()
         self.source.trace('w', self._enablePanels)
         self.source.trace('w', self._configChangeNotify)
-        self.selected = NotifyIntVar()
+        self.selected = NotifyBoolVar()
         self.selected.trace('w', self._enablePanels)
         self.selectedIndex = NotifyStringVar()
         self.positions = []
@@ -487,7 +488,7 @@ class MatchSettingsFrame(RepeatableFrame):
         self.scoreRound = NotifyNumericVar()
         self.scoreTable = NotifyNumericVar()
         self.scoreCustom = [NotifyStringVar(), NotifyStringVar()]
-        self.scoreNotFinished = NotifyIntVar()
+        self.scoreNotFinished = NotifyBoolVar()
         self.scoreNotFinished.trace('w', self._enablePanels)
         self.scoreBoards = NotifyNumericVar()
 

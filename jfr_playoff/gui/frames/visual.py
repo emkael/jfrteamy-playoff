@@ -10,7 +10,7 @@ from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
 from ..frames import WidgetRepeater
 from ..frames import SelectionFrame, RefreshableOptionMenu, NumericSpinbox
 from ..frames.team import TeamSelectionButton
-from ..variables import NotifyStringVar, NotifyIntVar, NotifyNumericVar
+from ..variables import NotifyStringVar, NotifyNumericVar, NotifyBoolVar
 
 class VisualSettingsFrame(GuiFrame):
     DEFAULT_VALUES = {
@@ -32,17 +32,17 @@ class VisualSettingsFrame(GuiFrame):
     }
 
     def renderContent(self):
-        self.startingPositionIndicators = NotifyIntVar()
-        self.finishingPositionIndicators = NotifyIntVar()
+        self.startingPositionIndicators = NotifyBoolVar()
+        self.finishingPositionIndicators = NotifyBoolVar()
         self.boxWidth = NotifyNumericVar()
         self.boxHeight = NotifyNumericVar()
         self.boxMargin = NotifyNumericVar()
-        self.shortenTeamNames = NotifyIntVar()
+        self.shortenTeamNames = NotifyBoolVar()
         self.teamNameLength = NotifyNumericVar()
         self.teamNameEllipsis = NotifyStringVar()
-        self.teamNamePredict = NotifyIntVar()
+        self.teamNamePredict = NotifyBoolVar()
         self.teamNamePlaceholder = NotifyStringVar()
-        self.teamNameSortPredictions = NotifyIntVar()
+        self.teamNameSortPredictions = NotifyBoolVar()
         self.teamLabelSeparator = NotifyStringVar()
         self.teamNameSeparator = NotifyStringVar()
         self.teamNamePrefix = NotifyStringVar()
