@@ -21,6 +21,7 @@ Konfiguracja składa się, po kolei, z:
    W ścieżce musi znajdować katalog `sklady/`, do którego kopiowany jest JavaScript `playoff.js`
  - sekcji `"page"`: ustawień strony
    + `"title"` - tytuł (`<title>` HTMLa)
+   + `"favicon"` - adres fawikony
    + `"logoh"` - nagłówek, jak w tabeli admin bazy turnieju
    + `"refresh"` - parametr odświeżania strony drabinki: `0` = wyłączone, liczba naturalna = interwał odświeżania, w sekundach
    + `"width"` i `"height"` - wymiary (w pikselach) miejsca rezerwowanego dla każdego meczu w widoku drabinki (`"width"` bezpośrednio wpływa na rozmieszczanie kolumn, wewnątrz każdej z kolumn mecze rozmieszczane są równomiernie, w zależnie od ich liczby)
