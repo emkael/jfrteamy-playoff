@@ -10,6 +10,7 @@ class PlayoffGenerator(object):
     def __init__(self, settings):
         self.data = PlayoffData(settings)
         self.page = settings.get('page')
+        print self.page.get('favicon')
         PlayoffLogger.get('generator').info(
             'page settings: %s', self.page)
         self.team_box_settings = self.page.get('team_boxes', {})
@@ -40,6 +41,10 @@ class PlayoffGenerator(object):
                     'PAGE_HEAD_REFRESH',
                     self.page['refresh']) \
                 if self.page['refresh'] > 0 else '',
+                self.p_temp.get(
+                    'PAGE_HEAD_FAVICON',
+                    self.page['favicon']) \
+                if len(self.page.get('favicon', '')) else '',
                 self.page['title']),
             self.p_temp.get(
                 'PAGE_BODY',
