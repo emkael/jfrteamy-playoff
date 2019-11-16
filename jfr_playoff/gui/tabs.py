@@ -250,8 +250,9 @@ class MatchesTab(PlayoffTab):
         phase = MatchPhaseFrame(
             self.phaseFrame, vertical=True, padx=10, pady=10)
         newPhase = max(self.phases.keys()) + 1 if len(self.phases) else 1
-        self.phaseFrame.add(phase, text='Faza #%d' % (newPhase))
+        self.phaseFrame.add(phase)
         self.phases[newPhase] = phase
+        self._renameTabs()
         self.winfo_toplevel().event_generate(
             '<<MatchListChanged>>', when='tail')
         return newPhase
@@ -275,7 +276,7 @@ class MatchesTab(PlayoffTab):
         for idx, tab in self.phases.iteritems():
             title = tab.name.get().strip()
             self.phaseFrame.tab(
-                tab, text=title if len(title) else 'Faza #%d' % (idx))
+                tab, text=(title if len(title) else '') + ' (#%d)' % (idx))
 
     def renderContent(self, container):
         container.columnconfigure(1, weight=1)

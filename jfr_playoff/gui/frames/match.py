@@ -641,9 +641,10 @@ class MatchSettingsFrame(RepeatableFrame):
     def label(self):
         try:
             phase = self._getPhase()
-            return 'Mecz #%d (%s)' % (
+            return 'Mecz #%d [faza: %s]' % (
                 self.getMatchID(),
-                phase.master.tab(phase)['text'] if phase is not None else '')
+                phase.master.tab(phase)['text'].strip()
+                if phase is not None else '')
         except tk.TclError:
             # we're probably just being created, ignore
             return ''
