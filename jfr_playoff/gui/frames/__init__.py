@@ -19,7 +19,7 @@ def setPanelState(frame, state):
 
 class WidgetRepeater(tk.Frame):
     def __init__(self, master, widgetClass, headers=None, classParams=None,
-                 *args, **kwargs):
+                 onAdd=None, *args, **kwargs):
         widgetList = widgetClass
         if not isinstance(widgetClass, list):
             widgetList = [widgetClass]
@@ -35,6 +35,7 @@ class WidgetRepeater(tk.Frame):
         self.headerFrame = None
         self.addButton = ttk.Button(
             self, text='[+]', width=5, command=self._addWidget)
+        self.onAdd = onAdd
         self.renderContent()
 
     def _findWidget(self, row, column):
@@ -56,6 +57,8 @@ class WidgetRepeater(tk.Frame):
             widget.configureContent(**widgetClassParams)
         self.widgets.append(widget)
         self._updateGrid()
+        if self.onAdd is not None:
+            self.onAdd(widget)
 
     def _handleWidgetSelection(self, selected):
         if selected < len(self.widgetClass):
@@ -244,6 +247,7 @@ class ScrollableFrame(tk.Frame):
 
     def renderContent(self, container):
         pass
+
 
 class WidgetSelectionFrame(ScrollableFrame):
     def __init__(self, *args, **kwargs):

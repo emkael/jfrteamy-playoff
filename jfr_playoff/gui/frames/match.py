@@ -807,11 +807,15 @@ class MatchPhaseFrame(ScrollableFrame):
             side=tk.LEFT, fill=tk.X, expand=True)
 
         self.matches = WidgetRepeater(
-            container, [MatchSettingsFrame, MatchSeparator])
+            container, [MatchSettingsFrame, MatchSeparator],
+            onAdd=self._matchAdded)
         self.matches.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
         self.link.trace('w', self._updateLinks)
         self.name.trace('w', self._signalPhaseRename)
+
+    def _matchAdded(self, widget):
+        self.after(100, self.canvas.yview_moveto, 1.0)
 
     def setValues(self, values):
         matches = values['matches'] if 'matches' in values else []
