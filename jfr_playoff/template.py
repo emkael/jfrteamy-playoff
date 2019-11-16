@@ -176,6 +176,7 @@ class PlayoffTemplateStrings(object):
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="Generator" content="PlayOff" />
     %s
+    %s
     <title>%s</title>
     <link rel="stylesheet" type="text/css" href="css/kolorki.css" />
     <link rel="stylesheet" type="text/css" href="css/playoff.css" />
@@ -184,6 +185,10 @@ class PlayoffTemplateStrings(object):
 
     PAGE_HEAD_REFRESH = '''
     <meta http-equiv="Refresh" content="%d" />
+    '''
+
+    PAGE_HEAD_FAVICON = '''
+    <link rel="shortcut icon" href="%s">
     '''
 
     PAGE_BODY = '''
