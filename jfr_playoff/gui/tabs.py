@@ -54,6 +54,7 @@ class MainSettingsTab(PlayoffTab):
         self.outputPath = NotifyStringVar()
         self.pageTitle = NotifyStringVar()
         self.pageLogoh = NotifyStringVar()
+        self.favicon = NotifyStringVar()
         self.refresh = NotifyBoolVar()
         self.refresh.trace('w', self._updateRefreshFields)
         self.refreshInterval = NotifyNumericVar()
@@ -77,9 +78,11 @@ class MainSettingsTab(PlayoffTab):
         self.outputPath.set(config['output'] if 'output' in config else '')
         if 'page' in config:
             self.pageTitle.set(
-                config['page']['title'] if 'title' in config['page'] else '')
+                config['page'].get('title', ''))
             self.pageLogoh.set(
-                config['page']['logoh'] if 'logoh' in config['page'] else '')
+                config['page'].get('logoh', ''))
+            self.favicon.set(
+                config['page'].get('favicon', ''))
             try:
                 interval = int(config['page']['refresh'])
                 if interval > 0:
@@ -94,6 +97,7 @@ class MainSettingsTab(PlayoffTab):
         else:
             self.pageTitle.set('')
             self.pageLogoh.set('')
+            self.favicon.set('')
             self.refresh.set(0)
             self.refreshInterval.set(self.DEFAULT_INTERVAL)
 
@@ -130,11 +134,15 @@ class MainSettingsTab(PlayoffTab):
                        variable=self.pageLogoh)).grid(
                            row=1, column=1,
                            sticky=tk.W+tk.N+tk.E+tk.S, pady=2)
+        (ttk.Label(pageSettings, text='Fawikona:')).grid(
+            row=2, column=0, sticky=tk.E, pady=2)
+        (tk.Entry(pageSettings, textvariable=self.favicon)).grid(
+            row=2, column=1, sticky=tk.W+tk.E, pady=2)
 
         (ttk.Label(pageSettings, text='Odświeżaj:')).grid(
-            row=2, column=0, sticky=tk.E, pady=2)
+            row=3, column=0, sticky=tk.E, pady=2)
         refreshPanel = tk.Frame(pageSettings)
-        refreshPanel.grid(row=2, column=1, sticky=tk.W+tk.E, pady=2)
+        refreshPanel.grid(row=3, column=1, sticky=tk.W+tk.E, pady=2)
         (ttk.Checkbutton(
             refreshPanel,
             command=self._updateRefreshFields, variable=self.refresh)).grid(
@@ -150,7 +158,7 @@ class MainSettingsTab(PlayoffTab):
         container.rowconfigure(4, weight=1)
 
     def getConfig(self):
-        return OrderedDict({
+        config = OrderedDict({
             'output': self.outputPath.get(),
             'page': OrderedDict({
                 'title': self.pageTitle.get(),
@@ -159,6 +167,10 @@ class MainSettingsTab(PlayoffTab):
                 if self.refresh.get() > 0 else 0
             })
         })
+        favicon = self.favicon.get().strip()
+        if len(favicon):
+            config['page']['favicon'] = favicon
+        return config
 
 class TeamsTab(PlayoffTab):
     @property
