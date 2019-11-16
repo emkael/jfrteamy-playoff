@@ -40,6 +40,7 @@ class PlayoffGUI(tk.Tk):
         self._runTimer = None
         self._runtimeError = None
         self._filepath = None
+        self._bindKeyboardShortcuts()
         self.protocol('WM_DELETE_WINDOW', self.onClose)
 
     def run(self):
@@ -134,11 +135,19 @@ class PlayoffGUI(tk.Tk):
                 tooltip=tooltip, label=statusBar)
             self.menuButtons[icon].pack(side=tk.LEFT)
 
-    def onNewFile(self):
+    def _bindKeyboardShortcuts(self):
+        self.bind('<Control-n>', self.onNewFile)
+        self.bind('<Control-s>', self.onSave)
+        self.bind('<Control-S>', self.onSaveAs)
+        self.bind('<Control-o>', self.onFileOpen)
+        self.bind('<Control-q>', self.onClose)
+        self.bind('<F9>', self.onRunOnce)
+
+    def onNewFile(self, *args):
         self._checkSave()
         self.newFile()
 
-    def onFileOpen(self):
+    def onFileOpen(self, *args):
         self._checkSave()
         filename = tkfd.askopenfilename(
             title='Wybierz plik drabniki',
@@ -147,13 +156,13 @@ class PlayoffGUI(tk.Tk):
         if filename:
             self.openFile(filename)
 
-    def onSave(self):
+    def onSave(self, *args):
         if self._filepath is not None:
             self.saveFile(self._filepath)
         else:
             self.onSaveAs()
 
-    def onSaveAs(self):
+    def onSaveAs(self, *args):
         filename = tkfd.asksaveasfilename(
             title='Wybierz plik drabniki',
             filetypes=(('JFR Teamy Play-Off files', '*.jtpo'),
