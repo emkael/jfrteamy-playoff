@@ -204,7 +204,7 @@ class PlayoffTemplateStrings(object):
     '''
 
     PAGE_BODY_FOOTER = '''
-    <p class="f">&nbsp;Admin&nbsp;&copy;Jan Romański&#39;2005, PlayOff&nbsp;&copyMichał Klichowicz&#39;2017-2018, {{FOOTER_GENERATED}} %s</p>
+    <p class="f">&nbsp;Admin&nbsp;&copy;Jan Romański&#39;2005, PlayOff&nbsp;&copyMichał Klichowicz&#39;2017-2020, {{FOOTER_GENERATED}} %s</p>
     '''
 
     PAGE = '''
