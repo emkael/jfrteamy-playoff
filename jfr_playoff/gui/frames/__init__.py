@@ -153,14 +153,16 @@ class GuiFrame(tk.Frame):
     def renderContent(self):
         pass
 
-class RepeatableFrame(tk.Frame):
-    def __init__(self, *args, **kwargs):
-        tk.Frame.__init__(self, *args, **kwargs)
-        self.renderContent()
+    def getSpecificParent(self, parentType):
+        obj = self
+        while not isinstance(obj, parentType):
+            obj = obj.master
+            if obj is None:
+                break
+        return obj
 
-    def renderContent(self):
-        pass
 
+class RepeatableFrame(GuiFrame):
     def configureContent(self, **kwargs):
         pass
 
