@@ -7,8 +7,8 @@ import tkinter as tk
 from tkinter import ttk
 import tkMessageBox
 
-from ..variables import NotifyStringVar, NotifyIntVar
-from ..variables import NotifyBoolVar, NotifyNumericVar, NumericVar
+from ..variables import BoolVar
+from ..variables import NotifyStringVar, NotifyNumericVar, NumericVar
 
 def setPanelState(frame, state):
     for child in frame.winfo_children():
@@ -100,6 +100,7 @@ class WidgetRepeater(tk.Frame):
         self.addButton.grid(
             row=len(self.widgets)+headeridx, column=0, columnspan=1,
             sticky=tk.W+tk.N)
+        self.event_generate('<<ValueChanged>>', when='tail')
 
     def _renderHeader(self):
         if self.headers:
@@ -263,7 +264,7 @@ class WidgetSelectionFrame(ScrollableFrame):
         addBtn.pack(side=tk.BOTTOM)
 
     def renderContent(self, container):
-        self.value = NotifyIntVar()
+        self.value = tk.IntVar()
         for idx, widget in enumerate(self.widgets):
             (ttk.Radiobutton(
                 container, variable=self.value, value=idx,
@@ -298,6 +299,7 @@ class SelectionButton(ttk.Button):
         kwargs['command'] = self._choosePositions
         if self.prompt is None:
             self.prompt = self.defaultPrompt
+        self._trackChanges = False
         ttk.Button.__init__(self, *args, **kwargs)
         self.setPositions([])
 
@@ -307,6 +309,8 @@ class SelectionButton(ttk.Button):
             text='[wybrano: %d]' % (len(values)))
         if self.callback is not None:
             self.callback(values)
+        if self._trackChanges:
+            self.event_generate('<<ValueChanged>>', when='tail')
 
     def _choosePositions(self):
         options = self.getOptions()
@@ -319,6 +323,7 @@ class SelectionButton(ttk.Button):
             dialog.title(self.title)
             dialog.grab_set()
             dialog.focus_force()
+            self._trackChanges = True
             selectionFrame = self.dialogclass(
                 dialog, title=self.prompt,
                 options=options,
@@ -360,7 +365,7 @@ class SelectionFrame(ScrollableFrame):
         self.renderHeader(container)
         for idx, option in enumerate(self.options):
             key = self._mapValue(idx, option)
-            self.values[key] = NotifyBoolVar()
+            self.values[key] = BoolVar()
             self.renderOption(container, option, idx)
             if self.selected and key in self.selected:
                 self.values[key].set(True)

@@ -20,16 +20,22 @@ class NumericVar(tk.StringVar):
         except ValueError:
             return default
 
+class BoolVar(tk.StringVar):
+    def get(self, *args, **kwargs):
+        value = tk.StringVar.get(self, *args, **kwargs)
+        return int(value == '1')
+
+    def set(self, value, *args, **kwargs):
+        return tk.StringVar.set(self, '1' if value else '0', *args, **kwargs)
+
 class NotifyStringVar(NotifyVar, tk.StringVar):
     pass
 
 class NotifyIntVar(NotifyVar, tk.IntVar):
     pass
 
-class NotifyBoolVar(NotifyVar, tk.StringVar):
-    def get(self, *args, **kwargs):
-        value = tk.StringVar.get(self, *args, **kwargs)
-        return int(value == '1')
+class NotifyBoolVar(NotifyVar, BoolVar):
+    pass
 
 class NotifyNumericVar(NumericVar, NotifyVar):
     def __init__(self, *args, **kwargs):
