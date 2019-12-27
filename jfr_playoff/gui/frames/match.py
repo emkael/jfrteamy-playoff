@@ -212,13 +212,23 @@ class MatchSelectionButton(SelectionButton):
 
     @property
     def errorMessage(self):
-        return 'W turnieju nie zdefiniowano żadnych meczów'
+        return 'Brak meczów do wyboru'
+
+    def __init__(self, *args, **kwargs):
+        for arg in ['maxphase']:
+            setattr(self, arg, kwargs[arg] if arg in kwargs else None)
+            if arg in kwargs:
+                del kwargs[arg]
+        SelectionButton.__init__(self, *args, **kwargs)
 
     def getOptions(self):
         matches = self.winfo_toplevel().getMatches()
         values = []
         prev_match = None
         for match in matches:
+            if self.maxphase is not None:
+                if match.getPhase() == self.maxphase:
+                    break
             if prev_match is not None:
                 if prev_match.getPhase() != match.getPhase():
                     values.append(None)
@@ -317,6 +327,10 @@ class BracketMatchSettingsFrame(GuiFrame):
             allTeams = [team[0] for team in self.teamWidgets[0].getOptions()]
             self.teams = [allTeams[idx-1] for idx in teams]
 
+    def getPhase(self):
+        obj = self.getSpecificParent(MatchSettingsFrame)
+        return obj.getPhase() if obj is not None else None
+
     def renderContent(self):
         self.source = NotifyIntVar()
         self.source.trace('w', self._enablePanels)
@@ -351,12 +365,14 @@ class BracketMatchSettingsFrame(GuiFrame):
             MatchSelectionButton(
                 self, prompt='Wybierz mecze:',
                 dialogclass=MatchSelectionFrame,
-                callback=self._setWinners),
+                callback=self._setWinners,
+                maxphase=self.getPhase()),
             ttk.Label(self, text='Przegrani meczów:'),
             MatchSelectionButton(
                 self, prompt='Wybierz mecze:',
                 dialogclass=MatchSelectionFrame,
-                callback=self._setLosers),
+                callback=self._setLosers,
+                maxphase=self.getPhase()),
             ttk.Label(self, text='Pozycje początkowe:'),
             TeamSelectionButton(
                 self, prompt='Wybierz pozycje początkowe:',
@@ -647,12 +663,7 @@ class MatchSettingsFrame(RepeatableFrame):
         return self.matchID.get()
 
     def getPhase(self):
-        obj = self
-        while not isinstance(obj, MatchPhaseFrame):
-            obj = obj.master
-            if obj is None:
-                break
-        return obj
+        return self.getSpecificParent(MatchPhaseFrame)
 
     @property
     def label(self):
