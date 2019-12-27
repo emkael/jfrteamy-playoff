@@ -182,7 +182,7 @@ class RemoteConfigurationFrame(ScrollableFrame):
         frame.pack(
             side=tk.TOP, fill=tk.BOTH, expand=True)
         self.repeater = WidgetRepeater(
-            frame, RepeatableEntry, classParams={'width':100})
+            frame, RepeatableEntry, classParams={'width':100}, reorderable=True)
         self.repeater.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
     def setValues(self, values):
