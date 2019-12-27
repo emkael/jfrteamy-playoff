@@ -835,8 +835,7 @@ class MatchPhaseFrame(ScrollableFrame):
 
     def getConfig(self):
         config = OrderedDict()
-        if self.name.get():
-            config['title'] = self.name.get()
+        config['title'] = self.name.get() or ''
         if self.link.get():
             config['link'] = self.link.get()
         values = self.matches.getValue()
