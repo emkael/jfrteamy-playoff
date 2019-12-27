@@ -326,7 +326,8 @@ class PlayoffGenerator(object):
                 if self.page.get('starting_position_indicators', None) \
                    else col_no * (self.page['width'] + self.page['margin'])
             grid_boxes += self.get_phase_header(phase, grid_x)
-            match_height = canvas_size[1] / len(phase.matches)
+            match_height = canvas_size[1] / len(phase.matches) \
+                if len(phase.matches) > 0 else 0
             row_no = 0
             for match in phase.matches:
                 grid_y = self.page['margin'] / 2 if dimensions[1] == 1 else \
