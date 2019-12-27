@@ -819,7 +819,7 @@ class MatchPhaseFrame(ScrollableFrame):
 
         self.matches = WidgetRepeater(
             container, [MatchSettingsFrame, MatchSeparator],
-            onAdd=self._matchAdded)
+            onAdd=self._matchAdded, reorderable=True)
         self.matches.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
         self.link.trace('w', self._updateLinks)

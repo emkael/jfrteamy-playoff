@@ -19,7 +19,7 @@ def setPanelState(frame, state):
 
 class WidgetRepeater(tk.Frame):
     def __init__(self, master, widgetClass, headers=None, classParams=None,
-                 onAdd=None, *args, **kwargs):
+                 onAdd=None, reorderable=False, *args, **kwargs):
         widgetList = widgetClass
         if not isinstance(widgetClass, list):
             widgetList = [widgetClass]
@@ -36,6 +36,7 @@ class WidgetRepeater(tk.Frame):
         self.addButton = ttk.Button(
             self, text='[+]', width=5, command=self._addWidget)
         self.onAdd = onAdd
+        self.reorderable = reorderable
         self.renderContent()
 
     def _findWidget(self, row, column):
@@ -47,11 +48,23 @@ class WidgetRepeater(tk.Frame):
 
     def _createWidget(self, widgetClass, widgetClassParams=None):
         headeridx = int(self.headerFrame is not None)
+        buttonFrame = tk.Frame(self)
+        buttonFrame.grid(
+            row=len(self.widgets)+headeridx, column=0, sticky=tk.N)
         removeButton = ttk.Button(
-            self, text='[-]', width=5,
+            buttonFrame, text='[-]', width=6,
             command=lambda i=len(self.widgets): self._removeWidget(i))
         removeButton.grid(
-            row=len(self.widgets)+headeridx, column=0, sticky=tk.N)
+            row=0, column=0, columnspan=2, sticky=tk.N+tk.E+tk.W)
+        if self.reorderable:
+            moveUpButton = ttk.Button(
+                buttonFrame, text='[↑]', width=3,
+                command=lambda i=len(self.widgets): self._moveWidgetUp(i))
+            moveUpButton.grid(row=1, column=0, sticky=tk.N+tk.S+tk.E+tk.W)
+            moveDownButton = ttk.Button(
+                buttonFrame, text='[↓]', width=3,
+                command=lambda i=len(self.widgets): self._moveWidgetDown(i))
+            moveDownButton.grid(row=1, column=1, sticky=tk.N+tk.S+tk.E+tk.W)
         widget = widgetClass(self)
         if widgetClassParams is not None:
             widget.configureContent(**widgetClassParams)
@@ -59,6 +72,20 @@ class WidgetRepeater(tk.Frame):
         self._updateGrid()
         if self.onAdd is not None:
             self.onAdd(widget)
+
+    def _moveWidgetUp(self, idx):
+        self._swapWidgets(idx, idx-1)
+
+    def _moveWidgetDown(self, idx):
+        self._swapWidgets(idx, idx+1)
+
+    def _swapWidgets(self, idx1, idx2):
+        if (idx1 >= 0) and (idx2 >= 0) and \
+           (idx1 < len(self.widgets)) and (idx2 < len(self.widgets)):
+            temp = self.widgets[idx1]
+            self.widgets[idx1] = self.widgets[idx2]
+            self.widgets[idx2] = temp
+            self._updateGrid()
 
     def _handleWidgetSelection(self, selected):
         if selected < len(self.widgetClass):
