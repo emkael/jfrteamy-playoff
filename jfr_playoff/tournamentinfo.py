@@ -22,10 +22,16 @@ class TournamentInfo:
         if not self.settings['link'].endswith('leaderb.html'):
             raise ValueError('invalid link to tournament results')
         PlayoffLogger.get('tournamentinfo').info(
-            'fetching tournament results from leaderboard URL: %s', self.settings['link'])
+            'fetching tournament results from leaderboard URL: %s',
+            self.settings['link'])
         leaderboard = p_remote.fetch(self.settings['link'])
-        result_links = [row.select('a[onmouseover]') for row in leaderboard.find_all('tr') if len(row.select('a[onmouseover]')) > 0]
-        results = [None] * (len(result_links) * max([len(links) for links in result_links]))
+        result_links = [
+            row.select('a[onmouseover]')
+            for row
+            in leaderboard.find_all('tr')
+            if len(row.select('a[onmouseover]')) > 0]
+        results = [None] * (len(result_links) * max([
+            len(links) for links in result_links]))
         for i in range(0, len(result_links)):
             for j in range(0, len(result_links[i])):
                 results[len(result_links) * j + i] = result_links[i][j]
@@ -105,8 +111,13 @@ class TournamentInfo:
         contains_digits = any(char.isdigit() for char in leaderb_heading)
         PlayoffLogger.get('tournamentinfo').info(
             'tournament header from HTML: %s, %s',
-            leaderb_heading, 'contains digits' if contains_digits else "doesn't contain digits")
-        non_zero_scores = [imps.text for imps in leaderboard.select('td.bdc small') if imps.text != '0-0']
+            leaderb_heading,
+            'contains digits' if contains_digits else "doesn't contain digits")
+        non_zero_scores = [
+            imps.text
+            for imps
+            in leaderboard.select('td.bdc small')
+            if imps.text != '0-0']
         PlayoffLogger.get('tournamentinfo').info(
             'tournament leaderboard from HTML: has %d non-zero scores',
             len(non_zero_scores))
