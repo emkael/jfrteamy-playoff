@@ -10,7 +10,7 @@ class RemoteUrl:
     url_cache = {}
 
     @classmethod
-    def fetch(cls, url):
+    def fetch_raw(cls, url):
         PlayoffLogger.get('remote').info(
             'fetching content for: %s', url)
         if url not in cls.url_cache:
@@ -24,4 +24,8 @@ class RemoteUrl:
             PlayoffLogger.get('remote').info(
                 'fetched %d bytes from remote location',
                 len(cls.url_cache[url]))
-        return bs(cls.url_cache[url], 'lxml')
+        return cls.url_cache[url]
+
+    @classmethod
+    def fetch(cls, url):
+        return bs(RemoteUrl.fetch_raw(url), 'lxml')
