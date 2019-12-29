@@ -1,6 +1,7 @@
 import json
 import urlparse
 
+from jfr_playoff.logger import PlayoffLogger
 from jfr_playoff.remote import RemoteUrl as p_remote
 from jfr_playoff.tournamentinfo import TournamentInfoClient
 
@@ -8,15 +9,28 @@ FLAG_CDN_URL = 'https://cdn.tournamentcalculator.com/flags/'
 
 
 class TCJsonTournamentInfo(TournamentInfoClient):
+    def get_exceptions(self, method):
+        return (TypeError, IndexError, KeyError, IOError, ValueError)
+
     def get_results_link(self, suffix):
-        return urlparse.urljoin(self.settings['link'], suffix)
+        link = urlparse.urljoin(self.settings['link'], suffix)
+        PlayoffLogger.get('tcjson').info(
+            'generating tournament-specific link from leaderboard link %s: %s -> %s',
+            self.settings['link'], suffix, link)
+        return link
 
     def is_finished(self):
         settings_json = json.loads(
             p_remote.fetch_raw(self.get_results_link('settings.json')))
-        return (not settings_json['LiveResults']) \
-            and (settings_json['LastPlayedRound'] > 0) \
-            and (settings_json['LastPlayedSession'] > 0)
+        live_results = settings_json['LiveResults']
+        last_round = settings_json['LastPlayedRound']
+        last_session = settings_json['LastPlayedSession']
+        finished = (not live_results) \
+            and (last_round > 0) and (last_session > 0)
+        PlayoffLogger.get('jfrhtml').info(
+            'tournament settings (live = %s, last_round = %d, last_session = %d) indicate finished: %s',
+            live_results, last_round, last_session, finished)
+        return finished
 
     def get_tournament_results(self):
         results = []
@@ -35,7 +49,6 @@ class TCJsonTournamentInfo(TournamentInfoClient):
                 result['ParticipantGroup'], result['Place'],
                 participant['_name'], participant['_shortName'],
                 flag_url))
+        PlayoffLogger.get('tcjson').info(
+            'tournament results fetched: %s' % results)
         return [list(r[2:]) + [None] for r in sorted(results)]
-
-    def get_exceptions(self, method):
-        return (TypeError, IndexError, KeyError, IOError, ValueError)
