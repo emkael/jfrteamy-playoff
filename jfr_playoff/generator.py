@@ -1,4 +1,5 @@
 from datetime import datetime
+import urlparse
 
 from jfr_playoff.dto import coalesce
 from jfr_playoff.template import PlayoffTemplate
@@ -435,4 +436,11 @@ class PlayoffGenerator(object):
 
     def get_flag(self, team):
         flag = self.data.get_team_image(team)
-        return '' if flag is None else self.p_temp.get('LEADERBOARD_ROW_FLAG', flag)
+        return '' \
+            if flag is None \
+               else self.p_temp.get(
+                       'LEADERBOARD_ROW_FLAG',
+                       ''
+                       if bool(urlparse.urlparse(flag).netloc)
+                       else 'images/',
+                       flag)

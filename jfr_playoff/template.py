@@ -149,7 +149,7 @@ class PlayoffTemplateStrings(object):
     '''
 
     LEADERBOARD_ROW_FLAG = '''
-    <img class="fl" src="images/%s" />
+    <img class="fl" src="%s%s" />
     '''
 
     LEADERBOARD_CAPTION_TABLE = '''
