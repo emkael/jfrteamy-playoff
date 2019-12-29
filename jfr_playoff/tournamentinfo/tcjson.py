@@ -36,7 +36,15 @@ class TCJsonTournamentInfo(TournamentInfoClient):
         results = []
         results_json = json.loads(
             p_remote.fetch_raw(self.get_results_link('results.json')))
+        participant_groups = []
         for result in results_json['Results']:
+            group = result['ParticipantGroup']
+            if group is not None:
+                if group not in participant_groups:
+                    participant_groups.append(group)
+                group_id = participant_groups.index(group) + 1
+            else:
+                group_id = 999999
             participant = result['Participant']
             flag_url = None
             flag = participant['_flag']
@@ -46,7 +54,7 @@ class TCJsonTournamentInfo(TournamentInfoClient):
                     if flag['IsCustom']
                     else '%s/%s.png' % (FLAG_CDN_URL, flag['CountryNameCode']))
             results.append((
-                result['ParticipantGroup'], result['Place'],
+                group_id, result['Place'],
                 participant['_name'], participant['_shortName'],
                 flag_url))
         PlayoffLogger.get('tcjson').info(
