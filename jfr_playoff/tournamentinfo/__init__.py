@@ -20,7 +20,6 @@ class TournamentInfoClient(object):
 
 
 class TournamentInfo:
-
     def __init__(self, settings, database):
         self.settings = settings
         from jfr_playoff.tournamentinfo.jfrdb import JFRDbTournamentInfo
