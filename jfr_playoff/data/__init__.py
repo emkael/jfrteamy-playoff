@@ -2,8 +2,8 @@ from cached_property import cached_property
 
 from jfr_playoff.db import PlayoffDB
 from jfr_playoff.dto import Phase
-from jfr_playoff.matchinfo import MatchInfo
-from jfr_playoff.data.tournament import TournamentInfo
+from jfr_playoff.data.match import MatchInfo
+from jfr_playoff.data.info import TournamentInfo
 from jfr_playoff.logger import PlayoffLogger
 
 
