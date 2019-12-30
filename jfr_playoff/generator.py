@@ -11,7 +11,6 @@ class PlayoffGenerator(object):
     def __init__(self, settings):
         self.data = PlayoffData(settings)
         self.page = settings.get('page')
-        print self.page.get('favicon')
         PlayoffLogger.get('generator').info(
             'page settings: %s', self.page)
         self.team_box_settings = self.page.get('team_boxes', {})
