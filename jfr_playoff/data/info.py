@@ -58,14 +58,16 @@ class ResultInfo(object):
             try:
                 ret = getattr(client, method)(*args)
                 PlayoffLogger.get('resultinfo').info(
-                    '%s method returned %s', method, ret)
+                    '%s.%s method returned %s',
+                    client.__class__.__name__, method, ret)
                 return ret
             except Exception as e:
                 if type(e) \
                    in client.get_exceptions(method) + (NotImplementedError,):
                     PlayoffLogger.get('resultinfo').warning(
-                        '%s method raised %s(%s)',
-                        method, type(e).__name__, str(e))
+                        '%s.%s method raised %s(%s)',
+                        client.__class__.__name__, method,
+                        type(e).__name__, str(e))
                 else:
                     raise
         PlayoffLogger.get('resultinfo').info(
