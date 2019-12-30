@@ -1,4 +1,7 @@
+import glob
+import inspect
 import re
+from os.path import dirname, basename, isfile, join
 from urlparse import urljoin
 
 import jfr_playoff.sql as p_sql
@@ -7,12 +10,46 @@ from jfr_playoff.remote import RemoteUrl as p_remote
 from jfr_playoff.logger import PlayoffLogger
 
 
+class ResultInfoClient(object):
+    def __init__(self, settings, database=None):
+        self.settings = settings
+        self.database = database
+
+    @property
+    def priority(self):
+        return 0
+
+    def is_capable(self):
+        return False
+
+    def get_exceptions(self, method):
+        pass
+
+
 class ResultInfo(object):
     def __init__(self, *args):
-        self.clients = self.fill_client_list(*args)
+        self.clients = self._fill_client_list(*args)
 
-    def fill_client_list(self, settings, database):
-        return []
+    @property
+    def submodule_path(self):
+        raise NotImplementedError()
+
+    @property
+    def _client_classes(self):
+        module = __import__(self.submodule_path, fromlist=[''])
+        for f in glob.glob(join(dirname(module.__file__), "*.py")):
+            if isfile(f) and not f.endswith('__init__.py'):
+                submodule_name = basename(f)[:-3]
+                submodule_path = self.submodule_path + '.' + submodule_name
+                submodule = __import__(submodule_path, fromlist=[''])
+                for member in inspect.getmembers(submodule, inspect.isclass):
+                    if member[1].__module__ == submodule_path:
+                        yield member[1]
+
+    def _fill_client_list(self, *args):
+        all_clients = [c(*args) for c in self._client_classes]
+        clients = [c for c in all_clients if c.is_capable()]
+        return sorted(clients, key=lambda c: c.priority, reverse=True)
 
     def call_client(self, method, default, *args):
         PlayoffLogger.get('resultinfo').info(
@@ -35,34 +72,22 @@ class ResultInfo(object):
         return default
 
 
-from jfr_playoff.data.tournament.jfrdb import JFRDbTournamentInfo
-from jfr_playoff.data.tournament.jfrhtml import JFRHtmlTournamentInfo
-from jfr_playoff.data.tournament.tcjson import TCJsonTournamentInfo
-
-
 class TournamentInfo(ResultInfo):
     def __init__(self, settings, database):
-        self.settings = settings
         ResultInfo.__init__(self, settings, database)
+        self.final_positions = settings.get('final_positions', [])
 
-    def fill_client_list(self, settings, database):
-        clients = []
-        if (database is not None) and ('database' in settings):
-            clients.append(JFRDbTournamentInfo(settings, database))
-        if 'link' in settings:
-            if settings['link'].endswith('leaderb.html'):
-                clients.append(JFRHtmlTournamentInfo(settings))
-            clients.append(TCJsonTournamentInfo(settings))
-        return clients
+    @property
+    def submodule_path(self):
+        return 'jfr_playoff.data.tournament'
 
     def get_tournament_results(self):
         teams = self.call_client('get_tournament_results', [])
         if self.is_finished():
-            final_positions = self.settings.get('final_positions', [])
             PlayoffLogger.get('tournamentinfo').info(
                 'setting final positions from tournament results: %s',
-                final_positions)
-            for position in final_positions:
+                self.final_positions)
+            for position in self.final_positions:
                 if len(teams) >= position:
                     teams[position-1] = (teams[position-1] + [None] * 4)[0:4]
                     teams[position-1][3] = position
@@ -80,6 +105,7 @@ class MatchInfo(ResultInfo):
     matches = {}
 
     def __init__(self, match_config, teams, database, aliases=None):
+        ResultInfo.__init__(self, match_config, database)
         self.config = match_config
         self.teams = teams
         self.database = database
@@ -88,13 +114,13 @@ class MatchInfo(ResultInfo):
             for team, team_aliases in aliases.iteritems():
                 for alias in team_aliases:
                     self.aliases[alias] = team
-        ResultInfo.__init__(self, match_config, database)
         self.info = Match()
         self.__init_info()
         self.__fetch_match_link()
 
-    def fill_client_list(self, settings, database):
-        return []
+    @property
+    def submodule_path(self):
+        return 'jfr_playoff.data.match'
 
     def __init_info(self):
         self.info.id = self.config['id']

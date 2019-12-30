@@ -1,5 +1,4 @@
 import jfr_playoff.sql as p_sql
-
 from jfr_playoff.logger import PlayoffLogger
 from jfr_playoff.data.tournament import TournamentInfoClient
 
@@ -9,6 +8,13 @@ SWISS_TIE_WARNING = 'tie detected in swiss %s.' + \
 
 
 class JFRDbTournamentInfo(TournamentInfoClient):
+    @property
+    def priority(self):
+        return 50
+
+    def is_capable(self):
+        return (self.database is not None) and ('database' in self.settings)
+
     def get_exceptions(self, method):
         return (IOError, TypeError, IndexError, KeyError)
 

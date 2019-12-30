@@ -9,6 +9,13 @@ FLAG_CDN_URL = 'https://cdn.tournamentcalculator.com/flags/'
 
 
 class TCJsonTournamentInfo(TournamentInfoClient):
+    @property
+    def priority(self):
+        return 20
+
+    def is_capable(self):
+        return 'link' in self.settings
+
     def get_exceptions(self, method):
         return (TypeError, IndexError, KeyError, IOError, ValueError)
 

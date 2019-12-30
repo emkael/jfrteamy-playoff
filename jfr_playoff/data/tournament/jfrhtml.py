@@ -7,6 +7,14 @@ from jfr_playoff.data.tournament import TournamentInfoClient
 
 
 class JFRHtmlTournamentInfo(TournamentInfoClient):
+    @property
+    def priority(self):
+        return 30
+
+    def is_capable(self):
+        return ('link' in self.settings) \
+            and (self.settings['link'].endswith('leaderb.html'))
+
     def get_exceptions(self, method):
         if method == 'get_results_link':
             return (KeyError, ValueError)
