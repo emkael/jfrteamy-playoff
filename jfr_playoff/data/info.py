@@ -294,8 +294,10 @@ class MatchInfo(ResultInfo):
                         for place in self.config['teams'][i]['place']]
             teams[i].name = match_teams
             teams[i].possible_name = possible_teams
-            teams[i].known_teams = len([team for team in match_teams if team is not None])
-            teams[i].selected_team = self.config['selected_teams'][i] if 'selected_teams' in self.config else -1
+            teams[i].known_teams = len([
+                team for team in match_teams if team is not None])
+            teams[i].selected_team = self.config['selected_teams'][i] \
+                if 'selected_teams' in self.config else -1
         PlayoffLogger.get('matchinfo').info(
             'config scores for match #%d: %s',
             self.info.id, teams)
@@ -305,7 +307,8 @@ class MatchInfo(ResultInfo):
         return [self.aliases[team] if team in self.aliases else team for team in teams]
 
     def __fetch_teams_with_scores(self):
-        (scores_fetched, teams_fetched, self.info.teams) = self.__get_predefined_scores()
+        (scores_fetched, teams_fetched, self.info.teams) = \
+            self.__get_predefined_scores()
         if scores_fetched:
             PlayoffLogger.get('matchinfo').info(
                 'pre-defined scores for match #%d fetched', self.info.id)
@@ -334,11 +337,16 @@ class MatchInfo(ResultInfo):
             if isinstance(self.config['teams'][team], dict):
                 self.info.teams[team].place = self.config['teams'][team].get(
                     'place', self.info.teams[team].place)
-            self.info.teams[team].name = self.__resolve_team_aliases(self.info.teams[team].name)
-            PlayoffLogger.get('matchinfo').info('team list after resolving aliases: %s', self.info.teams[team].name)
-            self.info.teams[team].possible_name = self.__resolve_team_aliases(self.info.teams[team].possible_name)
-            PlayoffLogger.get('matchinfo').info('predicted team list after resolving aliases: %s', self.info.teams[team].possible_name)
-
+            self.info.teams[team].name = self.__resolve_team_aliases(
+                self.info.teams[team].name)
+            PlayoffLogger.get('matchinfo').info(
+                'team list after resolving aliases: %s',
+                self.info.teams[team].name)
+            self.info.teams[team].possible_name = self.__resolve_team_aliases(
+                self.info.teams[team].possible_name)
+            PlayoffLogger.get('matchinfo').info(
+                'predicted team list after resolving aliases: %s',
+                self.info.teams[team].possible_name)
 
     def __get_db_board_count(self):
         towels = self.database.fetch(
