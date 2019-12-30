@@ -143,18 +143,12 @@ class MatchInfo(ResultInfo):
         self.info.teams = []
 
     def __fetch_match_link(self):
-        if 'link' in self.config:
-            self.info.link = self.config['link']
-            PlayoffLogger.get('matchinfo').info(
-                'match #%d link pre-defined: %s', self.info.id, self.info.link)
-        elif ('round' in self.config) and ('database' in self.config):
-            event_info = TournamentInfo(self.config, self.database)
-            self.info.link = event_info.get_results_link(
-                'runda%d.html' % (self.config['round']))
-            PlayoffLogger.get('matchinfo').info(
-                'match #%d link fetched: %s', self.info.id, self.info.link)
+        link = self.call_client('get_match_link', None)
+        if link is not None:
+            self.info.link = link
         else:
-            PlayoffLogger.get('matchinfo').info('match #%d link empty', self.info.id)
+            PlayoffLogger.get('matchinfo').info(
+                'match #%d link empty', self.info.id)
 
     def __get_predefined_scores(self):
         teams = [Team(), Team()]
@@ -561,6 +555,12 @@ class MatchInfo(ResultInfo):
         PlayoffLogger.get('matchinfo').info(
             'applying phase link %s to match #%d: %s',
             phase_link, self.info.id, self.info.link)
+        # re-init result info clients
+        if not len(self.clients) and (self.info.link is not None):
+            PlayoffLogger.get('matchinfo').info(
+                'config link changed, re-initializing result info client list')
+            self.config['link'] = self.info.link
+            ResultInfo.__init__(self, self.config, self.database)
 
     def get_info(self):
         self.__fetch_teams_with_scores()
