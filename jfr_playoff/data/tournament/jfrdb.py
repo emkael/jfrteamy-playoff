@@ -1,7 +1,7 @@
 import jfr_playoff.sql as p_sql
 
 from jfr_playoff.logger import PlayoffLogger
-from jfr_playoff.tournamentinfo import TournamentInfoClient
+from jfr_playoff.data.tournament import TournamentInfoClient
 
 SWISS_TIE_WARNING = 'tie detected in swiss %s.' + \
                     ' Make sure to resolve the tie by arranging teams' + \

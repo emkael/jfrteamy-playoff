@@ -1,5 +1,5 @@
 from jfr_playoff.logger import PlayoffLogger
-from jfr_playoff.data import ResultInfo
+from jfr_playoff.data.info import ResultInfo
 
 
 class TournamentInfoClient(object):
@@ -27,9 +27,9 @@ class TournamentInfo(ResultInfo):
 
     def fill_client_list(self, settings, database):
         clients = []
-        from jfr_playoff.tournamentinfo.jfrdb import JFRDbTournamentInfo
-        from jfr_playoff.tournamentinfo.jfrhtml import JFRHtmlTournamentInfo
-        from jfr_playoff.tournamentinfo.tcjson import TCJsonTournamentInfo
+        from jfr_playoff.data.tournament.jfrdb import JFRDbTournamentInfo
+        from jfr_playoff.data.tournament.jfrhtml import JFRHtmlTournamentInfo
+        from jfr_playoff.data.tournament.tcjson import TCJsonTournamentInfo
         if (database is not None) and ('database' in settings):
             clients.append(JFRDbTournamentInfo(settings, database))
         if 'link' in settings:

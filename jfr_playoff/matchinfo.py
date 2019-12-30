@@ -4,9 +4,10 @@ from urlparse import urljoin
 import jfr_playoff.sql as p_sql
 from jfr_playoff.dto import Match, Team
 from jfr_playoff.remote import RemoteUrl as p_remote
-from jfr_playoff.data import ResultInfo
-from jfr_playoff.tournamentinfo import TournamentInfo
+from jfr_playoff.data.info import ResultInfo
+from jfr_playoff.data.tournament import TournamentInfo
 from jfr_playoff.logger import PlayoffLogger
+
 
 class MatchInfo(ResultInfo):
 

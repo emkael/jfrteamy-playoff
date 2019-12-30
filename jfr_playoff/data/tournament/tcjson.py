@@ -3,7 +3,7 @@ import urlparse
 
 from jfr_playoff.logger import PlayoffLogger
 from jfr_playoff.remote import RemoteUrl as p_remote
-from jfr_playoff.tournamentinfo import TournamentInfoClient
+from jfr_playoff.data.tournament import TournamentInfoClient
 
 FLAG_CDN_URL = 'https://cdn.tournamentcalculator.com/flags/'
 
