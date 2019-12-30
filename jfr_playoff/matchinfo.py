@@ -4,10 +4,11 @@ from urlparse import urljoin
 import jfr_playoff.sql as p_sql
 from jfr_playoff.dto import Match, Team
 from jfr_playoff.remote import RemoteUrl as p_remote
+from jfr_playoff.data import ResultInfo
 from jfr_playoff.tournamentinfo import TournamentInfo
 from jfr_playoff.logger import PlayoffLogger
 
-class MatchInfo:
+class MatchInfo(ResultInfo):
 
     matches = {}
 
@@ -20,9 +21,13 @@ class MatchInfo:
             for team, team_aliases in aliases.iteritems():
                 for alias in team_aliases:
                     self.aliases[alias] = team
+        ResultInfo.__init__(self, match_config, database)
         self.info = Match()
         self.__init_info()
         self.__fetch_match_link()
+
+    def fill_client_list(self, settings, database):
+        return []
 
     def __init_info(self):
         self.info.id = self.config['id']
@@ -363,8 +368,8 @@ class MatchInfo:
                 pass
         if boards_played > 0:
             self.info.running = -1 \
-                                if boards_played >= boards_to_play \
-                                   else boards_played
+                if boards_played >= boards_to_play \
+                   else boards_played
 
     def __determine_outcome(self):
         if (self.info.teams[0].known_teams == 1) \
