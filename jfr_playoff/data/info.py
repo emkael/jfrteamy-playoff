@@ -61,7 +61,8 @@ class ResultInfo(object):
                     '%s method returned %s', method, ret)
                 return ret
             except Exception as e:
-                if type(e) in client.get_exceptions(method):
+                if type(e) \
+                   in client.get_exceptions(method) + (NotImplementedError,):
                     PlayoffLogger.get('resultinfo').warning(
                         '%s method raised %s(%s)',
                         method, type(e).__name__, str(e))
