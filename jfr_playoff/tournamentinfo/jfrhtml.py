@@ -14,19 +14,19 @@ class JFRHtmlTournamentInfo(TournamentInfoClient):
 
     def get_results_link(self, suffix='leaderb.html'):
         link = re.sub(r'leaderb.html$', suffix, self.settings['link'])
-        PlayoffLogger.get('jfrhtml').info(
+        PlayoffLogger.get('tournament.jfrhtml').info(
             'generating tournament-specific link from leaderboard link %s: %s -> %s',
             self.settings['link'], suffix, link)
         return link
 
     def is_finished(self):
-        PlayoffLogger.get('jfrhtml').info(
+        PlayoffLogger.get('tournament.jfrhtml').info(
             'fetching tournament finished status from HTML: %s',
             self.settings['link'])
         leaderboard = p_remote.fetch(self.settings['link'])
         leaderb_heading = leaderboard.select('td.bdnl12')[0].text
         contains_digits = any(char.isdigit() for char in leaderb_heading)
-        PlayoffLogger.get('jfrhtml').info(
+        PlayoffLogger.get('tournament.jfrhtml').info(
             'tournament header from HTML: %s, %s',
             leaderb_heading,
             'contains digits' if contains_digits else "doesn't contain digits")
@@ -35,17 +35,17 @@ class JFRHtmlTournamentInfo(TournamentInfoClient):
             for imps
             in leaderboard.select('td.bdc small')
             if imps.text != '0-0']
-        PlayoffLogger.get('jfrhtml').info(
+        PlayoffLogger.get('tournament.jfrhtml').info(
             'tournament leaderboard from HTML: has %d non-zero scores',
             len(non_zero_scores))
         finished = (not contains_digits) and (len(non_zero_scores) > 0)
-        PlayoffLogger.get('jfrhtml').info(
+        PlayoffLogger.get('tournament.jfrhtml').info(
             'tournament leaderboard from HTML indicates finished: %s',
             finished)
         return finished
 
     def get_tournament_results(self):
-        PlayoffLogger.get('jfrhtml').info(
+        PlayoffLogger.get('tournament.jfrhtml').info(
             'fetching tournament results from leaderboard URL: %s',
             self.settings['link'])
         leaderboard = p_remote.fetch(self.settings['link'])
@@ -72,21 +72,21 @@ class JFRHtmlTournamentInfo(TournamentInfoClient):
                 if team_image is not None:
                     team_info.append(team_image['src'].replace('images/', ''))
                 teams.append(team_info)
-        PlayoffLogger.get('jfrhtml').info(
+        PlayoffLogger.get('tournament.jfrhtml').info(
             'read tournament results from leaderboard: %s', teams)
         for table in range(1, int(ceil(len(teams)/2.0))+1):
             table_url = self.get_results_link('1t%d-1.html' % (table))
             table_content = p_remote.fetch(table_url)
-            PlayoffLogger.get('jfrhtml').info(
+            PlayoffLogger.get('tournament.jfrhtml').info(
                 'reading team shortnames from traveller: %s', table_url)
             for link in table_content.select('a.br'):
                 if link['href'] in team_links:
                     for team in teams:
                         if team[0] == team_links[link['href']]:
                             team[1] = link.text.strip(u'\xa0')
-                            PlayoffLogger.get('jfrhtml').info(
+                            PlayoffLogger.get('tournament.jfrhtml').info(
                                 'shortname for %s: %s', team[0], team[1])
                             break
-        PlayoffLogger.get('jfrhtml').info(
+        PlayoffLogger.get('tournament.jfrhtml').info(
             'tournament results from HTML: %s', teams)
         return teams

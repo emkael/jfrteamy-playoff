@@ -18,7 +18,7 @@ class JFRDbTournamentInfo(TournamentInfoClient):
         if row is not None:
             if len(row) > 0:
                 link = row[0] + suffix
-                PlayoffLogger.get('jfrdb').info(
+                PlayoffLogger.get('tournament.jfrdb').info(
                     'generating tournament-specific link from DB %s prefix: %s -> %s',
                     self.settings['database'], suffix, link)
                 return link
@@ -27,7 +27,7 @@ class JFRDbTournamentInfo(TournamentInfoClient):
     def is_finished(self):
         finished = self.database.fetch(
             self.settings['database'], p_sql.SWISS_ENDED, {})
-        PlayoffLogger.get('jfrdb').info(
+        PlayoffLogger.get('tournament.jfrdb').info(
             'fetching tournament finished status from DB %s: %s',
             self.settings['database'], finished)
         return (len(finished) > 0) and (finished[0] > 0)
@@ -44,17 +44,17 @@ class JFRDbTournamentInfo(TournamentInfoClient):
         swiss_results = sorted(
             swiss_results, key=lambda t: t[1], reverse=True)
         swiss_results = sorted(swiss_results, key=lambda team: team[2])
-        PlayoffLogger.get('jfrdb').info(
+        PlayoffLogger.get('tournament.jfrdb').info(
             'fetched tournament results from database %s: %s',
             self.settings['database'], swiss_results)
         prev_result = None
         for team in swiss_results:
             if prev_result == team[1]:
-                PlayoffLogger.get('jfrdb').warning(
+                PlayoffLogger.get('tournament.jfrdb').warning(
                     SWISS_TIE_WARNING, self.settings['database'])
             prev_result = team[1]
         db_teams = [[team[0], team[3], team[4]] for team in swiss_results]
-        PlayoffLogger.get('jfrdb').info(
+        PlayoffLogger.get('tournament.jfrdb').info(
             'fetched team list from database %s: %s',
             self.settings['database'], db_teams)
         return db_teams

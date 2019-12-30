@@ -14,7 +14,7 @@ class TCJsonTournamentInfo(TournamentInfoClient):
 
     def get_results_link(self, suffix):
         link = urlparse.urljoin(self.settings['link'], suffix)
-        PlayoffLogger.get('tcjson').info(
+        PlayoffLogger.get('tournament.tcjson').info(
             'generating tournament-specific link from leaderboard link %s: %s -> %s',
             self.settings['link'], suffix, link)
         return link
@@ -27,7 +27,7 @@ class TCJsonTournamentInfo(TournamentInfoClient):
         last_session = settings_json['LastPlayedSession']
         finished = (not live_results) \
             and (last_round > 0) and (last_session > 0)
-        PlayoffLogger.get('jfrhtml').info(
+        PlayoffLogger.get('tournament.tcjson').info(
             'tournament settings (live = %s, last_round = %d, last_session = %d) indicate finished: %s',
             live_results, last_round, last_session, finished)
         return finished
@@ -57,6 +57,6 @@ class TCJsonTournamentInfo(TournamentInfoClient):
                 group_id, result['Place'],
                 participant['_name'], participant['_shortName'],
                 flag_url))
-        PlayoffLogger.get('tcjson').info(
+        PlayoffLogger.get('tournament.tcjson').info(
             'tournament results fetched: %s' % results)
         return [list(r[2:]) + [None] for r in sorted(results)]
