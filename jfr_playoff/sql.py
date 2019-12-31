@@ -34,8 +34,9 @@ GROUP BY #db#.segments.tabl, #db#.segments.rnd
 '''
 
 CURRENT_SEGMENT = '''
-SELECT LEAST(segmentsperround, segm+1)
-FROM #db#.admin
+SELECT MAX(segment)
+FROM #db#.scores
+WHERE #db#.scores.rnd = %s AND #db#.scores.contract IS NOT NULL
 '''
 
 PREFIX = '''

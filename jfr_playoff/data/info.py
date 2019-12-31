@@ -1,12 +1,10 @@
+import copy
 import glob
 import inspect
-import re
 from os.path import dirname, basename, isfile, join
 from urlparse import urljoin
 
-import jfr_playoff.sql as p_sql
 from jfr_playoff.dto import Match, Team
-from jfr_playoff.remote import RemoteUrl as p_remote
 from jfr_playoff.logger import PlayoffLogger
 
 
@@ -176,90 +174,7 @@ class MatchInfo(ResultInfo):
                 self.info.id, teams)
         return scores_fetched, teams_fetched, teams
 
-    def __get_db_teams(self, teams, fetch_scores):
-        row = self.database.fetch(
-            self.config['database'], p_sql.MATCH_RESULTS,
-            (self.config['table'], self.config['round']))
-        for i in range(0, 2):
-            teams[i].name = [row[i]]
-            teams[i].known_teams = 1
-        if fetch_scores:
-            teams[0].score = row[3] + row[5]
-            teams[1].score = row[4] + row[6]
-            if row[2] > 0:
-                teams[0].score += row[2]
-            else:
-                teams[1].score -= row[2]
-        PlayoffLogger.get('matchinfo').info(
-            'db scores for match #%d: %s', self.info.id, teams)
-        return teams
-
-    def __find_table_row(self, url):
-        html_content = p_remote.fetch(url)
-        for row in html_content.select('tr tr'):
-            for cell in row.select('td.t1'):
-                if cell.text.strip() == str(self.config['table']):
-                    PlayoffLogger.get('matchinfo.html').debug(
-                        'HTML row for table %d found: %s',
-                        self.config['table'], row)
-                    return row
-        PlayoffLogger.get('matchinfo.html').debug(
-            'HTML row for table %d not found',
-            self.config['table'])
-        return None
-
-    def __get_html_teams(self, teams, fetch_score):
-        if self.info.link is None:
-            raise ValueError('link not set')
-        row = self.__find_table_row(self.info.link)
-        if row is None:
-            raise ValueError('table row not found')
-        try:
-            scores = [
-                float(text) for text
-                in row.select('td.bdc')[-1].contents
-                if isinstance(text, unicode)]
-        except ValueError:
-            # single-segment match
-            try:
-                # running single-segment
-                scores = [
-                    float(text.strip()) for text
-                    in row.select('td.bdcg a')[-1].contents
-                    if isinstance(text, unicode)]
-            except IndexError:
-                try:
-                    # static single-segment
-                    scores = [
-                        float(text.strip()) for text
-                        in row.select('td.bdc a')[-1].contents
-                        if isinstance(text, unicode)]
-                except IndexError:
-                    # toweled single-segment
-                    scores = [0.0, 0.0]
-            # carry-over
-            carry_over = [
-                float(text.strip()) if len(text.strip()) > 0 else 0.0 for text
-                in row.select('td.bdc')[0].contents
-                if isinstance(text, unicode)]
-            if len(carry_over) < 2:
-                # no carry-over, possibly no carry-over cells or empty
-                carry_over = [0.0, 0.0]
-            for i in range(0, 2):
-                scores[i] += carry_over[i]
-        team_names = [[text for text in link.contents
-                       if isinstance(text, unicode)][0].strip(u'\xa0')
-                      for link in row.select('a[onmouseover]')]
-        for i in range(0, 2):
-            teams[i].name = [team_names[i]]
-            teams[i].known_teams = 1
-            teams[i].score = scores[i]
-        PlayoffLogger.get('matchinfo').info(
-            'HTML scores for match #%d: %s',
-            self.info.id, teams)
-        return teams
-
-    def __get_config_teams(self, teams):
+    def _get_config_teams(self, teams):
         for i in range(0, 2):
             match_teams = []
             possible_teams = []
@@ -310,25 +225,16 @@ class MatchInfo(ResultInfo):
         if scores_fetched:
             self.info.running = int(self.config.get('running', -1))
         if not teams_fetched:
-            try:
-                try:
-                    if self.database is None:
-                        raise KeyError('database not configured')
-                    if 'database' not in self.config:
-                        raise KeyError('database not configured')
-                    self.info.teams = self.__get_db_teams(
-                        self.info.teams, not scores_fetched)
-                except (IOError, TypeError, IndexError, KeyError) as e:
-                    PlayoffLogger.get('matchinfo').warning(
-                        'fetching DB scores for match #%d failed: %s(%s)',
-                        self.info.id, type(e).__name__, str(e))
-                    self.info.teams = self.__get_html_teams(
-                        self.info.teams, not scores_fetched)
-            except (TypeError, IndexError, KeyError, IOError, ValueError) as e:
+            teams = self.call_client(
+                'fetch_teams', None,
+                copy.deepcopy(self.info.teams))
+            if teams is None:
                 PlayoffLogger.get('matchinfo').warning(
-                    'fetching HTML scores for match #%d failed: %s(%s)',
-                    self.info.id, type(e).__name__, str(e))
-                self.info.teams = self.__get_config_teams(self.info.teams)
+                    'fetching teams for match #%d failed, reverting to config',
+                    self.info.id)
+                self.info.teams = self._get_config_teams(self.info.teams)
+            else:
+                self.info.teams = teams
         for team in range(0, len(self.info.teams)):
             if isinstance(self.config['teams'][team], dict):
                 self.info.teams[team].place = self.config['teams'][team].get(
@@ -344,128 +250,9 @@ class MatchInfo(ResultInfo):
                 'predicted team list after resolving aliases: %s',
                 self.info.teams[team].possible_name)
 
-    def __get_db_board_count(self):
-        towels = self.database.fetch(
-            self.config['database'], p_sql.TOWEL_COUNT,
-            (self.config['table'], self.config['round']))
-        row = [0 if r is None
-               else r for r in
-               self.database.fetch(
-                   self.config['database'], p_sql.BOARD_COUNT,
-                   (self.config['table'], self.config['round']))]
-        boards_to_play = int(row[0])
-        boards_played = max(int(row[1]), 0)
-        if boards_to_play > 0:
-            boards_played += int(towels[0])
-        PlayoffLogger.get('matchinfo').info(
-            'DB board count for match #%d: %d/%d',
-            self.info.id, boards_played, boards_to_play)
-        return boards_played, boards_to_play
-
-    def __has_segment_link(self, cell):
-        links = [link for link in cell.select('a[href]')
-                 if re.match(r'^.*\d+t\d+-\d+\.htm$', link['href'])]
-        return len(links) > 0
-
-    def __has_towel_image(self, cell):
-        return len(cell.select('img[alt="towel"]')) > 0
-
-    def __get_html_running_boards(self, cell):
-        return int(cell.contents[-1].strip())
-
-    def __get_html_segment_board_count(self, segment_url):
-        segment_content = p_remote.fetch(segment_url)
-        board_rows = [row for row in segment_content.find_all('tr') if len(row.select('td.bdcc a.zb')) > 0]
-        board_count = len(board_rows)
-        played_boards = len([
-            row for row in board_rows if len(
-                ''.join([cell.text.strip() for cell in row.select('td.bdc')])) > 0])
-        return played_boards, board_count
-
-    def __get_finished_info(self, cell):
-        segment_link = cell.select('a[href]')
-        if len(segment_link) > 0:
-            segment_url = re.sub(
-                r'\.htm$', '.html',
-                urljoin(self.info.link, segment_link[0]['href']))
-            try:
-                played_boards, board_count = self.__get_html_segment_board_count(segment_url)
-                PlayoffLogger.get('matchinfo').info(
-                    'HTML played boards count for segment: %d/%d',
-                    played_boards, board_count)
-                return board_count, played_boards >= board_count
-            except IOError as e:
-                PlayoffLogger.get('matchinfo').info(
-                    'cannot fetch HTML played boards count for segment: %s(%s)',
-                    self.info.id, type(e).__name__, str(e))
-                return 0, False
-        return 0, False
-
-    def __get_html_board_count(self):
-        if self.info.link is None:
-            raise ValueError('link not set')
-        row = self.__find_table_row(self.info.link)
-        if row is None:
-            raise ValueError('table row not found')
-        for selector in ['td.bdc', 'td.bdcg']:
-            cells = row.select(selector)
-            segments = [cell for cell in cells if self.__has_segment_link(cell)]
-            towels = [cell for cell in cells if self.__has_towel_image(cell)]
-            if len(segments) == 0:
-                # in single-segment match, there are no td.bdc cells with segment links
-                # but maybe it's a multi-segment match with towels
-                if len(towels) > 0:
-                    PlayoffLogger.get('matchinfo').info(
-                        'HTML board count for match #%d: all towels', self.info.id)
-                    return 1, 1 # entire match is toweled, so mark as finished
-            else:
-                # not a single-segment match, no need to look for td.bdcg cells
-                break
-        if len(segments) == 0:
-            raise ValueError('segments not found')
-        running_segments = row.select('td.bdca')
-        running_boards = sum([self.__get_html_running_boards(segment) for segment in running_segments])
-        finished_segments = []
-        boards_in_segment = None
-        for segment in segments:
-            if segment not in running_segments:
-                boards, is_finished = self.__get_finished_info(segment)
-                if is_finished:
-                    finished_segments.append(segment)
-                if boards_in_segment is None and boards > 0:
-                    boards_in_segment = boards
-        if 'bdcg' in segments[0]['class']:
-            # only a single-segment match will yield td.bdcg cells with segment scores
-            total_boards = boards_in_segment
-        else:
-            PlayoffLogger.get('matchinfo').info(
-                'HTML board count for match #%d, found: %d finished segments, %d towels, %d boards per segment and %d boards in running segment',
-                self.info.id, len(finished_segments), len(towels), boards_in_segment, running_boards)
-            total_boards = (len(segments) + len(towels) + len(running_segments)) * boards_in_segment
-        played_boards = (len(towels) + len(finished_segments)) * boards_in_segment + running_boards
-        PlayoffLogger.get('matchinfo').info(
-            'HTML board count for match #%d: %d/%d',
-            self.info.id, played_boards, total_boards)
-        return played_boards, total_boards
-
     def _fetch_board_count(self):
-        boards_played = 0
-        boards_to_play = 0
-        try:
-            if self.database is None:
-                raise KeyError('database not configured')
-            boards_played, boards_to_play = self.__get_db_board_count()
-        except (IOError, TypeError, IndexError, KeyError) as e:
-            PlayoffLogger.get('matchinfo').warning(
-                'fetching board count from DB for match #%d failed: %s(%s)',
-                self.info.id, type(e).__name__, str(e))
-            try:
-                boards_played, boards_to_play = self.__get_html_board_count()
-            except (TypeError, IndexError, KeyError, IOError, ValueError) as e:
-                PlayoffLogger.get('matchinfo').warning(
-                    'fetching board count from HTML for match #%d failed: %s(%s)',
-                    self.info.id, type(e).__name__, str(e))
-                pass
+        boards_played, boards_to_play = self.call_client(
+            'board_count', (0, 0))
         if boards_played > 0:
             self.info.running = -1 \
                 if boards_played >= boards_to_play \
@@ -489,66 +276,13 @@ class MatchInfo(ResultInfo):
                     self.info.possible_loser = self.info.teams[0].name[0]
                     self.info.possible_winner = self.info.teams[1].name[0]
 
-    def __get_db_running_link(self, prefix, round_no):
-        current_segment = int(
-            self.database.fetch(
-                self.config['database'], p_sql.CURRENT_SEGMENT, ())[0])
-        PlayoffLogger.get('matchinfo').info(
-            'fetched running segment from DB for match #%d: %d',
-            self.info.id, current_segment)
-        return '%s%st%d-%d.html' % (
-            prefix, round_no, self.config['table'], current_segment)
-
-    def __get_html_running_link(self):
-        if self.info.link is None:
-            raise ValueError('link not set')
-        row = self.__find_table_row(self.info.link)
-        running_link = row.select('td.bdcg a[href]')
-        if len(running_link) == 0:
-            raise ValueError('running link not found')
-        PlayoffLogger.get('matchinfo').info(
-            'fetched running link from HTML for match #%d: %s',
-            self.info.id, running_link)
-        return urljoin(self.info.link, running_link[0]['href'])
-
     def _determine_running_link(self):
         if self.info.link is None:
             return
-        match_link = self.info.link
-        link_match = re.match(r'^(.*)runda(\d+)\.html$', self.info.link)
-        if link_match:
-            try:
-                if self.database is None:
-                    raise KeyError('database not configured')
-                self.info.link = self.__get_db_running_link(
-                    link_match.group(1), link_match.group(2))
-            except (IOError, TypeError, IndexError, KeyError) as e:
-                PlayoffLogger.get('matchinfo').warning(
-                    'cannot determine running link from DB for match #%d: %s(%s)',
-                    self.info.id, type(e).__name__, str(e))
-                try:
-                    self.info.link = self.__get_html_running_link()
-                except (TypeError, IndexError, KeyError, IOError, ValueError) as e:
-                    PlayoffLogger.get('matchinfo').warning(
-                        'cannot determine running link from HTML for match #%d: %s(%s)',
-                        self.info.id, type(e).__name__, str(e))
-            if self.info.link != match_link:
-                # we've detected a running segment link
-                # we should check if the segment's uploaded live
-                try:
-                    boards_played, board_count = self.__get_html_segment_board_count(re.sub('\.htm$', '.html', self.info.link))
-                except IOError as e:
-                    PlayoffLogger.get('matchinfo').warning(
-                        'cannot determine running link (%s) board count for match #%d: %s(%s)',
-                        self.info.link, self.info.id, type(e).__name__, str(e))
-                    boards_played = 0
-                if not boards_played:
-                    PlayoffLogger.get('matchinfo').warning(
-                        'running link (%s) for match #%d is not live, reverting to match link (%s)',
-                        self.info.link, self.info.id, match_link)
-                    self.info.link = match_link
+        self.info.link = self.call_client('running_link', self.info.link)
 
     def set_phase_link(self, phase_link):
+        prev_link = self.info.link
         if self.info.link is None:
             self.info.link = phase_link
         else:
@@ -558,7 +292,7 @@ class MatchInfo(ResultInfo):
             'applying phase link %s to match #%d: %s',
             phase_link, self.info.id, self.info.link)
         # re-init result info clients
-        if not len(self.clients) and (self.info.link is not None):
+        if (prev_link != self.info.link) and (self.info.link is not None):
             PlayoffLogger.get('matchinfo').info(
                 'config link changed, re-initializing result info client list')
             self.config['link'] = self.info.link
