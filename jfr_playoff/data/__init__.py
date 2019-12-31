@@ -74,7 +74,10 @@ class PlayoffData(object):
         self.match_info = {}
         for phase in self.phases:
             for match in phase['matches']:
-                match_info = MatchInfo(match, self.teams, self.database, self.aliases)
+                PlayoffLogger.get('data').info(
+                    'getting match info for #%d', match['id'])
+                match_info = MatchInfo(
+                    match, self.teams, self.database, self.aliases)
                 if 'link' in phase:
                     match_info.set_phase_link(phase['link'])
                 self.match_info[match['id']] = match_info.get_info()

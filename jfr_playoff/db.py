@@ -24,7 +24,8 @@ class PlayoffDB(object):
         return self.db_cursor
 
     def __execute_query(self, db_name, sql, params):
-        PlayoffLogger.get('db').info('query (%s): %s %s', db_name, sql.replace('\n', ' '), params)
+        PlayoffLogger.get('db').info(
+            'query (%s): %s %s', db_name, sql.replace('\n', ' '), params)
         self.db_cursor.execute(sql.replace('#db#', db_name), params)
 
     def fetch(self, db_name, sql, params):
