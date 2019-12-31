@@ -16,7 +16,7 @@ class PlayoffDB(object):
             user=settings['user'],
             password=settings['pass'],
             host=settings['host'],
-            port=settings['port'])
+            port=settings.get('port', 3306))
         PlayoffLogger.get('db').info('db settings: %s', settings)
         self.db_cursor = self.database.cursor(buffered=True)
 
