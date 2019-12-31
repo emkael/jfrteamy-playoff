@@ -118,14 +118,14 @@ class MatchInfo(ResultInfo):
                 for alias in team_aliases:
                     self.aliases[alias] = team
         self.info = Match()
-        self.__init_info()
-        self.__fetch_match_link()
+        self._init_info()
+        self._fetch_match_link()
 
     @property
     def submodule_path(self):
         return 'jfr_playoff.data.match'
 
-    def __init_info(self):
+    def _init_info(self):
         self.info.id = self.config['id']
         MatchInfo.matches[self.info.id] = self.info
         self.info.running = 0
@@ -142,7 +142,7 @@ class MatchInfo(ResultInfo):
         self.info.loser_place = self.config.get('loser', [])
         self.info.teams = []
 
-    def __fetch_match_link(self):
+    def _fetch_match_link(self):
         link = self.call_client('get_match_link', None)
         if link is not None:
             self.info.link = link
@@ -150,7 +150,7 @@ class MatchInfo(ResultInfo):
             PlayoffLogger.get('matchinfo').info(
                 'match #%d link empty', self.info.id)
 
-    def __get_predefined_scores(self):
+    def _get_predefined_scores(self):
         teams = [Team(), Team()]
         scores_fetched = False
         teams_fetched = False
@@ -297,15 +297,17 @@ class MatchInfo(ResultInfo):
             self.info.id, teams)
         return teams
 
-    def __resolve_team_aliases(self, teams):
-        return [self.aliases[team] if team in self.aliases else team for team in teams]
+    def _resolve_team_aliases(self, teams):
+        return [
+            self.aliases[team]
+            if team in self.aliases
+            else team
+            for team in teams]
 
-    def __fetch_teams_with_scores(self):
+    def _fetch_teams_with_scores(self):
         (scores_fetched, teams_fetched, self.info.teams) = \
-            self.__get_predefined_scores()
+            self._get_predefined_scores()
         if scores_fetched:
-            PlayoffLogger.get('matchinfo').info(
-                'pre-defined scores for match #%d fetched', self.info.id)
             self.info.running = int(self.config.get('running', -1))
         if not teams_fetched:
             try:
@@ -331,12 +333,12 @@ class MatchInfo(ResultInfo):
             if isinstance(self.config['teams'][team], dict):
                 self.info.teams[team].place = self.config['teams'][team].get(
                     'place', self.info.teams[team].place)
-            self.info.teams[team].name = self.__resolve_team_aliases(
+            self.info.teams[team].name = self._resolve_team_aliases(
                 self.info.teams[team].name)
             PlayoffLogger.get('matchinfo').info(
                 'team list after resolving aliases: %s',
                 self.info.teams[team].name)
-            self.info.teams[team].possible_name = self.__resolve_team_aliases(
+            self.info.teams[team].possible_name = self._resolve_team_aliases(
                 self.info.teams[team].possible_name)
             PlayoffLogger.get('matchinfo').info(
                 'predicted team list after resolving aliases: %s',
@@ -446,7 +448,7 @@ class MatchInfo(ResultInfo):
             self.info.id, played_boards, total_boards)
         return played_boards, total_boards
 
-    def __fetch_board_count(self):
+    def _fetch_board_count(self):
         boards_played = 0
         boards_to_play = 0
         try:
@@ -469,7 +471,7 @@ class MatchInfo(ResultInfo):
                 if boards_played >= boards_to_play \
                    else boards_played
 
-    def __determine_outcome(self):
+    def _determine_outcome(self):
         if (self.info.teams[0].known_teams == 1) \
            and (self.info.teams[1].known_teams == 1):
             if self.info.running == -1:
@@ -509,7 +511,7 @@ class MatchInfo(ResultInfo):
             self.info.id, running_link)
         return urljoin(self.info.link, running_link[0]['href'])
 
-    def __determine_running_link(self):
+    def _determine_running_link(self):
         if self.info.link is None:
             return
         match_link = self.info.link
@@ -563,9 +565,9 @@ class MatchInfo(ResultInfo):
             ResultInfo.__init__(self, self.config, self.database)
 
     def get_info(self):
-        self.__fetch_teams_with_scores()
-        self.__fetch_board_count()
-        self.__determine_outcome()
+        self._fetch_teams_with_scores()
+        self._fetch_board_count()
+        self._determine_outcome()
         if self.info.running > 0:
-            self.__determine_running_link()
+            self._determine_running_link()
         return self.info
