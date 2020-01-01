@@ -94,7 +94,7 @@ Sekcja `"teams"` może również być **obiektem**, określającym turniej (np. 
 
 Składa się z następujących pól:
  - `"database"` - nazwa bazy danych turnieju, z której pobierana jest lista teamów ALBO
- - `"link"` - URL do strony wyników (`PREFIXleaderb.html`) turnieju, dostępnej zdalnie
+ - `"link"` - URL do strony wyników (`PREFIXleaderb.html` dla JFR Teamy, `index.html` dla Tournament Calculatora) turnieju, dostępnej zdalnie
  - opcjonalne pole `"final_positions"` - tablica numerów miejsc, dla drużyn, które zakończyły rozgrywki (odpowiednik czwartego pola tablicy w tekstowej wersji listy teamów)
  - opcjonalne pole `"max_teams"` - wymusza pobranie tylko określonej liczby pierwszych teamów z tabeli
  - przy użyciu `"database"`: opcjonalne pole `"ties"` - tablica pełnych nazw drużyn w kolejności, w jakiej rozstrzygane powinny być remisy w VP w turnieju źródłowym
@@ -173,7 +173,7 @@ Definicję struktury drabinki określają pola:
 
 Dane meczu mogą pochodzić z następujących źródeł:
  - bazy danych turnieju: wówczas należy zdefiniować pola `"database"`, `"round"` i `"table"`
- - strony HTML meczu (tj. strony `PREFIXrundaN.html`): wówczas należy zdefiniować pola `"link"` (dla całej fazy lub dla pojedynczego meczu) oraz `"table"`
+ - strony HTML meczu (tj. strony `PREFIXrundaN.html` dla JFR Teamy lub strony wyników konkretnej rundy dla Tournament Calculatora): wówczas należy zdefiniować pola `"link"` (dla całej fazy lub dla pojedynczego meczu) oraz `"table"`
  - ręcznie wpisanego wyniku, wówczas:
    + pole `"score"` określa wynik meczu: może być tablicą dwóch liczb (wynik gospodarzy, wynik gości), może również być słownikiem indeksowanym pełną nazwą teamu lub łańcuchem tekstowym określającym miejsce w tablicy z sekcji `"teams"`
    + opcjonalne pole `"running"` określa, że nie jest zakończony i podaje liczbę rozegranych rozdań (0 dla meczu w przyszłości, >0 dla meczu w trakcie)
@@ -236,7 +236,7 @@ W sekcji `"swiss"` można zdefiniować pobieranie pozycji drużyn w klasyfikacji
 Sekcja jest tablicą obiektów określonych przy pomocy następujących właściwości:
 
  - `"database"`: nazwa bazy danych turnieju źródłowego ALBO
- - `"link"`: URL strony z wynikami (`PREFIXleaderb.html`) swissa
+ - `"link"`: URL strony z wynikami (`PREFIXleaderb.html` dla JFR Teamy lub `index.html` dla TournamentCalculatora) swissa
  - `"position"`: pozycja klasyfikacji końcowej, od której wypełniane są miejsca, kolejnymi teamami z klasyfikacji turnieju źródłowego
  - `"position_to"`: opcjonalnie - ostatnia pozycja klasyfikacji końcowej, która ma zostać wypełniona teamami ze swissa (domyślnie - program wypełnia kolejne miejsca, dopóki ma teamy lub miejsca w tabeli)
  - `"swiss_position"`: opcjonalnie - pozycja klasyfikacji swissa, od której program ma rozpocząć pobieranie teamów (domyślnie: od początku tabeli)
