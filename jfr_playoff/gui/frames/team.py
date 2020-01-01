@@ -281,7 +281,7 @@ class TeamSettingsFrame(ScrollableFrame):
         container.columnconfigure(0, weight=1)
 
         (ttk.Radiobutton(
-            container, text='Pobierz z JFR Teamy:',
+            container, text='Pobierz z:',
             variable=self.teamFormat, value=self.FORMAT_FETCH)).grid(
                 row=0, column=0, sticky=tk.W)
 
