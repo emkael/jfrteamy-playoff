@@ -1,7 +1,5 @@
 import copy
-import glob
 import inspect
-from os.path import dirname, basename, isfile, join
 from urlparse import urljoin
 
 from jfr_playoff.dto import Match, Team
@@ -35,14 +33,11 @@ class ResultInfo(object):
     @property
     def _client_classes(self):
         module = __import__(self.submodule_path, fromlist=[''])
-        for f in glob.glob(join(dirname(module.__file__), "*.py")):
-            if isfile(f) and not f.endswith('__init__.py'):
-                submodule_name = basename(f)[:-3]
-                submodule_path = self.submodule_path + '.' + submodule_name
-                submodule = __import__(submodule_path, fromlist=[''])
-                for member in inspect.getmembers(submodule, inspect.isclass):
-                    if member[1].__module__ == submodule_path:
-                        yield member[1]
+        for submodule_path in module.CLIENTS:
+            submodule = __import__(submodule_path, fromlist=[''])
+            for member in inspect.getmembers(submodule, inspect.isclass):
+                if member[1].__module__ == submodule_path:
+                    yield member[1]
 
     def _fill_client_list(self, *args):
         all_clients = [c(*args) for c in self._client_classes]

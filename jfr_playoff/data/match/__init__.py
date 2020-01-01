@@ -13,3 +13,10 @@ class MatchInfoClient(ResultInfoClient):
 
     def running_link(self):
         raise NotImplementedError
+
+
+CLIENTS = [
+    'jfr_playoff.data.match.jfrdb',
+    'jfr_playoff.data.match.jfrhtml',
+    'jfr_playoff.data.match.tcjson'
+]

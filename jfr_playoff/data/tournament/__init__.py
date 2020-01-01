@@ -10,3 +10,10 @@ class TournamentInfoClient(ResultInfoClient):
 
     def get_tournament_results(self):
         raise NotImplementedError
+
+
+CLIENTS = [
+    'jfr_playoff.data.tournament.jfrdb',
+    'jfr_playoff.data.tournament.jfrhtml',
+    'jfr_playoff.data.tournament.tcjson'
+]

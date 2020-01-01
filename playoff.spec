@@ -1,8 +1,7 @@
-import os
 a = Analysis(['playoff.py'],
-             pathex=[os.path.abspath('.')],
+             pathex=[SPECPATH],
              hiddenimports=['mysql.connector.locales.eng.client_error'],
-             hookspath=None,
+             hookspath=['.'],
              runtime_hooks=None,
              excludes=None)
 pyz = PYZ(a.pure)

@@ -8,10 +8,10 @@ icon_path = os.path.join('jfr_playoff', 'gui', 'icons')
 datas = [(icon_path, os.path.join('res', 'icons'))]
 
 a = Analysis(['gui.py'],
-             pathex=[os.path.abspath('.')],
+             pathex=[SPECPATH],
              datas=datas,
              hiddenimports=['mysql.connector.locales.eng.client_error'],
-             hookspath=[],
+             hookspath=['.'],
              runtime_hooks=[],
              excludes=[],
              win_no_prefer_redirects=False,
