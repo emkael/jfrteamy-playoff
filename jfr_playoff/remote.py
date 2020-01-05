@@ -29,3 +29,7 @@ class RemoteUrl:
     @classmethod
     def fetch(cls, url):
         return bs(RemoteUrl.fetch_raw(url), 'lxml')
+
+    @classmethod
+    def clear_cache(cls):
+        cls.url_cache = {}

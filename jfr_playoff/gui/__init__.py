@@ -11,6 +11,7 @@ import tkMessageBox as tkmb
 
 from jfr_playoff.filemanager import PlayoffFileManager
 from jfr_playoff.generator import PlayoffGenerator
+from jfr_playoff.remote import RemoteUrl as p_remote
 from jfr_playoff.settings import PlayoffSettings
 
 from .tabs import *
@@ -185,6 +186,7 @@ class PlayoffGUI(tk.Tk):
                 self._tempPath = os.path.join(
                     tempDir, next(tempfile._get_candidate_names()))
                 config['output'] = self._tempPath + '.html'
+            p_remote.clear_cache()
             settings = PlayoffSettings(config_obj=config)
             generator = PlayoffGenerator(settings)
             content = generator.generate_content()
