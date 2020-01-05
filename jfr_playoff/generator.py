@@ -115,7 +115,7 @@ class PlayoffGenerator(object):
                 team_label = ''
                 team_name = ''
             else:
-                # predicted teams are not in team.name, they're in tem.possible_name so corresponding spots in team.name are empty
+                # predicted teams are not in team.name, they're in team.possible_name so corresponding spots in team.name are empty
                 is_label_predicted = [name is None for name in team.name]
                 # fetch labels (shortnames) for teams in both lists
                 labels = [self.data.get_shortname(name) if name else None for name in team.name]

@@ -219,7 +219,7 @@ class TeamsTab(PlayoffTab):
             db = PlayoffDB(dbConfig)
         except Exception:
             pass
-        self._teamList = data.fetch_team_list(config['teams'], db)
+        self._teamList = data.fetch_team_list(config['teams'], db)[0]
         self.winfo_toplevel().event_generate(
             '<<TeamListChanged>>', when='tail')
 

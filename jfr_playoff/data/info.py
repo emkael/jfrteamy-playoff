@@ -100,7 +100,8 @@ class MatchInfo(ResultInfo):
 
     matches = {}
 
-    def __init__(self, match_config, teams, database, aliases=None):
+    def __init__(self, match_config, teams, database,
+                 aliases=None, starting_positions_certain=True):
         ResultInfo.__init__(self, match_config, database)
         self.config = match_config
         self.teams = teams
@@ -110,6 +111,7 @@ class MatchInfo(ResultInfo):
             for team, team_aliases in aliases.iteritems():
                 for alias in team_aliases:
                     self.aliases[alias] = team
+        self._starting_positions_certain = starting_positions_certain
         self.info = Match()
         self._init_info()
         self._fetch_match_link()
@@ -193,9 +195,15 @@ class MatchInfo(ResultInfo):
                         MatchInfo.matches[loser_match].possible_loser
                         for loser_match in self.config['teams'][i]['loser']]
                 if 'place' in self.config['teams'][i]:
-                    match_teams += [
+                    placed_teams = [
                         self.teams[place-1][0]
                         for place in self.config['teams'][i]['place']]
+                    if self._starting_positions_certain:
+                        match_teams += placed_teams
+                        possible_teams = [None] * len(placed_teams)
+                    else:
+                        possible_teams += placed_teams
+                        match_teams = [None] * len(placed_teams)
             teams[i].name = match_teams
             teams[i].possible_name = possible_teams
             teams[i].known_teams = len([

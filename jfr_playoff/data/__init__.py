@@ -8,6 +8,7 @@ from jfr_playoff.logger import PlayoffLogger
 
 class PlayoffData(object):
     def __init__(self, settings=None):
+        self._team_list_certain = True
         if settings is not None:
             self.database = PlayoffDB(settings.get('database')) \
                 if settings.has_section('database') else None
@@ -31,6 +32,8 @@ class PlayoffData(object):
             self.aliases = {}
             if settings.has_section('team_aliases'):
                 self.aliases = settings.get('team_aliases')
+            self._predict_teams = int(settings.get('page').get(
+                'team_boxes', {}).get('predict_teams', 0)) > 0
         self.grid = []
         self.match_info = {}
         self.leaderboard = []
@@ -39,17 +42,20 @@ class PlayoffData(object):
         if isinstance(settings, list):
             PlayoffLogger.get('data').info(
                 'team list pre-defined: %s', settings)
-            return settings
+            return settings, True
         tournament_info = TournamentInfo(settings, db_interface)
         team_list = tournament_info.get_tournament_results()
         if len(team_list) == 0:
             PlayoffLogger.get('data').warning('team list is empty!')
-        return team_list if 'max_teams' not in settings \
+        teams = team_list if 'max_teams' not in settings \
             else team_list[0:settings['max_teams']]
+        return teams, tournament_info.is_finished()
 
     @cached_property
     def teams(self):
-        return self.fetch_team_list(self.team_settings, self.database)
+        team_list, certain = self.fetch_team_list(self.team_settings, self.database)
+        self._team_list_certain = certain
+        return team_list
 
     def generate_phases(self):
         self.grid = []
@@ -76,8 +82,13 @@ class PlayoffData(object):
             for match in phase['matches']:
                 PlayoffLogger.get('data').info(
                     'getting match info for #%d', match['id'])
+                teams = self.teams
+                certain_starting_positions = self._team_list_certain \
+                    if self._predict_teams > 0 else True
                 match_info = MatchInfo(
-                    match, self.teams, self.database, self.aliases)
+                    match, teams, self.database,
+                    self.aliases,
+                    certain_starting_positions)
                 if 'link' in phase:
                     match_info.set_phase_link(phase['link'])
                 self.match_info[match['id']] = match_info.get_info()
