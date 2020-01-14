@@ -433,7 +433,7 @@ class RefreshableOptionMenu(ttk.OptionMenu):
             self._valueLock = True
             self._valueVariable.set(
                 self._lastValue
-                if self._lastValue in [option[1] for option in options]
+                if str(self._lastValue) in [str(option[1]) for option in options]
                 else '')
             self._valueLock = False
         except tk.TclError:
