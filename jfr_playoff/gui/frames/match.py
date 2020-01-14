@@ -449,11 +449,10 @@ class BracketMatchSettingsFrame(GuiFrame):
 
     def getSelectedTeam(self):
         if self.selected.get():
-            try:
-                return self.bracketWidgets[7].getValues().index(
-                    self.selectedIndex.get())
-            except ValueError:
-                return -1
+            for idx, val in enumerate(self.bracketWidgets[7].getValues()):
+                if str(self.selectedIndex.get()) == str(val):
+                    return idx - 1
+            return -1
         else:
             return -1
 
@@ -769,16 +768,6 @@ class MatchSettingsFrame(RepeatableFrame):
                 config['running'] = self.scoreBoards.get()
 
         return config
-
-        if 'selected_teams' in value \
-           and isinstance(value['selected_teams'], list):
-            for idx, val in enumerate(value['selected_teams']):
-                if idx < 2:
-                    self.bracketSettings[idx].setSelectedTeam(val)
-        else:
-            for idx in range(0, 2):
-                self.bracketSettings[idx].setSelectedTeam(-1)
-
 
 
 class MatchSeparator(RepeatableFrame):
