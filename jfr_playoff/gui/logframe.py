@@ -4,8 +4,8 @@ import datetime
 import logging as log
 from collections import OrderedDict
 
-import tkinter as tk
-from tkinter import ttk
+import Tkinter as tk
+import ttk
 import tkFileDialog as tkfd
 
 class LogWindow(tk.Toplevel):

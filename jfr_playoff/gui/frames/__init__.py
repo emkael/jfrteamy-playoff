@@ -3,8 +3,8 @@
 from functools import partial
 import types
 
-import tkinter as tk
-from tkinter import ttk
+import Tkinter as tk
+import ttk
 import tkMessageBox
 
 from ..variables import BoolVar

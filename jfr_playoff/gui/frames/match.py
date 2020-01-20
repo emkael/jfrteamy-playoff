@@ -2,9 +2,9 @@
 
 from collections import OrderedDict
 
-import tkinter as tk
-from tkinter.font import Font
-from tkinter import ttk
+import Tkinter as tk
+from tkFont import Font
+import ttk
 
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
 from ..frames import WidgetRepeater, RepeatableEntry, NumericSpinbox

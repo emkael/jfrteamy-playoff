@@ -3,8 +3,8 @@
 import copy
 from collections import OrderedDict
 
-import tkinter as tk
-from tkinter import ttk
+import Tkinter as tk
+import ttk
 
 from ..frames import RepeatableFrame, WidgetRepeater, ScrollableFrame
 from ...i18n import PLAYOFF_I18N_DEFAULTS

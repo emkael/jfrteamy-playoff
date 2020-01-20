@@ -3,8 +3,8 @@
 import os
 from collections import OrderedDict
 
-import tkinter as tk
-from tkinter import ttk
+import Tkinter as tk
+import ttk
 import tkFileDialog as tkfd
 import tkMessageBox as tkmb
 

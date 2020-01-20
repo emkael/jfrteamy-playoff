@@ -2,8 +2,8 @@
 
 from collections import OrderedDict
 
-import tkinter as tk
-from tkinter import ttk
+import Tkinter as tk
+import ttk
 import tkColorChooser as tkcc
 
 from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
