@@ -3,8 +3,8 @@
 import socket
 from collections import OrderedDict
 
-import tkinter as tk
-from tkinter import ttk
+import Tkinter as tk
+import ttk
 import tkMessageBox as tkmb
 
 from ...db import PlayoffDB

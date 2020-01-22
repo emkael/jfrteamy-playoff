@@ -4,8 +4,8 @@ import codecs, copy, json, os, shutil, sys, tempfile, threading, traceback, webb
 from collections import OrderedDict
 import logging as log
 
-import tkinter as tk
-from tkinter import ttk
+import Tkinter as tk
+import ttk
 import tkFileDialog as tkfd
 import tkMessageBox as tkmb
 

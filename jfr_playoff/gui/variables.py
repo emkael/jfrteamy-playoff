@@ -1,6 +1,6 @@
 #coding=utf-8
 
-import tkinter as tk
+import Tkinter as tk
 
 class NotifyVar(tk.Variable):
     def __init__(self, *args, **kwargs):
