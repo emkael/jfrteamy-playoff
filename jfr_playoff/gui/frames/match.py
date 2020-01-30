@@ -766,6 +766,8 @@ class MatchSettingsFrame(RepeatableFrame):
                     config['score'].append(0.0)
             if self.scoreNotFinished.get():
                 config['running'] = self.scoreBoards.get()
+            else:
+                config['running'] = -1
 
         return config
 
