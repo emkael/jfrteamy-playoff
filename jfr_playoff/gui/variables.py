@@ -35,7 +35,11 @@ class NotifyIntVar(NotifyVar, tk.IntVar):
     pass
 
 class NotifyBoolVar(NotifyVar, BoolVar):
-    pass
+    def get(self, *args, **kwargs):
+        return BoolVar.get(self, *args, **kwargs)
+
+    def set(self, *args, **kwargs):
+        return BoolVar.set(self, *args, **kwargs)
 
 class NotifyNumericVar(NumericVar, NotifyVar):
     def __init__(self, *args, **kwargs):
