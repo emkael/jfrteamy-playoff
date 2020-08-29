@@ -264,20 +264,24 @@ class MatchInfo(ResultInfo):
     def _determine_outcome(self):
         if (self.info.teams[0].known_teams == 1) \
            and (self.info.teams[1].known_teams == 1):
+            teams = [
+                team.name[max(0, team.selected_team)]
+                for team in self.info.teams
+            ]
             if self.info.running == -1:
                 if self.info.teams[0].score > self.info.teams[1].score:
-                    self.info.winner = self.info.teams[0].name[0]
-                    self.info.loser = self.info.teams[1].name[0]
+                    self.info.winner = teams[0]
+                    self.info.loser = teams[1]
                 else:
-                    self.info.loser = self.info.teams[0].name[0]
-                    self.info.winner = self.info.teams[1].name[0]
+                    self.info.loser = teams[0]
+                    self.info.winner = teams[1]
             elif self.info.running > 0:
                 if self.info.teams[0].score > self.info.teams[1].score:
-                    self.info.possible_winner = self.info.teams[0].name[0]
-                    self.info.possible_loser = self.info.teams[1].name[0]
+                    self.info.possible_winner = teams[0]
+                    self.info.possible_loser = teams[1]
                 elif self.info.teams[0].score < self.info.teams[1].score:
-                    self.info.possible_loser = self.info.teams[0].name[0]
-                    self.info.possible_winner = self.info.teams[1].name[0]
+                    self.info.possible_loser = teams[0]
+                    self.info.possible_winner = teams[1]
 
     def _determine_running_link(self):
         if self.info.link is None:
