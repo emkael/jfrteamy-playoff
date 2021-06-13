@@ -16,8 +16,11 @@ class RemoteUrl:
         if url not in cls.url_cache:
             request = requests.get(url)
             encoding_match = re.search(
-                'content=".*;( )?charset=(.*)"',
+                'content=".*;( )?charset=(.*?)"',
                 request.content, re.IGNORECASE)
+            PlayoffLogger.get('remote').debug(
+                'Content encoding: %s',
+                encoding_match.group(2))
             if encoding_match:
                 request.encoding = encoding_match.group(2)
             cls.url_cache[url] = request.text
