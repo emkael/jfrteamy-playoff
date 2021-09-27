@@ -18,10 +18,10 @@ class RemoteUrl:
             encoding_match = re.search(
                 'content=".*;( )?charset=(.*?)"',
                 request.content, re.IGNORECASE)
-            PlayoffLogger.get('remote').debug(
-                'Content encoding: %s',
-                encoding_match.group(2))
             if encoding_match:
+                PlayoffLogger.get('remote').debug(
+                    'Content encoding: %s',
+                    encoding_match.group(2))
                 request.encoding = encoding_match.group(2)
             cls.url_cache[url] = request.text
             PlayoffLogger.get('remote').info(
