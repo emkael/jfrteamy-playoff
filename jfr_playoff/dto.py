@@ -1,3 +1,4 @@
+from math import ceil, floor
 import sys
 
 def coalesce(*arg):
@@ -14,6 +15,15 @@ class Team(object):
     place = None
     known_teams = 0
     selected_team = -1
+
+    @property
+    def league_carry_over(self):
+        if self.score == 0.0:
+            return 0.0
+        carry_over = ceil(10 * self.score) / 10.0
+        if carry_over.is_integer():
+            carry_over = floor(10 * self.score) / 10.0
+        return carry_over
 
     def __init__(self):
         self.place = []

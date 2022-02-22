@@ -97,7 +97,13 @@ class PlayoffGenerator(object):
             PlayoffLogger.get('generator').info(
                 'generating HTML for team object: %s', team)
             # the easy part: team score cell
-            score_html = self.p_temp.get('MATCH_SCORE', team.score)
+            # fuck you, snarky comment-maker. carry-over settings should apply below:
+            team_score = team.score
+            if match.running == 0 and self.team_box_settings.get('league_carryovers', 0):
+                team_score = team.league_carry_over
+                PlayoffLogger.get('generator').info(
+                    'calculated league-like carry-over from %.03f: %0.1f', team.score, team_score)
+            score_html = self.p_temp.get('MATCH_SCORE', team_score)
             PlayoffLogger.get('generator').info(
                 'score HTML for team object: %s', score_html.strip())
             # the hard part begins here.
