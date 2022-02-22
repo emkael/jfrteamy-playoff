@@ -22,6 +22,7 @@ class VisualSettingsFrame(GuiFrame):
         'team_boxes': {
             'label_length_limit': 25,
             'predict_teams': 1,
+            'league_carryovers': 0,
             'label_separator': ' / ',
             'label_placeholder': '??',
             'label_ellipsis': '(...)',
@@ -46,6 +47,7 @@ class VisualSettingsFrame(GuiFrame):
         self.teamLabelSeparator = NotifyStringVar()
         self.teamNameSeparator = NotifyStringVar()
         self.teamNamePrefix = NotifyStringVar()
+        self.leagueCarryoverRounding = NotifyBoolVar()
 
         indicatorsFrame = ttk.LabelFrame(self, text='Znaczniki pozycji:')
         indicatorsFrame.grid(row=0, column=0, sticky=tk.W+tk.E+tk.N+tk.S)
@@ -55,6 +57,8 @@ class VisualSettingsFrame(GuiFrame):
         teamNamesFrame.grid(row=1, column=0, sticky=tk.W+tk.E+tk.N+tk.S)
         separatorsFrame = ttk.LabelFrame(self, text='Separatory nazw teamów:')
         separatorsFrame.grid(row=1, column=1, sticky=tk.W+tk.E+tk.N+tk.S)
+        scoresFrame = ttk.LabelFrame(self, text='Opcje wyświetlania wyników:')
+        scoresFrame.grid(row=2, column=0, columnspan=2, sticky=tk.W+tk.E+tk.N+tk.S)
 
         self._fieldsToEnable = []
 
@@ -142,6 +146,12 @@ class VisualSettingsFrame(GuiFrame):
             textvariable=self.teamNamePrefix)).grid(
                 row=2, column=2, sticky=tk.W)
 
+        (ttk.Checkbutton(
+            scoresFrame,
+            text='zaokrąglaj nierozegrane mecze wg "ligowych" zasad c/o (w górę do 0.1, pomijając x.0)',
+            variable=self.leagueCarryoverRounding)).grid(
+                row=0, column=0, sticky=tk.W+tk.E+tk.N+tk.S)
+
         for var, fields in self._fieldsToEnable:
             var.trace('w', self._enableFields)
         self._enableFields()
@@ -179,6 +189,7 @@ class VisualSettingsFrame(GuiFrame):
         self.teamLabelSeparator.set(values['team_boxes']['label_separator'])
         self.teamNameSeparator.set(values['team_boxes']['name_separator'])
         self.teamNamePrefix.set(values['team_boxes']['name_prefix'])
+        self.leagueCarryoverRounding.set(values['team_boxes']['league_carryovers'])
 
     def getValues(self):
         return OrderedDict(
@@ -190,6 +201,7 @@ class VisualSettingsFrame(GuiFrame):
                 'finishing_position_indicators': self.finishingPositionIndicators.get(),
                 'team_boxes': {
                     'label_length_limit': self.teamNameLength.get(default=25) if self.shortenTeamNames else 0,
+                    'league_carryovers': self.leagueCarryoverRounding.get(),
                     'predict_teams': self.teamNamePredict.get(),
                     'label_separator': self.teamLabelSeparator.get(),
                     'label_placeholder': self.teamNamePlaceholder.get(),
