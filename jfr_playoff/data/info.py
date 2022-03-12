@@ -1,4 +1,5 @@
 import copy
+from decimal import Decimal
 import inspect
 from urlparse import urljoin
 
@@ -101,10 +102,11 @@ class MatchInfo(ResultInfo):
     matches = {}
 
     def __init__(self, match_config, teams, database,
-                 aliases=None, starting_positions_certain=True):
+                 aliases=None, starting_positions_certain=True, auto_carryover=False):
         ResultInfo.__init__(self, match_config, database)
         self.config = match_config
         self.teams = teams
+        self.teams_by_name = { team[0]: team for team in self.teams }
         self.database = database
         self.aliases = {}
         if aliases:
@@ -112,6 +114,7 @@ class MatchInfo(ResultInfo):
                 for alias in team_aliases:
                     self.aliases[alias] = team
         self._starting_positions_certain = starting_positions_certain
+        self._auto_carryover = auto_carryover
         self.info = Match()
         self._init_info()
         self._fetch_match_link()
@@ -282,6 +285,21 @@ class MatchInfo(ResultInfo):
                 elif self.info.teams[0].score < self.info.teams[1].score:
                     self.info.possible_loser = teams[0]
                     self.info.possible_winner = teams[1]
+            elif self.info.running == 0:
+                if self._auto_carryover:
+                    team_data = [self.teams_by_name[team] for team in teams]
+                    if len(team_data[0]) > 4 and len(team_data[1]) > 4:
+                        carry_over = self._auto_carryover / Decimal(100.0) * (team_data[0][4] - team_data[1][4])
+                        if carry_over > 0:
+                            self.info.teams[0].score = carry_over
+                            self.info.teams[1].score = 0.0
+                        else:
+                            self.info.teams[0].score = 0.0
+                            self.info.teams[1].score = -carry_over
+                        PlayoffLogger.get('matchinfo').info(
+                            'calculated carry-over for match #%d: %s, team data: %s',
+                            self.info.id, carry_over, self.info.teams)
+
 
     def _determine_running_link(self):
         if self.info.link is None:

@@ -1,4 +1,5 @@
 from cached_property import cached_property
+from decimal import Decimal
 
 from jfr_playoff.db import PlayoffDB
 from jfr_playoff.dto import Phase
@@ -34,6 +35,8 @@ class PlayoffData(object):
                 self.aliases = settings.get('team_aliases')
             self._predict_teams = int(settings.get('page').get(
                 'team_boxes', {}).get('predict_teams', 0)) > 0
+            self._calculate_carry_over = Decimal(settings.get('page').get(
+                'team_boxes', {}).get('auto_carryover', 0.0))
         self.grid = []
         self.match_info = {}
         self.leaderboard = []
@@ -88,7 +91,8 @@ class PlayoffData(object):
                 match_info = MatchInfo(
                     match, teams, self.database,
                     self.aliases,
-                    certain_starting_positions)
+                    certain_starting_positions,
+                    self._calculate_carry_over)
                 if 'link' in phase:
                     match_info.set_phase_link(phase['link'])
                 self.match_info[match['id']] = match_info.get_info()
