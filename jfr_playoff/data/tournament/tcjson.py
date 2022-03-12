@@ -63,7 +63,7 @@ class TCJsonTournamentInfo(TournamentInfoClient):
             results.append((
                 group_id, result['Place'],
                 participant['_name'], participant['_shortName'],
-                flag_url))
+                flag_url, None, result['Result']['_pointsDecimal']))
         PlayoffLogger.get('tournament.tcjson').info(
             'tournament results fetched: %s' % results)
-        return [list(r[2:]) + [None] for r in sorted(results)]
+        return [list(r[2:]) for r in sorted(results)]

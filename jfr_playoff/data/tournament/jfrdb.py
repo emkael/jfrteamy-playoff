@@ -59,7 +59,7 @@ class JFRDbTournamentInfo(TournamentInfoClient):
                 PlayoffLogger.get('tournament.jfrdb').warning(
                     SWISS_TIE_WARNING, self.settings['database'])
             prev_result = team[1]
-        db_teams = [[team[0], team[3], team[4]] for team in swiss_results]
+        db_teams = [[team[0], team[3], team[4], None, None, team[1]] for team in swiss_results]
         PlayoffLogger.get('tournament.jfrdb').info(
             'fetched team list from database %s: %s',
             self.settings['database'], db_teams)

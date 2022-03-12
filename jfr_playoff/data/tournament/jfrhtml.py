@@ -1,3 +1,4 @@
+from decimal import Decimal
 from math import ceil
 import re
 
@@ -79,6 +80,21 @@ class JFRHtmlTournamentInfo(TournamentInfoClient):
                 team_image = team.find('img')
                 if team_image is not None:
                     team_info.append(team_image['src'].replace('images/', ''))
+                else:
+                    team_info.append(None)
+                # make room for final positionswhich would otherwise be defined in config
+                team_info.append(None)
+                # fetch score for carry-over purposes
+                score_td = team
+                while score_td is not None and score_td.name != 'td':
+                    score_td = score_td.parent
+                if score_td is None:
+                    PlayoffLogger.get('tournament.jfrhtml').info(
+                        'something went wrong, could not find parent cell table for team: %s', team_info)
+                score_td = score_td.find_next_sibling('td', class_='bdc')
+                PlayoffLogger.get('tournament.jfrhtml').debug(
+                    'score cell for team: %s', score_td)
+                team_info.append(Decimal(score_td.text.strip()))
                 teams.append(team_info)
         PlayoffLogger.get('tournament.jfrhtml').info(
             'read tournament results from leaderboard: %s', teams)
