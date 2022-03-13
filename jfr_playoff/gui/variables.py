@@ -13,6 +13,13 @@ class NotifyVar(tk.Variable):
             self._root.event_generate('<<ValueChanged>>', when='tail')
         self._prevValue = self.get()
 
+class FloatVar(tk.StringVar):
+    def get(self, default=None):
+        try:
+            return float(str(tk.StringVar.get(self)).strip())
+        except ValueError:
+            return default
+
 class NumericVar(tk.StringVar):
     def get(self, default=None):
         try:
@@ -45,3 +52,8 @@ class NotifyNumericVar(NumericVar, NotifyVar):
     def __init__(self, *args, **kwargs):
         NotifyVar.__init__(self, *args, **kwargs)
         NumericVar.__init__(self, *args, **kwargs)
+
+class NotifyFloatVar(FloatVar, NotifyVar):
+    def __init__(self, *args, **kwargs):
+        NotifyVar.__init__(self, *args, **kwargs)
+        FloatVar.__init__(self, *args, **kwargs)
