@@ -26,6 +26,8 @@ Konfiguracja składa się, po kolei, z:
    + `"starting_position_indicators"`, `"finishing_position_indicators"` - włączają znaczniki miejsc początkowych/końcowych, wynikających ze zdefiniowanego schematu
    + słownik `"team_boxes"` przechowuje opcjonalne ustawienia wyświetlania nazw teamów:
      * `"label_length_limit"` - maksymalna liczba znaków wyświetlanych jako skrócona nazwa drużyn(y) w schemacie (domyślnie `0` = brak limitu)
+     * `"auto_carryover"` - jeśli dla teamów określono wynik początkowy (np. pobrano z wyników turnieju), włącza automatyczne wyliczanie carry-over dla meczów, których jeszcze nie rozegrano, a obie drużyny są już znane (wartość w procentach, domyśnie `0` = nie wylicza)
+     * `"league_carryovers"` - dla meczów jeszcze nierozegranych, wyświetlanie wyniku z zaokrągleniem "ligowym": do 0.1 w górę chyba że wyjdzie liczba całkowita, to w dół (domyślnie `0` = wyłączone)
      * `"predict_teams"` - flaga, jeśli włączona (`1`), w kolejnej fazie wypełniane są nazwy drużyn prowadzących/przegrywających w trwających meczach tak, jakby mecz miał się skończyć aktualnym wynikiem (etykiety takich drużyn mają nadaną osobną klasę CSS)
      * `"label_separator"` - ciąg rozdzielający skrócone nazwy drużyn wyświetlane na schemacie (domyślnie ` / `)
      * `"label_placeholder"` - ciąg wyświetlany w miejsce nieznanej drużyny (domyślnie `??`)
@@ -85,6 +87,8 @@ Każdy team to tablica, kolejno: pełnej nazwy (tej, która MUSI się zgadzać z
 Jako czwarty element każdej tablicy można wpisać liczbę naturalną, która oznacza pozycję, jaką team ma zająć w końcowej klasyfikacji (tj. wpisanie tam liczby oznacza, że team od samego początku umieszczany jest na tej pozycji w klasyfikacji końcowej - np. jeśli nie uczestniczy w ogóle w play-off).
 
 Co zrobić, gdy jest taki team, a turniej nie ma ustawionych obrazków z flagami? Ustawić flagę na `null` - nie zostanie wyświetlona.
+
+Jako piąty element każdej tablicy można wpisać wynik początkowy drużyny, używany do automatycznego wyliczania carry-over (p. `"auto_carryover"` powyżej).
 
 
 Ustawienia teamów - wariant pobierania z istniejącego turnieju
