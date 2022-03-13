@@ -10,7 +10,7 @@ from ..frames import GuiFrame, RepeatableFrame, ScrollableFrame
 from ..frames import WidgetRepeater
 from ..frames import SelectionFrame, RefreshableOptionMenu, NumericSpinbox
 from ..frames.team import TeamSelectionButton
-from ..variables import NotifyStringVar, NotifyNumericVar, NotifyBoolVar
+from ..variables import NotifyStringVar, NotifyNumericVar, NotifyBoolVar, NotifyFloatVar
 
 class VisualSettingsFrame(GuiFrame):
     DEFAULT_VALUES = {
@@ -22,6 +22,7 @@ class VisualSettingsFrame(GuiFrame):
         'team_boxes': {
             'label_length_limit': 25,
             'predict_teams': 1,
+            'auto_carryover': 0,
             'league_carryovers': 0,
             'label_separator': ' / ',
             'label_placeholder': '??',
@@ -47,6 +48,8 @@ class VisualSettingsFrame(GuiFrame):
         self.teamLabelSeparator = NotifyStringVar()
         self.teamNameSeparator = NotifyStringVar()
         self.teamNamePrefix = NotifyStringVar()
+        self.enableAutoCarryover = NotifyBoolVar()
+        self.autoCarryoverValue = NotifyFloatVar()
         self.leagueCarryoverRounding = NotifyBoolVar()
 
         indicatorsFrame = ttk.LabelFrame(self, text='Znaczniki pozycji:')
@@ -148,9 +151,25 @@ class VisualSettingsFrame(GuiFrame):
 
         (ttk.Checkbutton(
             scoresFrame,
+            text='automatycznie wyliczaj c/o dla nierozegranych meczów',
+            variable=self.enableAutoCarryover)).grid(
+                row=0, column=0, columnspan=2, sticky=tk.W+tk.E+tk.N+tk.S)
+        carryoverValue = ttk.Entry(
+            scoresFrame, width=4,
+            textvariable=self.autoCarryoverValue)
+        carryoverValue.grid(row=1, column=0, sticky=tk.E)
+        carryoverLabel = ttk.Label(scoresFrame, text='% różnicy wyniku początkowego teamów')
+        carryoverLabel.grid(row=1, column=1, sticky=tk.W)
+        (ttk.Checkbutton(
+            scoresFrame,
             text='zaokrąglaj nierozegrane mecze wg "ligowych" zasad c/o (w górę do 0.1, pomijając x.0)',
             variable=self.leagueCarryoverRounding)).grid(
-                row=0, column=0, sticky=tk.W+tk.E+tk.N+tk.S)
+                row=2, column=0, columnspan=2, sticky=tk.W+tk.E+tk.N+tk.S)
+        scoresFrame.columnconfigure(0, weight=1)
+        scoresFrame.columnconfigure(1, weight=2)
+        self._fieldsToEnable.append(
+            (self.enableAutoCarryover,
+             [carryoverValue, carryoverLabel]))
 
         for var, fields in self._fieldsToEnable:
             var.trace('w', self._enableFields)
@@ -189,6 +208,8 @@ class VisualSettingsFrame(GuiFrame):
         self.teamLabelSeparator.set(values['team_boxes']['label_separator'])
         self.teamNameSeparator.set(values['team_boxes']['name_separator'])
         self.teamNamePrefix.set(values['team_boxes']['name_prefix'])
+        self.enableAutoCarryover.set(values['team_boxes']['auto_carryover'] > 0)
+        self.autoCarryoverValue.set(values['team_boxes']['auto_carryover'])
         self.leagueCarryoverRounding.set(values['team_boxes']['league_carryovers'])
 
     def getValues(self):
@@ -201,6 +222,7 @@ class VisualSettingsFrame(GuiFrame):
                 'finishing_position_indicators': self.finishingPositionIndicators.get(),
                 'team_boxes': {
                     'label_length_limit': self.teamNameLength.get(default=25) if self.shortenTeamNames else 0,
+                    'auto_carryover': self.autoCarryoverValue.get(default=0) if self.enableAutoCarryover else 0,
                     'league_carryovers': self.leagueCarryoverRounding.get(),
                     'predict_teams': self.teamNamePredict.get(),
                     'label_separator': self.teamLabelSeparator.get(),
