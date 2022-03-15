@@ -26,17 +26,11 @@ class PlayoffGUI(tk.Tk):
         ttk.Style().configure('TLabelframe.Label', foreground='black')
         ttk.Style().configure('TLabelframe', padding=5)
         self.geometry('920x640')
-        try:
-            self.iconbitmap(GuiImage.get_path('icons', 'playoff', 'ico'))
-        except tk.TclError:
-            pass # sometimes it fails on Linux, just ignore
+        self._setWindowIcon(self, GuiImage.get_icon('playoff'))
         self.tabs = {}
         self.logWindow = LogWindow(self)
         self.logWindow.title('Dziennik komunikatów')
-        try:
-            self.logWindow.iconbitmap(GuiImage.get_path('icons', 'playoff', 'ico'))
-        except tk.TclError:
-            pass # sometimes it fails on Linux, just ignore
+        self._setWindowIcon(self.logWindow, GuiImage.get_icon('playoff'))
         self._buildMenu()
         self.newFileIndex = 0
         self._title = tk.StringVar()
@@ -64,6 +58,12 @@ class PlayoffGUI(tk.Tk):
         self.bind('<<BracketGenerated>>', self._onBracketGenerated, add='+')
         self.bind('<<BracketError>>', self._onBracketError, add='+')
         self.mainloop()
+
+    def _setWindowIcon(self, window, icon):
+        try:
+            self.tk.call('wm', 'iconphoto', window._w, icon)
+        except tk.TclError:
+            pass # sometimes it fails on Linux, just ignore
 
     def _onFileChange(self, *args):
         self._dirty.set(True)
