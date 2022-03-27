@@ -328,6 +328,7 @@ class PlayoffGenerator(object):
         finishing_positions = {}
         finishing_places = set()
         for phase in grid:
+            PlayoffLogger.get('generator').info('phase object to generate: %s', phase)
             grid_x = col_no * self.page['width'] + (col_no + 1) * self.page['margin'] \
                 if self.page.get('starting_position_indicators', None) \
                    else col_no * (self.page['width'] + self.page['margin'])

@@ -75,7 +75,7 @@ class PlayoffData(object):
                     phase_pos += 1
                 phase_object.matches[phase_pos] = match['id']
                 phase_pos += 1
-            PlayoffLogger.get('data').info('phase object: %s', phase_object)
+            PlayoffLogger.get('data').info('phase object from config: %s', phase_object)
             self.grid.append(phase_object)
         return self.grid
 
