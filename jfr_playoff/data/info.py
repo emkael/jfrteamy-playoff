@@ -287,7 +287,7 @@ class MatchInfo(ResultInfo):
                     self.info.possible_winner = teams[1]
             elif self.info.running == 0:
                 if self._auto_carryover:
-                    team_data = [self.teams_by_name[team] for team in teams]
+                    team_data = [self.teams_by_name.get(team, []) for team in teams]
                     if len(team_data[0]) > 4 and len(team_data[1]) > 4:
                         carry_over = self._auto_carryover / Decimal(100.0) * (team_data[0][4] - team_data[1][4])
                         if carry_over > 0:
