@@ -18,7 +18,8 @@ var playoff = {
         'place_loser_colour': '#dddd00',
         'place_winner_colour': '#00dddd',
         'finish_loser_colour': '#ff0000',
-        'finish_winner_colour': '#00ff00'
+        'finish_winner_colour': '#00ff00',
+        'fade_boxes': 0
     },
 
     drawLine: function(ctx, line) {
@@ -42,15 +43,60 @@ var playoff = {
         return defaults;
     },
 
-    run: function() {
+    initEvents: function() {
+        this.settings = this.loadSettings(document.getElementById('playoff_canvas'), this.settings);
+        var fadeInterval = this.settings['fade_boxes'];
+        if (fadeInterval > 0) {
+            var highlightTrigger;
+            var boxes = document.getElementsByClassName('playoff_matchbox');
+            var that = this;
+            for (var b = 0; b < boxes.length; b++) {
+                var box = boxes[b];
+                var highlightHandler = this.highlightBox;
+                box.addEventListener('mouseenter', function(evt) {
+                    highlightTrigger = setTimeout(function() {
+                        var boxId = evt.target.getAttribute('data-id');
+                        that.highlightBox(boxId);
+                        that.run(boxId);
+                    }, fadeInterval);
+                });
+                box.addEventListener('mouseleave', function(evt) {
+                    clearTimeout(highlightTrigger);
+                    that.highlightBox();
+                    that.run();
+                });
+            }
+        }
+    },
+
+    highlightBox: function(box) {
         var boxes = document.getElementsByClassName('playoff_matchbox');
+        for (var b = 0; b < boxes.length; b++) {
+            var boxId = boxes[b].getAttribute('data-id');
+            if (box && (boxId != box)) {
+                boxes[b].classList.add('faded');
+            } else {
+                boxes[b].classList.remove('faded');
+            }
+        }
+    },
+
+    run: function(highlightedBox) {
+        var boxes = document.getElementsByClassName('playoff_matchbox');
+        var canvas = document.getElementById('playoff_canvas');
         var lines = {
             'winner': {},
             'loser': {},
             'place-winner': {},
             'place-loser': {},
             'finish-winner': {},
-            'finish-loser': {}
+            'finish-loser': {},
+            'winner-fade': {},
+            'loser-fade': {},
+            'place-winner-fade': {},
+            'place-loser-fade': {},
+            'finish-winner-fade': {},
+            'finish-loser-fade': {}
         };
         var boxes_idx = {};
         for (var b = 0; b < boxes.length; b++) {
@@ -59,6 +105,9 @@ var playoff = {
             for (var attr in lines) {
                 var value = boxes[b].getAttribute('data-' + attr);
                 if (value) {
+                    if (highlightedBox && (highlightedBox != id && !value.split(' ').includes(highlightedBox))) {
+                        attr = attr + '-fade';
+                    }
                     if (!lines[attr][value]) {
                         lines[attr][value] = [];
                     }
@@ -66,8 +115,6 @@ var playoff = {
                 }
             }
         }
-        var canvas = document.getElementById('playoff_canvas');
-        this.settings = this.loadSettings(canvas, this.settings);
         var lineMethods = {
             'place-winner': 'to',
             'place-loser': 'to',
@@ -217,13 +264,22 @@ var playoff = {
             }
         };
         var ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'white';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         for (var type in lines) {
-            styleType = type.replace('-', '_');
+            ctx.globalAlpha = 1.0;
+            realType = type;
+            if (type.endsWith('-fade')) {
+                realType = type.replace('-fade', '');
+                ctx.globalAlpha = 0.3;
+            }
+            styleType = realType.replaceAll('-', '_');
             ctx.strokeStyle = this.settings[styleType + '_colour'];
             for (var from in lines[type]) {
                 var to = lines[type][from];
                 from = from.split(' ');
-                var linesToDraw = lineCalculator[lineMethods[type]](
+                var linesToDraw = lineCalculator[lineMethods[realType]](
                     from, to,
                     this.settings[styleType + '_h_offset'], this.settings[styleType + '_v_offset']);
                 for (var l in linesToDraw.hFrom) {
@@ -248,4 +304,5 @@ var playoff = {
 
 };
 
+playoff.initEvents();
 playoff.run();
