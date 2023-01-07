@@ -97,7 +97,7 @@ var playoff = {
                     hTo: [],
                     vTo: [canvas.width, canvas.height, canvas.width, 0],
                     midpoints: []
-                }
+                };
             },
             from: function(from, to, hOffset, vOffset) {
                 var lines = this.template();
@@ -200,7 +200,7 @@ var playoff = {
                         (lines.vTo[0] + lines.vTo[2]) / 2,
                         (lines.vTo[1] + lines.vTo[3]) / 2
                     ]
-                ]
+                ];
                 for (var h in lines.hTo) {
                     lines.hTo[h][2] = Math.max(
                         lines.hTo[h][2],
@@ -246,6 +246,6 @@ var playoff = {
         }
     }
 
-}
+};
 
 playoff.run();
