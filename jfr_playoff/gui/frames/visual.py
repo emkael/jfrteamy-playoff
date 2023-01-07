@@ -382,8 +382,34 @@ class LineStylesFrame(GuiFrame):
             self.lines[line[0]].grid(row=idx+1, column=1, sticky=tk.W)
             (ttk.Label(self, text=line[2])).grid(
                 row=idx+1, column=0, sticky=tk.E)
+
         (ttk.Label(self, text='Kolory linii')).grid(
             row=0, column=0, columnspan=2, sticky=tk.W)
+
+        boxFadesFrame = ttk.Frame(self)
+        boxFadesFrame.grid(
+            row=len(self.DEFAULT_VALUES)+1, column=0, columnspan=2, sticky=tk.W)
+        self.enableBoxFades = NotifyBoolVar()
+        self.boxFadeDelay = NotifyNumericVar()
+        (ttk.Checkbutton(
+            boxFadesFrame, text='podświetlaj elementy i ścieżki drabinki po',
+            variable=self.enableBoxFades)).grid(
+                row=0, column=0)
+        boxFadeDelayField = NumericSpinbox(
+            boxFadesFrame, width=5, from_=1, to=999,
+            textvariable=self.boxFadeDelay)
+        boxFadeDelayField.grid(row=0, column=2, sticky=tk.W)
+        boxFadeDelayLabel = ttk.Label(boxFadesFrame, text='ms')
+        boxFadeDelayLabel.grid(row=0, column=3, sticky=tk.W)
+        self._fieldsToEnable = [
+            boxFadeDelayField, boxFadeDelayLabel
+        ]
+        self._enableFields()
+        self.enableBoxFades.trace('w', self._enableFields)
+
+    def _enableFields(self, *args):
+        for field in self._fieldsToEnable:
+            field.configure(state=tk.NORMAL if self.enableBoxFades.get() else tk.DISABLED)
 
     def setValues(self, values):
         for line in self.DEFAULT_VALUES:
@@ -394,12 +420,21 @@ class LineStylesFrame(GuiFrame):
                     value[idx] = values[key]
             self.lines[line[0]].setValue(value)
 
+        if 'fade_boxes' in values:
+            self.enableBoxFades.set(values['fade_boxes'] > 0)
+            self.boxFadeDelay.set(values['fade_boxes'] if values['fade_boxes'] > 0 else 500)
+        else:
+            self.enableBoxFades.set(False)
+            self.boxFadeDelay.set(500)
+
     def getValues(self):
         config = OrderedDict()
         for line, widget in self.lines.iteritems():
             value = widget.getValue()
             for idx, key in enumerate(self.CONFIG_KEYS):
                 config['%s_%s' % (line, key)] = value[idx]
+        fadeBoxes = self.boxFadeDelay.get()
+        config['fade_boxes'] = fadeBoxes if self.enableBoxFades.get() else 0
         return config
 
 
