@@ -71,12 +71,41 @@ var playoff = {
 
     highlightBox: function(box) {
         var boxes = document.getElementsByClassName('playoff_matchbox');
+        var highlightBoxes = [];
+        var attrArr = ['data-winner', 'data-loser', 'data-place-winner', 'data-place-loser', 'data-finish-winner', 'data-finish-loser'];
         for (var b = 0; b < boxes.length; b++) {
             var boxId = boxes[b].getAttribute('data-id');
-            if (box && (boxId != box)) {
-                boxes[b].classList.add('faded');
-            } else {
-                boxes[b].classList.remove('faded');
+            if (box && (boxId == box)) {
+                highlightBoxes.push(boxId);
+                for (const attr of attrArr) {
+                    var attrVal = boxes[b].getAttribute(attr);
+                    if (attrVal) {
+                        highlightBoxes = highlightBoxes.concat(attrVal.split(' '));
+                    }
+                }
+            }
+            boxes[b].classList.remove('faded');
+        }
+        if (box) {
+            for (var b = 0; b < boxes.length; b++) {
+                var fade = true;
+                var boxId = boxes[b].getAttribute('data-id');
+                if (highlightBoxes.includes(boxId)) {
+                    fade = false;
+                } else {
+                    for (const attr of attrArr) {
+                        var boxId = boxes[b].getAttribute(attr);
+                        if (boxId) {
+                            boxIds = boxId.split(' ');
+                            if (boxIds.includes(box)) {
+                                fade = false;
+                            }
+                        }
+                    }
+                }
+                if (fade) {
+                    boxes[b].classList.add('faded');
+                }
             }
         }
     },
