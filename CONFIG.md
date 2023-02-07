@@ -43,6 +43,7 @@ Konfiguracja składa się, po kolei, z:
    + `"loser_h_offset"`, `"loser_v_offset"` - analogiczne marginesy rysowania linii przegranych
    + `"place_winner_h_offset"`, `"place_winner_v_offset"`, `"place_loser_h_offset"`, `"place_loser_v_offset"`, `"finish_winner_h_offset"`, `"finish_winner_v_offset"`, `"finish_loser_h_offset"`, `"finish_loser_v_offset"` - marginesy rysowania linii łączących mecze z miejscami początkowymi/końcowymi
    + `"box_positioning"`: możliwość ręcznego ustawienia pozycji każdego meczu - słownik indeksowany tekstowymi identyfikatorami meczów, z wartościami liczbowymi: pojedyncza wartość = pozycja w pionie w pikselach, w ramach fazy meczu, tablica dwóch wartości: dowolna pozycja w pikselach
+   + `"fade_boxes"`: czas po najechaniu kursorem na mecz, po którym mecze (i linie) niepowiązane z danym meczem są wygaszane (`0` = efekt wyłączony, wszystkie linie i mecze zawsze widoczne)
  - sekcji `"database"`, zawierającej ustawienia połączenia bazy danych
  - sekcji `"goniec"`, zawierającej ustawienia Gońca (`"enabled"` przyjmuje wartości `0`/`1`)
 
