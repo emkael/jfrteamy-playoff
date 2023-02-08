@@ -25,6 +25,10 @@ class Team(object):
             carry_over = floor(10 * self.score) / 10.0
         return carry_over
 
+    @property
+    def selected_name(self):
+        return self.name[min(max(0, self.selected_team), len(self.name)-1)]
+
     def __init__(self):
         self.place = []
         self.name = []

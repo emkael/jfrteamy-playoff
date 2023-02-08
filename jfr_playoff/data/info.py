@@ -268,7 +268,7 @@ class MatchInfo(ResultInfo):
         if (self.info.teams[0].known_teams == 1) \
            and (self.info.teams[1].known_teams == 1):
             teams = [
-                team.name[max(0, team.selected_team)]
+                team.selected_name
                 for team in self.info.teams
             ]
             if self.info.running == -1:
