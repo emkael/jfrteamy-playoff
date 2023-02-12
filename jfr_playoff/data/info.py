@@ -209,8 +209,11 @@ class MatchInfo(ResultInfo):
                         match_teams = [None] * len(placed_teams)
             teams[i].name = match_teams
             teams[i].possible_name = possible_teams
-            teams[i].selected_team = self.config['selected_teams'][i] \
-                if 'selected_teams' in self.config else -1
+            teams[i].unknown_teams = len([team for team in match_teams if team is None])
+            teams[i].selected_team = -1
+            if 'selected_teams' in self.config \
+               and not teams[i].unknown_teams:
+                teams[i].selected_team = self.config['selected_teams'][i]
             teams[i].known_teams = 1 if teams[i].selected_team >= 0 else len([
                 team for team in match_teams if team is not None])
         PlayoffLogger.get('matchinfo').info(

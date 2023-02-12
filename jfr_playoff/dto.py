@@ -14,6 +14,7 @@ class Team(object):
     score = 0.0
     place = None
     known_teams = 0
+    unknown_teams = 0
     selected_team = -1
 
     @property
