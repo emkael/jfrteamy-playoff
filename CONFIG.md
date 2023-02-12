@@ -174,7 +174,7 @@ Definicję struktury drabinki określają pola:
   Tablica ta jest używana do wyświetlenia możliwych w meczu drużyn, jeśli dane meczu nie mogą być pobrane z innego źródła (np. bazy danych).
  - opcjonalne pola `"winner"` i `"loser"` - które z kolei w tym kontekście oznaczają, miejsca, które zajmują zwycięzcy/przegrani danego meczu w końcowej klasyfikacji
  - opcjonalne pole `"link"` - określające link do wyników meczu, nadpisujący link generowany z bazy turnieju lub linku fazy
- - opcjonalna tablica `"selected_teams"` - jeśli w meczu znana jest już drużyna, ale nie wynika ona ze schematu drabinki (tj. schemat przewidywał wiele możliwości dla danego meczu), można określić znaną/wybraną drużynę, zanim dostępne będą inne źródła danych (baza/HTML) - jest to dwuelementowa tablica liczb całkowitych, określających, które drużyny spośród wszystkich możliwych zostały wybrane (`-1` oznacza brak wyboru, drużyny numerowane są od `0`)
+ - opcjonalna tablica `"selected_teams"` - jeśli w meczu znana jest już drużyna, ale nie wynika ona ze schematu drabinki (tj. schemat przewidywał wiele możliwości dla danego meczu), można określić znaną/wybraną drużynę, zanim dostępne będą inne źródła danych (baza/HTML) - jest to dwuelementowa tablica liczb całkowitych, określających, które drużyny spośród wszystkich możliwych zostały wybrane (`-1` oznacza brak wyboru, drużyny numerowane są od `0`); drużyny są numerowane w kolejności: `"winner"`, `"loser"`, `"place"`
 
 Dane meczu mogą pochodzić z następujących źródeł:
  - bazy danych turnieju: wówczas należy zdefiniować pola `"database"`, `"round"` i `"table"`

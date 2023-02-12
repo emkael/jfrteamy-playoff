@@ -203,10 +203,10 @@ class MatchInfo(ResultInfo):
                         for place in self.config['teams'][i]['place']]
                     if self._starting_positions_certain:
                         match_teams += placed_teams
-                        possible_teams = [None] * len(placed_teams)
+                        possible_teams += [None] * len(placed_teams)
                     else:
                         possible_teams += placed_teams
-                        match_teams = [None] * len(placed_teams)
+                        match_teams += [None] * len(placed_teams)
             teams[i].name = match_teams
             teams[i].possible_name = possible_teams
             teams[i].unknown_teams = len([team for team in match_teams if team is None])
