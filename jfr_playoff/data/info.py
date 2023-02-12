@@ -269,7 +269,9 @@ class MatchInfo(ResultInfo):
 
     def _determine_outcome(self):
         if (self.info.teams[0].known_teams == 1) \
-           and (self.info.teams[1].known_teams == 1):
+           and (self.info.teams[1].known_teams == 1) \
+           and (self.info.teams[0].unknown_teams == 0) \
+           and (self.info.teams[1].unknown_teams == 0):
             teams = [
                 team.selected_name
                 for team in self.info.teams
