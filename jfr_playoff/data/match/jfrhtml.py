@@ -129,13 +129,13 @@ class JFRHtmlMatchInfo(MatchInfoClient):
                 PlayoffLogger.get('match.jfrhtml').info(
                     'HTML played boards count for segment: %d/%d',
                     played_boards, board_count)
-                return board_count, played_boards >= board_count
+                return board_count, played_boards
             except IOError as e:
                 PlayoffLogger.get('match.jfrhtml').info(
                     'cannot fetch played boards count for segment: %s(%s)',
                     type(e).__name__, str(e))
-                return 0, False
-        return 0, False
+                return 0, 0
+        return 0, 0
 
     def board_count(self):
         row = self._find_table_row(self.settings['link'])
@@ -166,9 +166,12 @@ class JFRHtmlMatchInfo(MatchInfoClient):
             in running_segments])
         finished_segments = []
         boards_in_segment = None
+        played_boards = 0
         for segment in segments:
             if segment not in running_segments:
-                boards, is_finished = self._get_finished_info(segment)
+                boards, played = self._get_finished_info(segment)
+                is_finished = played >= boards
+                played_boards += played
                 if is_finished:
                     finished_segments.append(segment)
                 if boards_in_segment is None and boards > 0:
@@ -186,9 +189,7 @@ class JFRHtmlMatchInfo(MatchInfoClient):
             total_boards = (
                 len(segments) + len(towels) + len(running_segments)) \
                 * boards_in_segment
-        played_boards = (len(towels) + len(finished_segments)) \
-            * boards_in_segment \
-            + running_boards
+        played_boards += running_boards
         PlayoffLogger.get('match.jfrhtml').info(
             'board count: %d/%d', played_boards, total_boards)
         return played_boards, total_boards
