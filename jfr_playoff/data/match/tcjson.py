@@ -38,12 +38,7 @@ class TCJsonMatchInfo(MatchInfoClient):
             p_remote.fetch_raw(
                 self._get_results_link(
                     'o%d-%d.json' % (session_no, round_no))))
-        tables = []
-        for result in round_results['Results']:
-            tables.append(result['Table'])
-        table_id = sorted(tables)[table_no-1]
-        PlayoffLogger.get('match.tcjson').info(
-            'table no %d from %s: %s', table_no, tables, table_id)
+        table_id = str(table_no)
         for result in round_results['Results']:
             if result['Table'] == table_id:
                 return result

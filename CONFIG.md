@@ -179,6 +179,7 @@ Definicję struktury drabinki określają pola:
 Dane meczu mogą pochodzić z następujących źródeł:
  - bazy danych turnieju: wówczas należy zdefiniować pola `"database"`, `"round"` i `"table"`
  - strony HTML meczu (tj. strony `PREFIXrundaN.html` dla JFR Teamy lub strony wyników konkretnej rundy dla Tournament Calculatora): wówczas należy zdefiniować pola `"link"` (dla całej fazy lub dla pojedynczego meczu) oraz `"table"`
+   + pole `"table"` to widoczny na stronie wyników rundy w pierwszej kolumnie numer stołu
  - ręcznie wpisanego wyniku, wówczas:
    + pole `"score"` określa wynik meczu: może być tablicą dwóch liczb (wynik gospodarzy, wynik gości), może również być słownikiem indeksowanym pełną nazwą teamu lub łańcuchem tekstowym określającym miejsce w tablicy z sekcji `"teams"`
    + opcjonalne pole `"running"` określa, że nie jest zakończony i podaje liczbę rozegranych rozdań (0 dla meczu w przyszłości, >0 dla meczu w trakcie)
