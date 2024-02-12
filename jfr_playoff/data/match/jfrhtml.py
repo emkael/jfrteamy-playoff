@@ -77,9 +77,11 @@ class JFRHtmlMatchInfo(MatchInfoClient):
                 carry_over = [0.0, 0.0]
             for i in range(0, 2):
                 scores[i] += carry_over[i]
-        team_names = [[text for text in link.contents
-                       if isinstance(text, unicode)][0].strip(u'\xa0')
-                      for link in row.select('a[onmouseover]')]
+        team_names = []
+        for link in row.select('a[onmouseover]'):
+            texts = [text for text in link.contents if isinstance(text, unicode)]
+            if texts:
+                team_names.append(texts[0].strip(u'\xa0'))
         for i in range(0, 2):
             teams[i].name = [team_names[i]]
             teams[i].known_teams = 1
