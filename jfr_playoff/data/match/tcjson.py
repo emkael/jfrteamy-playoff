@@ -22,7 +22,11 @@ class TCJsonMatchInfo(MatchInfoClient):
 
     def _get_round_from_link(self, link):
         fragment = urlparse.urlparse(link).fragment
-        return max(1, int(fragment[11:14])), max(1, int(fragment[14:17]))
+        if len(fragment) < 28:
+            # old, shorter TC hashes
+            return int(fragment[11:14]), int(fragment[14:17])
+        # new, longer TC hashes
+        return int(fragment[20:26]), int(fragment[26:32])
 
     def get_match_link(self):
         PlayoffLogger.get('match.tcjson').info(
