@@ -49,7 +49,8 @@ class TCJsonMatchInfo(MatchInfoClient):
     def fetch_teams(self, teams):
         results = self._get_results(
             self.settings['link'], self.settings['table'])
-        for idx, side in enumerate(['Ns', 'Ew']):
+        sides = [side for side in ['Ns', 'Sn', 'We', 'Ew'] if side in results]
+        for idx, side in enumerate(sides):
             teams[idx].name = [results[side]['_name']]
             teams[idx].known_teams = 1
             teams[idx].score = results['Sum1'+side]
