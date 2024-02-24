@@ -190,6 +190,7 @@ class JFRHtmlMatchInfo(MatchInfoClient):
                 len(segments) + len(towels) + len(running_segments)) \
                 * boards_in_segment
         played_boards += running_boards
+        played_boards += len(towels) * boards_in_segment
         PlayoffLogger.get('match.jfrhtml').info(
             'board count: %d/%d', played_boards, total_boards)
         return played_boards, total_boards
