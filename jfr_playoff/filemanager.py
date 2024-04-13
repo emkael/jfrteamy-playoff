@@ -12,20 +12,25 @@ class PlayoffFileManager(object):
     def __init__(self, settings):
         self.goniec = settings.get('goniec') if settings.has_section('goniec') else None
         PlayoffLogger.get('filemanager').info('goniec settings: %s', self.goniec)
-        self.output_file = settings.get('output')
+        self.output_file = self._sanitize_pathsep(settings.get('output'))
         PlayoffLogger.get('filemanager').info('output file: %s', self.output_file)
         self.output_path = os.path.dirname(
             self.output_file
         ).strip(os.sep)
         if len(self.output_path) > 0:
             self.output_path += os.sep
+        self.output_path = self._sanitize_pathsep(self.output_path)
         PlayoffLogger.get('filemanager').info('output path: %s', self.output_path)
         self.files = set()
+
+    def _sanitize_pathsep(self, path):
+        return path.replace('/', os.sep).replace('\\', os.sep)
 
     def reset(self):
         self.files.clear()
 
     def register_file(self, path):
+        path = self._sanitize_pathsep(path)
         if path.startswith(self.output_path):
             PlayoffLogger.get('filemanager').info('registering file: %s', path)
             self.files.add(path.replace(self.output_path, ''))
@@ -56,8 +61,8 @@ class PlayoffFileManager(object):
         if not os.path.exists(source_path):
             raise IOError('File: %s missing from runtime directory' % (
                 filename))
-        output_path = os.path.join(self.output_path, path)
-        output_dir = os.path.dirname(output_path)
+        output_path = self._sanitize_pathsep(os.path.join(self.output_path, path))
+        output_dir = self._sanitize_pathsep(os.path.dirname(output_path))
         if len(output_dir) > 0:
             if not os.path.exists(output_dir):
                 PlayoffLogger.get('filemanager').info(
