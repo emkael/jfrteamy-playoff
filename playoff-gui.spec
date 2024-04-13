@@ -32,6 +32,6 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           runtime_tmpdir=None,
-          console=True,
+          console=False,
           icon=os.path.join(icon_path, 'playoff.ico'),
           version='.version')
