@@ -1,6 +1,9 @@
 from math import ceil, floor
 import sys
 
+from jfr_playoff.logger import log_encoding
+
+
 def coalesce(*arg):
     for el in arg:
         if el is not None:
@@ -39,7 +42,7 @@ class Team(object):
         return u'%s (%.1f)' % (coalesce(self.name, '<None>'), self.score)
 
     def __repr__(self):
-        return unicode(self).encode(sys.stdin.encoding)
+        return unicode(self).encode(log_encoding())
 
 
 class Match(object):
@@ -61,7 +64,7 @@ class Match(object):
             self.id, coalesce(self.link, '<None>'), [unicode(team) for team in self.teams],
             u'finished' if self.running < 0 else (
                 u'%d boards' % self.running))
-        ).encode(sys.stdin.encoding)
+        ).encode(log_encoding())
 
 
 class Phase(object):

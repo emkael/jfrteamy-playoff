@@ -4,7 +4,7 @@ import readline
 import requests
 import sys
 
-from jfr_playoff.logger import PlayoffLogger
+from jfr_playoff.logger import PlayoffLogger, log_encoding
 
 
 def complete_filename(text, state):
@@ -47,7 +47,7 @@ class PlayoffSettings(object):
             readline.parse_and_bind("tab: complete")
             readline.set_completer(complete_filename)
             self.settings_file = raw_input(
-                'JSON settings file: ').decode(sys.stdin.encoding)
+                'JSON settings file: ').decode(log_encoding())
 
         if self.settings is None:
             PlayoffLogger.get('settings').info(

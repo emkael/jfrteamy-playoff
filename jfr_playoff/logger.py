@@ -1,4 +1,10 @@
 import logging as log
+import sys
+
+
+def log_encoding():
+    # if there's no sys.stdin (e.g. console-less GUI), revert to default
+    return sys.stdin.encoding or 'utf8'
 
 
 class PlayoffLogger:
