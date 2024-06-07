@@ -24,9 +24,9 @@ class TCJsonMatchInfo(MatchInfoClient):
         fragment = urlparse.urlparse(link).fragment
         if len(fragment) < 28:
             # old, shorter TC hashes
-            return int(fragment[11:14]), int(fragment[14:17])
+            return int(fragment[11:14]), int(fragment[14:17]), False
         # new, longer TC hashes
-        return int(fragment[20:26]), int(fragment[26:32])
+        return int(fragment[20:26]), int(fragment[26:32]), True
 
     def get_match_link(self):
         PlayoffLogger.get('match.tcjson').info(
@@ -35,7 +35,7 @@ class TCJsonMatchInfo(MatchInfoClient):
         return self.settings['link']
 
     def _get_results(self, link, table_no):
-        session_no, round_no = self._get_round_from_link(link)
+        session_no, round_no, _ = self._get_round_from_link(link)
         PlayoffLogger.get('match.tcjson').info(
             'link %s -> session %d, round %d', link, session_no, round_no)
         round_results = json.loads(
@@ -86,10 +86,15 @@ class TCJsonMatchInfo(MatchInfoClient):
         return played, played if finished else played+1
 
     def _get_segment_link(self, base_link, segment_id, table_id):
-        table_id = '{t:{pad}>6}'.format(t=table_id, pad='0')
-        session_id, round_id = self._get_round_from_link(base_link)
-        fragment = '#000SS000000%03d%03d%03d%s' % (
-            session_id, round_id, segment_id, table_id)
+        session_id, round_id, long_link = self._get_round_from_link(base_link)
+        if long_link:
+            table_id = '{t:{pad}>12}'.format(t=table_id, pad='0')
+            fragment = '#000000SS000000000000%06d%06d%06d%s' % (
+                session_id, round_id, segment_id, table_id)
+        else:
+            table_id = '{t:{pad}>6}'.format(t=table_id, pad='0')
+            fragment = '#000SS000000%03d%03d%03d%s' % (
+                session_id, round_id, segment_id, table_id)
         return urlparse.urljoin(base_link, fragment)
 
     def running_link(self):
