@@ -294,7 +294,7 @@ class MatchInfo(ResultInfo):
                 if self._auto_carryover:
                     team_data = [self.teams_by_name.get(team, []) for team in teams]
                     if len(team_data[0]) > 4 and len(team_data[1]) > 4:
-                        carry_over = self._auto_carryover / Decimal(100.0) * (team_data[0][4] - team_data[1][4])
+                        carry_over = self._auto_carryover / Decimal(100.0) * Decimal(team_data[0][4] - team_data[1][4])
                         if carry_over > 0:
                             self.info.teams[0].score = carry_over
                             self.info.teams[1].score = 0.0
