@@ -69,15 +69,19 @@ class TCJsonMatchInfo(MatchInfoClient):
         finished = True
         for segment in results['Segments']:
             PlayoffLogger.get('match.tcjson').info(
-                'segment %d: played boards=%d, live=%s, towel=%s',
+                'segment %d: played boards=%d, live=%s, towel=%s, notmeanttobeplayed=%s',
                 segment['Segment']+1, segment['BoardsCounted'],
-                segment['Live'], segment['Towel'])
-            played += segment['BoardsCounted']
-            if segment['Live'] or not (
-                    (segment['BoardsCounted'] or segment['Towel'])):
+                segment['Live'], segment['Towel'], segment['NotMeantToBePlayed'])
+            if not segment['NotMeantToBePlayed']:
+                played += segment['BoardsCounted']
+                if segment['Live'] or not (
+                        (segment['BoardsCounted'] or segment['Towel'])):
+                    PlayoffLogger.get('match.tcjson').info(
+                        'segment %d not finished', segment['Segment']+1)
+                    finished = False
+            else:
                 PlayoffLogger.get('match.tcjson').info(
-                    'segment %d not finished', segment['Segment']+1)
-                finished = False
+                    'segment %d not meant to be played', segment['Segment']+1)
         PlayoffLogger.get('match.tcjson').info(
             'board count: %d, finished: %s', played, finished)
         if finished and not played:
