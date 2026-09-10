@@ -41,7 +41,9 @@ class TCJsonMatchInfo(MatchInfoClient):
         round_results = json.loads(
             p_remote.fetch_raw(
                 self._get_results_link(
-                    'o%d-%d.json' % (session_no, round_no))))
+                    'o%d-%d.json' % (session_no, round_no)),
+                gzip_fallback = True
+            ))
         table_id = str(table_no)
         for result in round_results['Results']:
             if result['Table'] == table_id:
@@ -103,7 +105,9 @@ class TCJsonMatchInfo(MatchInfoClient):
 
     def running_link(self):
         settings = json.loads(p_remote.fetch_raw(
-            self._get_results_link('settings.json')))
+            self._get_results_link('settings.json'),
+            gzip_fallback=True
+        ))
         if settings['ShowOnlyResults']:
             PlayoffLogger.get('match.tcjson').info(
                 'ShowOnlyResults active, no running segment link available')
