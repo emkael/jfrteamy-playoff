@@ -28,7 +28,10 @@ class TCJsonTournamentInfo(TournamentInfoClient):
 
     def is_finished(self):
         settings_json = json.loads(
-            p_remote.fetch_raw(self.get_results_link('settings.json')))
+            p_remote.fetch_raw(
+                self.get_results_link('settings.json'),
+                gzip_fallback=True
+            ))
         live_results = settings_json['LiveResults']
         last_round = settings_json['LastPlayedRound']
         last_session = settings_json['LastPlayedSession']
@@ -42,7 +45,10 @@ class TCJsonTournamentInfo(TournamentInfoClient):
     def get_tournament_results(self):
         results = []
         results_json = json.loads(
-            p_remote.fetch_raw(self.get_results_link('results.json')))
+            p_remote.fetch_raw(
+                self.get_results_link('results.json'),
+                gzip_fallback=True
+            ))
         participant_groups = []
         for result in results_json['Results']:
             group = result['ParticipantGroup']
